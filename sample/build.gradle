@@ -1,0 +1,135 @@
+import org.json.JSONObject
+
+plugins {
+    id 'com.android.application'
+    id 'vmos-build'
+}
+
+def signingConfigValue = rootProject.ext.has("signingConfig") ? rootProject.ext.signingConfig : null
+def localProject = rootProject.ext.has("localProject") ? rootProject.ext.localProject : false
+android {
+    compileSdk rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        applicationId "com.vlite.app"
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+
+        multiDexEnabled true
+    }
+
+
+    if (signingConfigValue) {
+        signingConfigs {
+            release {
+                keyAlias rootProject.ext.signingConfig.keyAlias
+                keyPassword rootProject.ext.signingConfig.keyPassword
+                storeFile rootProject.ext.signingConfig.storeFile
+                storePassword rootProject.ext.signingConfig.storePassword
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            if (signingConfigValue) signingConfig signingConfigs.release
+        }
+        release {
+            if (signingConfigValue) signingConfig signingConfigs.release
+            minifyEnabled true
+            if (localProject) {
+                zipAlignEnabled false
+                proguardFiles 'r8-rules.pro'
+            } else {
+                zipAlignEnabled true
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            }
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.4.2'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    implementation "com.github.permissions-dispatcher:permissionsdispatcher:4.9.2"
+    annotationProcessor "com.github.permissions-dispatcher:permissionsdispatcher-processor:4.9.2"
+
+    implementation 'com.github.bumptech.glide:glide:4.13.2'
+    implementation 'com.tencent:mmkv:1.2.13'
+    implementation 'com.google.code.gson:gson:2.9.0'
+
+    if (localProject) {
+        implementation project(path: ':vmos-lite-sdk')
+    } else {
+        implementation 'com.vmos:vmos-lite-sdk:1.0.1-beta24'
+        implementation 'com.vmos:com-vlite-app:1.0.1'
+    }
+}
+
+// 是否加入预置apk
+def includePresetApps = true
+android.applicationVariants.all { variant ->
+    if (!includePresetApps) {
+        variant.mergeAssets.doLast {
+            def presetAppsDir = new File(variant.mergeAssets.outputDir.get().getAsFile(), "preset_apps")
+            delete(fileTree(dir: presetAppsDir, includes: ['*.apk']))
+        }
+    }
+    def versionCode = android.defaultConfig.versionCode
+    variant.outputs.all {
+        outputFileName = "${rootProject.name}-${project.name}_${buildType.name}_${versionName}_${versionCode}.apk"
+    }
+}
+
+def buildToolsDir = new File(android.sdkDirectory.path, "build-tools")
+def aaptFilepath = new File(buildToolsDir.listFiles().last(), "aapt").absolutePath
+
+// 提取预装apk信息放到assets
+JSONObject jsonObject = new JSONObject()
+def assetsDir = new File(project.projectDir, "src/main/assets")
+if (assetsDir.exists()) {
+    // 挑出文件夹和apk
+    new File(assetsDir, "preset_apps").listFiles().findAll { it.isDirectory() || it.name.endsWith('.apk') }
+            .each { file ->
+                // 如果是分包的 排除config和split开头的 文件最大的就是主包
+                def mainApkFile = file.isDirectory() ? file.listFiles().findAll { !it.name.startsWith('config') && !it.name.startsWith('split') }
+                        .max { a, b -> a.length() <=> b.length() } : file
+                def proc = "${aaptFilepath} dump badging ${mainApkFile.absolutePath}".execute()
+                BufferedReader br = new BufferedReader(new InputStreamReader(proc.in))
+                def firstLine = br.readLine()
+                br.close()
+                if (firstLine != null) {
+                    String[] args = firstLine.split("' ")
+                    def packageName = args[0].split("='")[1]
+                    def versionCode = args[1].split("='")[1].trim()
+                    def versionName = args[2].split("='")[1].trim()
+
+                    // 添加到json
+                    JSONObject itemJson = new JSONObject()
+                    def relativePath = file.absolutePath.replace(assetsDir.absolutePath, "").replace(File.separator, '/')
+                    def assetName = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath
+                    itemJson.putOpt("version_code", Long.parseLong(versionCode))
+                    itemJson.putOpt("version_name", versionName)
+                    itemJson.putOpt("asset_path", assetName)
+                    jsonObject.putOpt(packageName, itemJson)
+                }
+            }
+    def versionFile = new File(assetsDir, 'preset_app_versions.json')
+    versionFile.write(jsonObject.toString())
+    println("write asset apk versions -> ${versionFile.absolutePath}\n${jsonObject.toString(4)}")
+}

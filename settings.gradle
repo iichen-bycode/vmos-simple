@@ -1,0 +1,40 @@
+pluginManagement {
+    Properties localProperties = new Properties()
+    localProperties.load(new File(rootDir, 'local.properties').newDataInputStream())
+
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
+        maven {
+            url "https://maven.vmos.pro"
+            credentials {
+                username localProperties.getProperty("artifactory.user")
+                password localProperties.getProperty("artifactory.password")
+            }
+        }
+    }
+}
+
+Properties localProperties = new Properties()
+localProperties.load(new File(rootDir, 'local.properties').newDataInputStream())
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven {
+            url "https://maven.vmos.pro"
+            credentials {
+                username localProperties.getProperty("artifactory.user")
+                password localProperties.getProperty("artifactory.password")
+            }
+        }
+    }
+}
+
+rootProject.name = "vmos-lite-sample"
+include ':sample'

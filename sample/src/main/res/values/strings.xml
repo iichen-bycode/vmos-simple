@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">VMOS Lite</string>
+    <string name="message_loading_start">正在启动</string>
+</resources>
