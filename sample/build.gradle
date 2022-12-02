@@ -39,13 +39,8 @@ android {
         release {
             if (signingConfigValue) signingConfig signingConfigs.release
             minifyEnabled true
-            if (localProject) {
-                zipAlignEnabled false
-                proguardFiles 'r8-rules.pro'
-            } else {
-                zipAlignEnabled true
-                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            }
+            zipAlignEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -75,9 +70,9 @@ dependencies {
 
     if (localProject) {
         implementation project(path: ':vmos-lite-sdk')
+        compileOnly project(path: ':hiddenapi-stub')
     } else {
-        implementation 'com.vmos:vmos-lite-sdk:1.0.1-beta24'
-        implementation 'com.vmos:com-vlite-app:1.0.1'
+        implementation 'com.vmos:vmos-lite-sdk:1.0.2-beta18'
     }
 }
 

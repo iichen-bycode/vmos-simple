@@ -1,6 +1,15 @@
 pluginManagement {
     Properties localProperties = new Properties()
     localProperties.load(new File(rootDir, 'local.properties').newDataInputStream())
+    def artifactoryUsername = localProperties.getProperty("artifactory.user")
+    def artifactoryPassword = localProperties.getProperty("artifactory.password")
+    if (!artifactoryUsername && !artifactoryPassword){
+        throw new GradleException("""
+请在local.properties配置Maven用户名和密码
+artifactory.user=
+artifactory.password=\n
+""")
+    }
 
     repositories {
         gradlePluginPortal()
@@ -10,8 +19,8 @@ pluginManagement {
         maven {
             url "https://maven.vmos.pro"
             credentials {
-                username localProperties.getProperty("artifactory.user")
-                password localProperties.getProperty("artifactory.password")
+                username artifactoryUsername
+                password artifactoryPassword
             }
         }
     }

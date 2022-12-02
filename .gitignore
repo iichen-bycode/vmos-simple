@@ -18,4 +18,5 @@ sandhook/build/
 sample/src/main/assets/unit-test-app.apk
 sample/src/main/assets/preset_apps/
 sample/src/main/assets/app_ver.json
-vmos*-license-*.txt
+vmos-lite-sdk/build
+stub/build

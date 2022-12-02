@@ -8,9 +8,8 @@ import android.os.Environment;
 
 import androidx.annotation.NonNull;
 
-
 import com.vlite.app.bean.VmFileItem;
-import com.vlite.app.utils.CursorUtils;
+import com.vlite.sdk.utils.DatabaseUtils;
 
 import org.json.JSONArray;
 
@@ -52,7 +51,7 @@ public class DeviceFilesFragment extends FilesFragment {
     protected JSONArray queryContentProvider(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         // 真机
         final Cursor cursor = getContext().getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
-        JSONArray jsonArray = CursorUtils.toJsonArray(cursor);
+        JSONArray jsonArray = DatabaseUtils.toJsonArray(cursor);
         cursor.close();
         return jsonArray == null ? new JSONArray() : jsonArray;
     }

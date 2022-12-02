@@ -16,8 +16,8 @@ task clean(type: Delete) {
 }
 
 ext {
-    versionCode = 10124
-    versionName = "1.0.1-beta24"
+    versionCode = 10218
+    versionName = "1.0.2-beta18"
     minSdkVersion = 21
     targetSdkVersion = 28
     compileSdkVersion = 31
