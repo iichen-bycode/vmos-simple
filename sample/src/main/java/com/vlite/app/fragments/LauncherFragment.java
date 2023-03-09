@@ -3,6 +3,8 @@ package com.vlite.app.fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -25,6 +27,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.vlite.app.R;
+import com.vlite.app.activities.AppDetailActivity;
 import com.vlite.app.activities.LaunchAppActivity;
 import com.vlite.app.adapters.AppItemAdapter;
 import com.vlite.app.bean.AppItem;
@@ -45,8 +48,10 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
@@ -59,6 +64,20 @@ public class LauncherFragment extends Fragment {
     private FragmentLauncherBinding binding;
 
     private AppItemAdapter adapter;
+
+    private final OnReceivedEventListener receivedEventListener = new OnReceivedEventListener() {
+        /**
+         * 接收到事件
+         * @param type 事件类型
+         * @param extras 事件额外信息
+         */
+        @Override
+        public void onReceivedEvent(int type, @NonNull Bundle extras) {
+            // 除特别说明的事件外 事件默认回调于子线程
+            AppLogger.d("onReceivedEvent -> type = " + BinderEvent.typeToString(type) + ", extras = " + BinderEvent.bundleToString(extras) + ", thread_name = " + Thread.currentThread().getName());
+            handleBinderEvent(type, extras);
+        }
+    };
 
     @Nullable
     @Override
@@ -73,13 +92,7 @@ public class LauncherFragment extends Fragment {
         bindViews();
 
         // 注册事件
-        VLite.get().setOnReceivedEventListener(new OnReceivedEventListener() {
-            @Override
-            public void onReceivedEvent(int type, @NonNull Bundle extras) {
-                AppLogger.d("onReceivedEvent -> type = " + BinderEvent.typeToString(type) + ", extras = " + BinderEvent.bundleToString(extras) + ", thread_name = " + Thread.currentThread().getName());
-                handleBinderEvent(type, extras);
-            }
-        });
+        VLite.get().registerReceivedEventListener(receivedEventListener);
 
         binding.refreshLayout.setOnRefreshListener(() -> {
             loadInstalledApps(view.getContext());
@@ -101,7 +114,7 @@ public class LauncherFragment extends Fragment {
         adapter.setOnItemLongClickListener((view, position) -> {
             final AppItem it = adapter.getData().get(position);
             if (it != null) {
-                showUninstallAppDialog(it.getPackageName(), it.getAppName());
+                showAppOptionsDialog(it.getPackageName(), it.getAppName());
             }
         });
         Resources res = requireContext().getResources();
@@ -184,28 +197,35 @@ public class LauncherFragment extends Fragment {
         startActivity(LaunchAppActivity.getIntent(packageName));
     }
 
-    /**
-     * 卸载应用
-     *
-     * @param packageName
-     */
-    private void showUninstallAppDialog(String packageName, String appName) {
+    private void showAppOptionsDialog(String packageName, String appName) {
+        final Map<String, DialogInterface.OnClickListener> items = new HashMap<>();
+        items.put("应用详情", (dialog, which) -> {
+            final Intent intent = new Intent(requireContext(), AppDetailActivity.class);
+            intent.putExtra("app_name", appName);
+            intent.putExtra("package_name", packageName);
+            startActivity(intent);
+        });
+        items.put("卸载", (dialog, which) -> {
+            SampleUtils.showUninstallAppDialog(getContext(), appName, (dialog_, which_) -> {
+                dialog_.dismiss();
+                asyncUninstallApp(getContext(), packageName);
+            });
+        });
+        final String[] labels = items.keySet().toArray(new String[0]);
+        final DialogInterface.OnClickListener[] values = items.values().toArray(new DialogInterface.OnClickListener[0]);
         new AlertDialog.Builder(requireContext())
-                .setTitle("卸载应用")
-                .setMessage("确定要卸载 " + appName + " 吗？")
-                .setPositiveButton("卸载", (dialog, which) -> {
+                .setTitle(appName)
+                .setItems(labels, (dialog, which) -> {
+                    values[which].onClick(dialog, which);
                     dialog.dismiss();
-                    asyncUninstallApp(packageName);
                 })
-                .setNegativeButton("取消", (dialog, which) -> {
-                    dialog.cancel();
-                })
+                .setNegativeButton("取消", null)
                 .show();
     }
 
     @SuppressLint("StaticFieldLeak")
-    private void asyncUninstallApp(String packageName) {
-        new DialogAsyncTask<Void, Void, Boolean>(getContext()) {
+    public static void asyncUninstallApp(Context context, String packageName) {
+        new DialogAsyncTask<Void, Void, Boolean>(context) {
             @Override
             protected void onPreExecute() {
                 super.showProgressDialog("正在卸载");
@@ -219,7 +239,7 @@ public class LauncherFragment extends Fragment {
             @Override
             protected void onPostExecute(Boolean result) {
                 super.onPostExecute(result);
-                Toast.makeText(getContext(), result ? "卸载成功" : "卸载失败", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, result ? "卸载成功" : "卸载失败", Toast.LENGTH_SHORT).show();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -360,5 +380,11 @@ public class LauncherFragment extends Fragment {
 
     private interface OnPreparePresetAppListener {
         void onPreparePresetApp(String packageName);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        VLite.get().unregisterReceivedEventListener(receivedEventListener);
     }
 }

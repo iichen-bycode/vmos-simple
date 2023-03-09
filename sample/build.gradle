@@ -67,12 +67,15 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.13.2'
     implementation 'com.tencent:mmkv:1.2.13'
     implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'androidx.palette:palette:1.0.0'
+    implementation 'com.github.princekin-f:EasyFloat:2.0.4'
 
     if (localProject) {
         implementation project(path: ':vmos-lite-sdk')
         compileOnly project(path: ':hiddenapi-stub')
     } else {
-        implementation 'com.vmos:vmos-lite-sdk:1.0.2-beta18'
+        implementation 'com.vmos:vmos-lite-sdk:1.0.5-beta27'
+        compileOnly 'com.vmos:hiddenapi-stub:1.0.5'
     }
 }
 

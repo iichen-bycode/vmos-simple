@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Vmos.Base" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="Theme.App.Base" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorPrimary</item>
@@ -26,7 +26,10 @@
         <item name="android:textSize">13sp</item>
     </style>
 
-    <style name="Theme.Vmos" parent="Theme.Vmos.Base"></style>
+    <style name="Theme.App" parent="Theme.App.Base"></style>
+
+    <style name="Theme.App.Main" parent="Theme.App">
+    </style>
 
     <style name="Theme.Transparent" parent="android:Theme.Translucent.NoTitleBar">
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -35,25 +38,34 @@
         <item name="android:windowTranslucentNavigation">true</item>
     </style>
 
-    <style name="Theme.Vmos.Dialog" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+    <style name="Theme.App.Dialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
-        <item name="android:backgroundDimEnabled">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
     </style>
 
-    <style name="Theme_Lite_BottomSheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
+    <style name="Theme_App_BottomSheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorAccent">@color/colorPrimary</item>
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
-        <item name="android:windowAnimationStyle">@style/Animation.MaterialComponents.BottomSheetDialog</item>
+        <item name="android:windowAnimationStyle">
+            @style/Animation.MaterialComponents.BottomSheetDialog
+        </item>
     </style>
 
     <style name="circleImageStyle">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
+    </style>
+
+
+    <style name="corner_running_task">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">15dp</item>
     </style>
 
     <style name="textview_title_option">

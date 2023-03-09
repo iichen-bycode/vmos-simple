@@ -29,5 +29,6 @@ public class InstalledAdapter extends BaseBindingAdapter<InstalledInfo, ItemInst
         holder.binding.tvCreateTime.setVisibility(View.VISIBLE);
         holder.binding.tvCreateTime.setText(item.getPackageName());
         holder.binding.ivLogo.setImageDrawable(item.getIcon());
+        holder.binding.tvNumber.setText(String.valueOf(position + 1));
     }
 }

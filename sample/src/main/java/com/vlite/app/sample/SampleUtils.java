@@ -1,12 +1,20 @@
 package com.vlite.app.sample;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.tencent.mmkv.MMKV;
 import com.vlite.app.bean.AppItem;
+import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.context.HostContext;
 import com.vlite.sdk.logger.AppLogger;
@@ -17,17 +25,6 @@ import com.vlite.sdk.utils.GsonUtils;
 import java.io.File;
 
 public class SampleUtils {
-    private static final MMKV deviceMMKV = MMKV.mmkvWithID("virtual_device");
-
-    public static DeviceEnvInfo getVirtualDeviceInfo() {
-        final String json = deviceMMKV.getString("virtual_device", null);
-        AppLogger.d(json);
-        return GsonUtils.toObject(json, DeviceEnvInfo.class);
-    }
-
-    public static void putVirtualDeviceInfo(DeviceEnvInfo deviceInfo) {
-        deviceMMKV.putString("virtual_device", GsonUtils.toJson(deviceInfo));
-    }
 
     public static AppItem newAppItem(PackageManager pm, PackageInfo pkg) {
         final Intent launchIntent = VLite.get().getLaunchIntentForPackage(pkg.packageName);
@@ -52,4 +49,29 @@ public class SampleUtils {
         }
         return iconFile.getAbsolutePath();
     }
+
+    public static File getSnapshotCacheFile(String packageName) {
+        final File dir = new File(HostContext.getContext().getCacheDir(), "snapshot_cache");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        return new File(dir, packageName + ".jpg");
+    }
+
+
+    /**
+     * 卸载应用
+     *
+     */
+    public static void showUninstallAppDialog(Context context, String appName, DialogInterface.OnClickListener listener) {
+        new AlertDialog.Builder(context)
+                .setTitle("卸载应用")
+                .setMessage("确定要卸载 " + appName + " 吗？")
+                .setPositiveButton("卸载", listener)
+                .setNegativeButton("取消", (dialog, which) -> {
+                    dialog.cancel();
+                })
+                .show();
+    }
+
 }

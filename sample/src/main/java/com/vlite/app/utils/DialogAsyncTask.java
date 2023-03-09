@@ -25,7 +25,7 @@ public abstract class DialogAsyncTask<Params, Progress, Result> extends AsyncTas
     protected void showProgressDialog(String message) {
         final View view = LayoutInflater.from(context).inflate(R.layout.dialog_material_loading, null);
         mMessageView = view.findViewById(android.R.id.message);
-        mProgressDialog = new AlertDialog.Builder(context, R.style.Theme_Vmos_Dialog)
+        mProgressDialog = new AlertDialog.Builder(context, R.style.Theme_App_Dialog)
                 .setView(view)
                 .setCancelable(false)
                 .show();
@@ -38,6 +38,8 @@ public abstract class DialogAsyncTask<Params, Progress, Result> extends AsyncTas
 
     @Override
     protected void onPostExecute(Result result) {
-        mProgressDialog.cancel();
+        if (mProgressDialog != null) {
+            mProgressDialog.cancel();
+        }
     }
 }

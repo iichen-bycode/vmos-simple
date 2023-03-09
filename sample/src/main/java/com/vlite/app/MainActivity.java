@@ -1,12 +1,20 @@
 package com.vlite.app;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,19 +24,36 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
+import androidx.multidex.BuildConfig;
+import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.vlite.app.adapters.ProcessItemAdapter;
+import com.vlite.app.bean.ProcessInfo;
+import com.vlite.app.bean.RunningInfo;
 import com.vlite.app.databinding.ActivityMainBinding;
+import com.vlite.app.databinding.DialogProcessListBinding;
 import com.vlite.app.databinding.LayoutNavigationHeaderBinding;
 import com.vlite.app.dialog.DeviceFileSelectorFragment;
-import com.vlite.app.dialog.InstalledAppDialog;
+import com.vlite.app.dialog.DeviceInstalledAppDialog;
+import com.vlite.app.dialog.VmInstalledAppDialog;
+import com.vlite.app.fragments.RunningTaskFragment;
+import com.vlite.app.sample.SampleApplicationLifecycleDelegate;
+import com.vlite.app.sample.SampleDeviceUtils;
+import com.vlite.app.sample.SampleIntentInterceptor;
 import com.vlite.app.sample.SampleUtils;
 import com.vlite.app.utils.DialogAsyncTask;
+import com.vlite.app.utils.FileSizeFormat;
+import com.vlite.app.view.FloatPointView;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.model.DeviceEnvInfo;
+import com.vlite.sdk.model.PackageConfiguration;
 import com.vlite.sdk.model.ResultParcel;
+import com.vlite.sdk.utils.BitmapUtils;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,12 +67,14 @@ public class MainActivity extends AppCompatActivity {
 
         bindViews();
 
+        applyConfiguration();
+
         asyncApplyVirtualDeviceInfo();
     }
 
     private void bindViews() {
         try {
-            final String title = String.format("%s %s (%d) %s", getString(R.string.app_name), BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.BUILD_TYPE);
+            final String title = String.format("%s %s (%d) %s", getString(R.string.app_name), com.vlite.app.BuildConfig.VERSION_NAME, com.vlite.app.BuildConfig.VERSION_CODE, com.vlite.app.BuildConfig.BUILD_TYPE);
             setTitle(title);
             final View toolbar = findViewById(androidx.appcompat.R.id.action_bar);
             if (toolbar instanceof Toolbar) {
@@ -89,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected Void doInBackground(Void... voids) {
                 // 默认虚拟一个设备信息
-                DeviceEnvInfo deviceInfo = SampleUtils.getVirtualDeviceInfo();
+                DeviceEnvInfo deviceInfo = SampleDeviceUtils.getVirtualDeviceInfo();
                 if (deviceInfo == null) {
                     deviceInfo = DeviceEnvInfo.random();
 
@@ -116,12 +143,19 @@ public class MainActivity extends AppCompatActivity {
                     deviceInfo.putSystemProperty("ro.product.device", device);
                     deviceInfo.putSystemProperty("ro.build.fingerprint", fingerprint);
 
-                    SampleUtils.putVirtualDeviceInfo(deviceInfo);
+                    SampleDeviceUtils.putVirtualDeviceInfo(deviceInfo);
                 }
                 VLite.get().setDeviceEnvInfo(deviceInfo);
                 return null;
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void applyConfiguration() {
+        VLite.get().setPackageConfiguration(new PackageConfiguration.Builder()
+                .setApplicationLifecycleDelegate(SampleApplicationLifecycleDelegate.class)
+                .setIntentInterceptor(SampleIntentInterceptor.class)
+                .build());
     }
 
     private void toggleDrawer() {
@@ -156,13 +190,24 @@ public class MainActivity extends AppCompatActivity {
                 // 导入真机应用
                 showDeviceInstalledAppDialog();
                 break;
+            case R.id.menu_installed_app:
+                // 已安装的应用
+                showInstalledAppDialog();
+                break;
             case R.id.menu_vm_running_app:
                 // 运行中的应用
-                showRunningAppDialog();
+                showRunningTasks();
+                break;
+            // 运行中的进程
+            case R.id.menu_vm_running_process:
+                showRunningProcessesDialog();
+                break;
+            // 触摸事件
+            case R.id.menu_touch:
+                showSendMotionEventDialog();
                 break;
             // 虚拟设备信息
             case R.id.menu_vm_device:
-                // 虚拟设备信息
                 showVirtualDeviceDialog();
                 break;
         }
@@ -174,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
      * 选择apk
      */
     public void showChooseApkFragment() {
-        DeviceFileSelectorFragment fragment = DeviceFileSelectorFragment.newInstance("请选择Apk", new String[]{".apk"});
+        DeviceFileSelectorFragment fragment = DeviceFileSelectorFragment.newInstance("请选择Apk", new String[]{".apk"}, true);
         fragment.setOnFileSelectorListener(item -> {
             // 安装apk
             asyncInstallApkFile(new File(item.getAbsolutePath()));
@@ -187,11 +232,46 @@ public class MainActivity extends AppCompatActivity {
      * 真机已安装的应用列表
      */
     private void showDeviceInstalledAppDialog() {
-        new InstalledAppDialog()
-                .setOnClickInstalledItemListener(item -> {
+        new DeviceInstalledAppDialog("导入真机应用")
+                .setOnClickInstalledItemListener((item, position) -> {
                     asyncInstallApkFile(new File(item.getSourcePath()));
                 })
                 .show(getSupportFragmentManager());
+    }
+
+    /**
+     * 虚拟机已安装的应用列表
+     */
+    @SuppressLint("StaticFieldLeak")
+    private void showInstalledAppDialog() {
+        VmInstalledAppDialog dialog = new VmInstalledAppDialog("已安装的应用");
+        dialog.setOnClickInstalledItemListener((item, position) -> {
+            SampleUtils.showUninstallAppDialog(this, item.getAppName(), (dialog_, which_) -> {
+                asyncUninstallAppAndRemoveItem(dialog, item.getPackageName(), position);
+            });
+        });
+        dialog.show(getSupportFragmentManager());
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void asyncUninstallAppAndRemoveItem(VmInstalledAppDialog dialog, String packageName, int position) {
+        new DialogAsyncTask<Void, Void, Boolean>(dialog.getContext()) {
+            @Override
+            protected void onPreExecute() {
+                super.showProgressDialog("正在卸载");
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                return VLite.get().uninstallPackage(packageName);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
+                dialog.removeItem(position);
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -234,36 +314,132 @@ public class MainActivity extends AppCompatActivity {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-
-
-    private void showRunningAppDialog() {
-        final List<String> packageNames = VLite.get().getRunningPackageNames();
-        new AlertDialog.Builder(this)
-                .setTitle("正在运行的应用")
-                .setItems(packageNames.toArray(new String[0]), (dialog, which) -> {
-                    dialog.cancel();
-                })
-                .show();
-    }
-
     /**
      * 虚拟设备信息
      */
     private void showVirtualDeviceDialog() {
-        final DeviceEnvInfo deviceInfo = SampleUtils.getVirtualDeviceInfo();
+        final DeviceEnvInfo deviceInfo = SampleDeviceUtils.getVirtualDeviceInfo();
         new AlertDialog.Builder(this)
                 .setTitle("虚拟设备信息")
                 .setNegativeButton("关闭", null)
-                .setPositiveButton("应用", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        VLite.get().setDeviceEnvInfo(deviceInfo);
-                    }
+                .setPositiveButton("应用", (dialog, which) -> {
+                    VLite.get().setDeviceEnvInfo(deviceInfo);
                 })
                 .show();
 
     }
 
+
+    /**
+     * 运行中的进程信息
+     */
+    @SuppressLint("StaticFieldLeak")
+    private void showRunningProcessesDialog() {
+        final Context context = this;
+        // 获取进程列表
+        new DialogAsyncTask<Void, Void, List<ProcessInfo>>(context) {
+
+            @Override
+            protected void onPreExecute() {
+                super.showProgressDialog(null);
+            }
+
+            @Override
+            protected List<ProcessInfo> doInBackground(Void... voids) {
+                final List<ActivityManager.RunningAppProcessInfo> processes = VLite.get().getRunningAppProcesses();
+                final int[] pids = new int[processes.size()];
+                for (int i = 0; i < processes.size(); i++) {
+                    pids[i] = processes.get(i).pid;
+                }
+                final List<ProcessInfo> infos = new ArrayList<>();
+                final ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+                final Debug.MemoryInfo[] memoryInfos =  am.getProcessMemoryInfo(pids);
+                for (int i = 0; i < processes.size(); i++) {
+                    final Debug.MemoryInfo memoryInfo = memoryInfos[i];
+                    final ActivityManager.RunningAppProcessInfo process = processes.get(i);
+                    final ProcessInfo processInfo = new ProcessInfo();
+                    processInfo.uid = process.uid;
+                    processInfo.pid = process.pid;
+                    processInfo.processName = process.processName;
+                    processInfo.pss = memoryInfo.getTotalPss() * 1024L;
+                    infos.add(processInfo);
+                }
+                return infos;
+            }
+
+            @Override
+            protected void onPostExecute(List<ProcessInfo> infos) {
+                super.onPostExecute(infos);
+                final DialogProcessListBinding dialogBinding = DialogProcessListBinding.inflate(LayoutInflater.from(context));
+                long sumPss = 0;
+                for (ProcessInfo info : infos) sumPss += info.pss;
+
+                dialogBinding.tvVmProcSumMem.setText(FileSizeFormat.formatSize(sumPss));
+                final ProcessItemAdapter processAdapter = new ProcessItemAdapter(infos);
+                dialogBinding.rvProcessList.setAdapter(processAdapter);
+                dialogBinding.rvProcessList.setLayoutManager(new LinearLayoutManager(context));
+                new AlertDialog.Builder(context)
+                        .setTitle("运行中的进程")
+                        .setView(dialogBinding.getRoot())
+                        .setNegativeButton("关闭", null)
+                        .show();
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+
+    @SuppressLint("StaticFieldLeak")
+    private void showRunningTasks() {
+        new DialogAsyncTask<Void, Void, List<RunningInfo>>(this) {
+
+            @Override
+            protected void onPreExecute() {
+                super.showProgressDialog(null);
+            }
+
+            @Override
+            protected List<RunningInfo> doInBackground(Void... voids) {
+                final List<RunningInfo> items = new ArrayList<>();
+                final List<String> runningPackageNames = VLite.get().getRunningPackageNames();
+                final PackageManager pm = getPackageManager();
+                for (String packageName : runningPackageNames) {
+                    final RunningInfo item = new RunningInfo();
+
+                    final ApplicationInfo info = VLite.get().getApplicationInfo(packageName, 0);
+                    final Drawable drawable = info.loadIcon(pm);
+                    final Bitmap bitmap = BitmapUtils.toBitmap(drawable);
+                    if (bitmap != null) {
+                        final Palette palette = Palette.from(bitmap).generate();
+                        item.setBackgroundColor(palette.getLightVibrantColor(Color.WHITE));
+                    }
+
+                    item.setIcon(drawable);
+                    item.setSnapshot(SampleUtils.getSnapshotCacheFile(packageName).getAbsolutePath());
+
+                    item.setAppName(info.loadLabel(pm).toString());
+                    item.setPackageName(packageName);
+                    items.add(item);
+                }
+                return items;
+            }
+
+            @Override
+            protected void onPostExecute(List<RunningInfo> result) {
+                super.onPostExecute(result);
+                if (result.isEmpty()) {
+                    Toast.makeText(MainActivity.this, "没有正在运行的应用", Toast.LENGTH_SHORT).show();
+                } else {
+                    new RunningTaskFragment()
+                            .setRunningInfos(result)
+                            .show(getSupportFragmentManager());
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void showSendMotionEventDialog(){
+        FloatPointView.show(this);
+    }
 
     private void setSubtitle(CharSequence subtitle) {
         getSupportActionBar().setSubtitle(subtitle);

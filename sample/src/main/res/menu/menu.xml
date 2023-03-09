@@ -13,8 +13,25 @@
                     android:id="@+id/menu_vm_install_app_from_device"
                     android:title="导入真机应用" />
                 <item
+                    android:id="@+id/menu_installed_app"
+                    android:title="已安装的应用" />
+                <item
                     android:id="@+id/menu_vm_running_app"
                     android:title="运行中的应用" />
+                <item
+                    android:id="@+id/menu_vm_running_process"
+                    android:title="运行中的进程" />
+            </menu>
+        </item>
+    </group>
+    <group
+        android:id="@+id/menu_group_ui">
+        <item
+            android:title="事件">
+            <menu>
+                <item
+                    android:id="@+id/menu_touch"
+                    android:title="发送触摸事件" />
             </menu>
         </item>
     </group>

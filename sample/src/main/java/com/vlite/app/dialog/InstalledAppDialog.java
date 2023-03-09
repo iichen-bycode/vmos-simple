@@ -8,18 +8,23 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewbinding.ViewBinding;
 
 import com.vlite.app.R;
+import com.vlite.app.adapters.BaseBindingAdapter;
 import com.vlite.app.adapters.InstalledAdapter;
 import com.vlite.app.bean.InstalledInfo;
 import com.vlite.sdk.logger.AppLogger;
@@ -32,10 +37,16 @@ import java.util.List;
 /**
  * 应用列表dialog
  */
-public class InstalledAppDialog extends BaseBottomSheetDialogFragment {
+public abstract class InstalledAppDialog extends BaseBottomSheetDialogFragment {
     private ProgressBar mLoadingView;
 
     private OnClickInstalledItemListener mOnClickInstalledItemListener;
+
+    public InstalledAppDialog(String title) {
+        final Bundle bundle = new Bundle();
+        bundle.putString("title", title);
+        setArguments(bundle);
+    }
 
     public InstalledAppDialog setOnClickInstalledItemListener(OnClickInstalledItemListener listener) {
         this.mOnClickInstalledItemListener = listener;
@@ -54,6 +65,18 @@ public class InstalledAppDialog extends BaseBottomSheetDialogFragment {
         super.onViewCreated(view, savedInstanceState);
         mLoadingView = view.findViewById(R.id.loading);
         RecyclerView recyclerView = view.findViewById(R.id.rv);
+        TextView titleView = view.findViewById(R.id.tv_fragment_title);
+
+        final Bundle arguments = getArguments();
+        if (arguments != null) {
+            final String title = arguments.getString("title");
+            if (TextUtils.isEmpty(title)) {
+                titleView.setVisibility(View.GONE);
+            } else {
+                titleView.setVisibility(View.VISIBLE);
+                titleView.setText(title);
+            }
+        }
 
         mLoadingView.setVisibility(View.VISIBLE);
 
@@ -61,10 +84,13 @@ public class InstalledAppDialog extends BaseBottomSheetDialogFragment {
             @Override
             protected List<InstalledInfo> doInBackground(Void... voids) {
                 final PackageManager pm = getContext().getPackageManager();
-                final List<PackageInfo> packages = pm.getInstalledPackages(0);
+                final List<PackageInfo> packages = getInstalledPackages();
                 final List<InstalledInfo> infos = new ArrayList<>();
                 for (PackageInfo pkg : packages) {
                     try {
+                        if (pkg.packageName.equals(getContext().getPackageName())) {
+                            continue;
+                        }
                         if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) <= 0) {
                             final String packageName = pkg.packageName;
                             final File apkFile = new File(pkg.applicationInfo.sourceDir);
@@ -90,11 +116,12 @@ public class InstalledAppDialog extends BaseBottomSheetDialogFragment {
                 if (context != null) {
                     mLoadingView.setVisibility(View.GONE);
 
-                    recyclerView.setLayoutManager(new GridLayoutManager(context, 4));
-                    InstalledAdapter installedAdapter = new InstalledAdapter(result);
+                    final int spanCount = getSpanCount();
+                    recyclerView.setLayoutManager(spanCount > 1 ? new GridLayoutManager(context, spanCount) : new LinearLayoutManager(context));
+                    BaseBindingAdapter<InstalledInfo, ? extends ViewBinding> installedAdapter = newRecyclerViewAdapter(result);
                     installedAdapter.setOnItemClickListener((v, position) -> {
                         if (mOnClickInstalledItemListener != null) {
-                            mOnClickInstalledItemListener.OnClickInstalledItem(installedAdapter.getData().get(position));
+                            mOnClickInstalledItemListener.onClickInstalledItem(installedAdapter.getData().get(position), position);
                         }
                         dismiss();
                     });
@@ -108,12 +135,21 @@ public class InstalledAppDialog extends BaseBottomSheetDialogFragment {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    protected abstract List<PackageInfo> getInstalledPackages();
+
+    protected BaseBindingAdapter<InstalledInfo, ? extends ViewBinding> newRecyclerViewAdapter(List<InstalledInfo> result) {
+        return new InstalledAdapter(result);
+    }
+
+    protected int getSpanCount() {
+        return 4;
+    }
 
     public void show(@NonNull FragmentManager manager) {
         super.show(manager, getClass().getName());
     }
 
     public interface OnClickInstalledItemListener {
-        void OnClickInstalledItem(InstalledInfo item);
+        void onClickInstalledItem(InstalledInfo item, int position);
     }
 }

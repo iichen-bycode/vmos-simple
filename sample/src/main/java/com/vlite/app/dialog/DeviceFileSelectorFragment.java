@@ -24,16 +24,17 @@ public class DeviceFileSelectorFragment extends BaseBottomSheetDialogFragment {
     private DialogFileSelectorBinding binding;
     private OnFileSelectorListener fileSelectorListener;
 
-    public static DeviceFileSelectorFragment newInstance(String title, String[] fileSuffixes) {
-        return newInstance(title, fileSuffixes, null);
+    public static DeviceFileSelectorFragment newInstance(String title, String[] fileSuffixes, boolean supportUseDirectory) {
+        return newInstance(title, fileSuffixes, supportUseDirectory, null);
     }
 
-    public static DeviceFileSelectorFragment newInstance(String title, String[] fileSuffixes, String rootDir) {
+    public static DeviceFileSelectorFragment newInstance(String title, String[] fileSuffixes, boolean supportUseDirectory, String rootDir) {
         Bundle args = new Bundle();
         args.putString("title", title);
 //        if (mimeTypes != null) args.putStringArray("disabled_mime_types", mimeTypes);
         if (fileSuffixes != null) args.putStringArray("disabled_file_suffixes", fileSuffixes);
         if (!TextUtils.isEmpty(rootDir)) args.putString("root_dir", rootDir);
+        args.putBoolean("support_use_directory", supportUseDirectory);
         DeviceFileSelectorFragment fragment = new DeviceFileSelectorFragment();
         fragment.setArguments(args);
         return fragment;

@@ -42,8 +42,12 @@ public abstract class FilesFragment extends Fragment {
     private boolean queryProvider;
     private List<String> disabledMimeTypes;
     private List<String> disabledFileSuffixes;
+    private boolean supportUseDirectory;
 
     private OnFileItemListener fileItemListener;
+
+    private final int ID_PARENT = -1;
+    private final int ID_SELECT_CURRENT = -2;
 
     @Nullable
     @Override
@@ -75,6 +79,7 @@ public abstract class FilesFragment extends Fragment {
             }
             title = arguments.getString("title");
             queryProvider = arguments.getBoolean("query_provider", false);
+            supportUseDirectory = arguments.getBoolean("support_use_directory", false);
         }
         if (TextUtils.isEmpty(title)) {
             binding.tvFragmentTitle.setVisibility(View.GONE);
@@ -138,11 +143,20 @@ public abstract class FilesFragment extends Fragment {
             protected List<VmFileItem> doInBackground(Void... voids) {
                 final List<VmFileItem> items = new ArrayList<>();
                 if (!directoryPath.equals(sdcardRealPath)) {
+                    // 上一级
                     VmFileItem parent = new VmFileItem();
-                    parent.setId(-1);
-                    parent.setName("上一级..");
+                    parent.setId(ID_PARENT);
+                    parent.setName("上一级...");
                     parent.setDirectory(true);
                     items.add(parent);
+                    // 选择文件夹
+                    if (supportUseDirectory) {
+                        VmFileItem selectCurrent = new VmFileItem();
+                        selectCurrent.setId(ID_SELECT_CURRENT);
+                        selectCurrent.setName("选择此文件夹...");
+                        selectCurrent.setDirectory(true);
+                        items.add(selectCurrent);
+                    }
                 }
 
                 final List<VmFileItem> fileItems;
@@ -160,10 +174,10 @@ public abstract class FilesFragment extends Fragment {
                 currentDirectoryPath = directoryPath;
 
                 Collections.sort(items, (o1, o2) -> {
-                    if (o1.getId() == -1) {
-                        return -1;
-                    } else if (o2.getId() == -1) {
-                        return 1;
+                    if (o1.getId() == ID_PARENT || o1.getId() == ID_SELECT_CURRENT) {
+                        return o1.getId() - ID_SELECT_CURRENT;
+                    } else if (o2.getId() == ID_PARENT || o2.getId() == ID_SELECT_CURRENT) {
+                        return o2.getId() - ID_SELECT_CURRENT;
                     } else {
                         return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
                     }
@@ -183,17 +197,27 @@ public abstract class FilesFragment extends Fragment {
                     if (item.isDisabled()) {
                         return;
                     }
-                    // 如果是文件夹 继续进入
-                    if (item.isDirectory()) {
-                        if (item.getId() == -1) {
-                            // 如果是上一级
-                            asyncLoadExternalFiles(new File(directoryPath).getParent(), -1);
-                        } else {
-                            asyncLoadExternalFiles(item.getPath(), item.getId());
+                    if (item.getId() == ID_SELECT_CURRENT) {
+                        if (fileItemListener != null) {
+                            final VmFileItem newItem = new VmFileItem();
+                            newItem.setId(ID_SELECT_CURRENT);
+                            newItem.setDirectory(true);
+                            newItem.setAbsolutePath(directoryPath);
+                            fileItemListener.onClickFile(FilesFragment.this, newItem);
                         }
                     } else {
-                        if (fileItemListener != null) {
-                            fileItemListener.onClickFile(FilesFragment.this, item);
+                        // 如果是文件夹 继续进入
+                        if (item.isDirectory()) {
+                            if (item.getId() == ID_PARENT) {
+                                // 如果是上一级
+                                asyncLoadExternalFiles(new File(directoryPath).getParent(), ID_PARENT);
+                            } else {
+                                asyncLoadExternalFiles(item.getPath(), item.getId());
+                            }
+                        } else {
+                            if (fileItemListener != null) {
+                                fileItemListener.onClickFile(FilesFragment.this, item);
+                            }
                         }
                     }
                 });

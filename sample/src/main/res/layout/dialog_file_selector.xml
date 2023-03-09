@@ -5,6 +5,7 @@
     android:layout_height="match_parent">
 
     <CheckBox
+        android:visibility="gone"
         android:id="@+id/cb_query_provider"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -15,7 +16,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
-        android:layout_marginTop="-6dp"
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
