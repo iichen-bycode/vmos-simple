@@ -6,6 +6,7 @@ import androidx.multidex.MultiDexApplication;
 
 import com.tencent.mmkv.MMKV;
 import com.vlite.app.sample.PackageManagerProxySample;
+import com.vlite.app.sample.SampleLocationManagerService;
 import com.vlite.sdk.LiteConfig;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.context.HostContext;
@@ -32,7 +33,7 @@ public class SampleApplication extends MultiDexApplication {
 //                        .addLogger(new MarsLogger(this))
                 )
                 // 注册自定义服务
-//                .registerCustomService(ServiceContext.LOCATION_SERVICE, CustomLocationManagerService.class)
+                .registerCustomService(ServiceContext.LOCATION_SERVICE, SampleLocationManagerService.class)
                 // 设置系统服务客户端代理
 //                .registerSystemServiceClientProxy(ServiceContext.PACKAGE_SERVICE, PackageManagerProxySample.class)
                 .build());

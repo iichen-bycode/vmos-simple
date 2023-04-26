@@ -1,11 +1,8 @@
 package com.vlite.app.sample;
 
-import android.content.pm.PackageInfo;
-
-import com.vlite.sdk.annotation.NonNull;
-import com.vlite.sdk.annotation.Nullable;
 import com.vlite.sdk.application.MethodOverrideHandler;
 import com.vlite.sdk.application.SystemServiceClientProxy;
+import com.vlite.sdk.context.HostContext;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -19,15 +16,17 @@ public class PackageManagerProxySample extends SystemServiceClientProxy {
     private final Map<String, MethodOverrideHandler> methods = new HashMap<>();
 
     public PackageManagerProxySample() {
-        // 覆盖getPackageInfo原本逻辑 修复PackageInfo versionName
+        // 覆盖getPackageInfo原本逻辑 当参数是宿主包名时返回null
         methods.put("getPackageInfo", new MethodOverrideHandler() {
             @Override
-            public Object afterInvoke(@NonNull Object obj, @NonNull Method method, Object[] params, @Nullable Object retVal) throws Throwable {
-                Object result = super.afterInvoke(obj, method, params, retVal);
-                if (result instanceof PackageInfo) {
-                    ((PackageInfo) result).versionName = "9.9.9-custom";
+            public Object doInvoke(Object obj, Method method, Object[] args) throws Throwable {
+                // PackageInfo getPackageInfo(String packageName, int flags, int userId);
+                final String packageName = (String) args[0];
+                if (HostContext.getPackageName().equals(packageName)) {
+                    return null;
+                } else {
+                    return super.doInvoke(obj, method, args);
                 }
-                return result;
             }
         });
     }

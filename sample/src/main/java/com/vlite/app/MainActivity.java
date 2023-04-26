@@ -8,13 +8,14 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Debug;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ import com.vlite.app.adapters.ProcessItemAdapter;
 import com.vlite.app.bean.ProcessInfo;
 import com.vlite.app.bean.RunningInfo;
 import com.vlite.app.databinding.ActivityMainBinding;
+import com.vlite.app.databinding.DialogInputLocationBinding;
 import com.vlite.app.databinding.DialogProcessListBinding;
 import com.vlite.app.databinding.LayoutNavigationHeaderBinding;
 import com.vlite.app.dialog.DeviceFileSelectorFragment;
@@ -41,11 +43,13 @@ import com.vlite.app.fragments.RunningTaskFragment;
 import com.vlite.app.sample.SampleApplicationLifecycleDelegate;
 import com.vlite.app.sample.SampleDeviceUtils;
 import com.vlite.app.sample.SampleIntentInterceptor;
+import com.vlite.app.sample.SampleLocationStore;
 import com.vlite.app.sample.SampleUtils;
 import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.app.utils.FileSizeFormat;
 import com.vlite.app.view.FloatPointView;
 import com.vlite.sdk.VLite;
+import com.vlite.sdk.model.ConfigurationContext;
 import com.vlite.sdk.model.DeviceEnvInfo;
 import com.vlite.sdk.model.PackageConfiguration;
 import com.vlite.sdk.model.ResultParcel;
@@ -152,6 +156,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void applyConfiguration() {
+        SampleLocationStore.clear();
+        VLite.get().setConfigurationContext(new ConfigurationContext.Builder()
+                .setUseInternalSdcard(false)
+                .build());
         VLite.get().setPackageConfiguration(new PackageConfiguration.Builder()
                 .setApplicationLifecycleDelegate(SampleApplicationLifecycleDelegate.class)
                 .setIntentInterceptor(SampleIntentInterceptor.class)
@@ -202,9 +210,16 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_vm_running_process:
                 showRunningProcessesDialog();
                 break;
+            // 杀死全部进程
+            case R.id.menu_kill_all:
+                showKillAppDialog();
+                break;
             // 触摸事件
             case R.id.menu_touch:
                 showSendMotionEventDialog();
+                break;
+            case R.id.menu_vm_location:
+                showInputLocationDialog();
                 break;
             // 虚拟设备信息
             case R.id.menu_vm_device:
@@ -353,7 +368,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 final List<ProcessInfo> infos = new ArrayList<>();
                 final ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-                final Debug.MemoryInfo[] memoryInfos =  am.getProcessMemoryInfo(pids);
+                final Debug.MemoryInfo[] memoryInfos = am.getProcessMemoryInfo(pids);
                 for (int i = 0; i < processes.size(); i++) {
                     final Debug.MemoryInfo memoryInfo = memoryInfos[i];
                     final ActivityManager.RunningAppProcessInfo process = processes.get(i);
@@ -437,7 +452,50 @@ public class MainActivity extends AppCompatActivity {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private void showSendMotionEventDialog(){
+    private void showInputLocationDialog() {
+        final DialogInputLocationBinding dialogBinding = DialogInputLocationBinding.inflate(LayoutInflater.from(this));
+        new AlertDialog.Builder(this)
+                .setView(dialogBinding.getRoot())
+                .setTitle("手动输入经纬度")
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", (dialog, which) -> {
+                    double longitude = Double.parseDouble(dialogBinding.etLongitude.getText().toString());
+                    double latitude = Double.parseDouble(dialogBinding.edLatitude.getText().toString());
+                    final Location fakeLocation = new Location(LocationManager.GPS_PROVIDER);
+                    fakeLocation.setLongitude(longitude);
+                    fakeLocation.setLatitude(latitude);
+                    SampleLocationStore.setFakeLocation(fakeLocation);
+                    Toast.makeText(this, "设置位置信息 " + longitude + ", " + latitude, Toast.LENGTH_SHORT).show();
+                }).show();
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    private void showKillAppDialog() {
+        new DialogAsyncTask<Void, Void, Void>(this) {
+
+            @Override
+            protected void onPreExecute() {
+                super.showProgressDialog(null);
+            }
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                final List<String> packageNames = VLite.get().getRunningPackageNames();
+                for (String packageName : packageNames) {
+                    VLite.get().killApplication(packageName);
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+                super.onPostExecute(result);
+                Toast.makeText(MainActivity.this, "已清理运行中的应用", Toast.LENGTH_SHORT).show();
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void showSendMotionEventDialog() {
         FloatPointView.show(this);
     }
 

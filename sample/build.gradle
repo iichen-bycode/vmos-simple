@@ -74,8 +74,8 @@ dependencies {
         implementation project(path: ':vmos-lite-sdk')
         compileOnly project(path: ':hiddenapi-stub')
     } else {
-        implementation 'com.vmos:vmos-lite-sdk:1.0.5-beta27'
-        compileOnly 'com.vmos:hiddenapi-stub:1.0.5'
+        implementation 'com.vmos:vmos-lite-sdk:1.0.6-beta20'
+        compileOnly 'com.vmos:hiddenapi-stub:1.0.8'
     }
 }
 

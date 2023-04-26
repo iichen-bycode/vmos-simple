@@ -105,7 +105,13 @@ public abstract class InstalledAppDialog extends BaseBottomSheetDialogFragment {
                         e.printStackTrace();
                     }
                 }
-                Collections.sort(infos, (o1, o2) -> (int) (o2.getLength() - o1.getLength()));
+                Collections.sort(infos, (o1, o2) -> {
+                    final String top = "com.vlite.unittest";
+                    if (top.equals(o1.getPackageName())) {
+                        return -1;
+                    }
+                    return (int) (o2.getLength() - o1.getLength());
+                });
                 return infos;
             }
 
