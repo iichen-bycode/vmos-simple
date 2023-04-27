@@ -48,7 +48,9 @@ import com.vlite.app.sample.SampleUtils;
 import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.app.utils.FileSizeFormat;
 import com.vlite.app.view.FloatPointView;
+import com.vlite.sdk.LiteConfig;
 import com.vlite.sdk.VLite;
+import com.vlite.sdk.context.ServiceContext;
 import com.vlite.sdk.model.ConfigurationContext;
 import com.vlite.sdk.model.DeviceEnvInfo;
 import com.vlite.sdk.model.PackageConfiguration;
@@ -453,6 +455,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showInputLocationDialog() {
+        if (!LiteConfig.get().getCustomServiceClassNames().containsKey(ServiceContext.LOCATION_SERVICE)){
+            Toast.makeText(this, "此示例需要解开registerCustomService注释", Toast.LENGTH_SHORT).show();
+            return;
+        }
         final DialogInputLocationBinding dialogBinding = DialogInputLocationBinding.inflate(LayoutInflater.from(this));
         new AlertDialog.Builder(this)
                 .setView(dialogBinding.getRoot())
