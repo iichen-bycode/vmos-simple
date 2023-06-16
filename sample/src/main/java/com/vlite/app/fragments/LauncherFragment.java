@@ -39,14 +39,11 @@ import com.vlite.app.sample.SampleUtils;
 import com.vlite.app.utils.AssetsUtils;
 import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.sdk.VLite;
-import com.vlite.sdk.client.VirtualClient;
-import com.vlite.sdk.client.virtualservice.pm.VirtualPackageManager;
 import com.vlite.sdk.event.BinderEvent;
 import com.vlite.sdk.event.OnReceivedEventListener;
 import com.vlite.sdk.logger.AppLogger;
 import com.vlite.sdk.model.InstallConfig;
 import com.vlite.sdk.model.ResultParcel;
-import com.vlite.sdk.server.virtualservice.am.LaunchActivityInfo;
 import com.vlite.sdk.utils.BitmapUtils;
 import com.vlite.sdk.utils.io.FileUtils;
 
