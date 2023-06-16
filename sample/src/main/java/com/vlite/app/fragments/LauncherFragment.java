@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -12,6 +14,7 @@ import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,11 +39,15 @@ import com.vlite.app.sample.SampleUtils;
 import com.vlite.app.utils.AssetsUtils;
 import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.sdk.VLite;
+import com.vlite.sdk.client.VirtualClient;
+import com.vlite.sdk.client.virtualservice.pm.VirtualPackageManager;
 import com.vlite.sdk.event.BinderEvent;
 import com.vlite.sdk.event.OnReceivedEventListener;
 import com.vlite.sdk.logger.AppLogger;
 import com.vlite.sdk.model.InstallConfig;
 import com.vlite.sdk.model.ResultParcel;
+import com.vlite.sdk.server.virtualservice.am.LaunchActivityInfo;
+import com.vlite.sdk.utils.BitmapUtils;
 import com.vlite.sdk.utils.io.FileUtils;
 
 import org.json.JSONObject;
@@ -64,6 +71,8 @@ public class LauncherFragment extends Fragment {
     private FragmentLauncherBinding binding;
 
     private AppItemAdapter adapter;
+    private static int icon = 0;
+    private static String componentChanged = "";
 
     private final OnReceivedEventListener receivedEventListener = new OnReceivedEventListener() {
         /**
@@ -102,6 +111,37 @@ public class LauncherFragment extends Fragment {
         loadInstalledApps(view.getContext());
     }
 
+
+    private void getAppLauncherIcon(String packageName) {
+        if (TextUtils.isEmpty(packageName)){
+            return;
+        }
+        try {
+            componentChanged = packageName;
+
+            ActivityInfo launchActivityInfo = VLite.get().getLaunchActivityInfoForPackage(packageName);
+            //刷新界面，重新加载
+            List<AppItem> appItems = adapter.getData();
+            if (appItems != null && appItems.size() > 0){
+                for (AppItem item:appItems){
+                    if (item.getPackageName().equals(componentChanged)){
+                        String path = item.getIconUri();
+                        BitmapUtils.toFile(BitmapUtils.toBitmap(launchActivityInfo.loadIcon(getContext().getPackageManager())), path);
+                        item.setIconUri(path);
+                        break;
+                    }
+                }
+            }
+            adapter.notifyDataSetChanged();
+
+        }catch (Exception e){
+            AppLogger.w(e);
+        }
+
+    }
+
+
+
     private void bindViews() {
         binding.refreshLayout.setColorSchemeResources(R.color.colorPrimary);
         adapter = new AppItemAdapter(new ArrayList<>());
@@ -137,6 +177,14 @@ public class LauncherFragment extends Fragment {
         } else if (BinderEvent.TYPE_PACKAGE_UNINSTALLED == type) {
             // 有应用卸载
             handlePackageUninstalledEvent(extras);
+        }else if (BinderEvent.TYPE_COMPONENT_CHANGE_ENABLED == type){
+            //更新应用icon
+            if (extras != null){
+                String pkgName = extras.getString("packageName");
+                String clzName = extras.getString("className");
+                getAppLauncherIcon(pkgName);
+            }
+
         }
     }
 

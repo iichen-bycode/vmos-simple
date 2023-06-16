@@ -4,9 +4,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
@@ -27,25 +29,26 @@ import java.io.File;
 public class SampleUtils {
 
     public static AppItem newAppItem(PackageManager pm, PackageInfo pkg) {
-        final Intent launchIntent = VLite.get().getLaunchIntentForPackage(pkg.packageName);
+//        final Intent launchIntent = VLite.get().getLaunchIntentForPackage(pkg.packageName);
+        final ActivityInfo launchIntent = VLite.get().getLaunchActivityInfoForPackage(pkg.packageName);
         if (launchIntent != null) {
             final AppItem it = new AppItem();
             it.setPackageName(pkg.packageName);
             it.setAppName(pkg.applicationInfo.loadLabel(pm).toString());
-            it.setIconUri(getIconCacheUri(pm, pkg.versionCode, pkg.applicationInfo));
+            it.setIconUri(getIconCacheUri(pm, pkg.versionCode, pkg.applicationInfo,launchIntent.loadIcon(pm)));
             return it;
         }
         return null;
     }
 
-    public static String getIconCacheUri(PackageManager pm, int versionCode, ApplicationInfo info) {
+    public static String getIconCacheUri(PackageManager pm, int versionCode, ApplicationInfo info, Drawable drawable) {
         final File iconDir = new File(HostContext.getContext().getCacheDir(), "icon_cache");
         if (!iconDir.exists()) {
             iconDir.mkdirs();
         }
         final File iconFile = new File(iconDir, info.packageName + "_" + versionCode + ".png");
         if (!iconFile.exists()) {
-            BitmapUtils.toFile(BitmapUtils.toBitmap(info.loadIcon(pm)), iconFile.getAbsolutePath());
+            BitmapUtils.toFile(BitmapUtils.toBitmap(drawable), iconFile.getAbsolutePath());
         }
         return iconFile.getAbsolutePath();
     }

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <group
-        android:id="@+id/menu_group_vm_app">
-        <item
-            android:title="应用管理">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/menu_group_vm_app">
+        <item android:title="应用管理">
             <menu>
                 <item
                     android:id="@+id/menu_vm_install_app"
@@ -19,10 +16,8 @@
         </item>
     </group>
 
-    <group
-        android:id="@+id/menu_group_vm_process">
-        <item
-            android:title="进程管理">
+    <group android:id="@+id/menu_group_vm_process">
+        <item android:title="进程管理">
             <menu>
                 <item
                     android:id="@+id/menu_vm_running_app"
@@ -36,10 +31,8 @@
             </menu>
         </item>
     </group>
-    <group
-        android:id="@+id/menu_group_ui">
-        <item
-            android:title="事件">
+    <group android:id="@+id/menu_group_ui">
+        <item android:title="事件">
             <menu>
                 <item
                     android:id="@+id/menu_touch"
@@ -47,10 +40,8 @@
             </menu>
         </item>
     </group>
-    <group
-        android:id="@+id/menu_group_location">
-        <item
-            android:title="定位">
+    <group android:id="@+id/menu_group_location">
+        <item android:title="定位">
             <menu>
                 <item
                     android:id="@+id/menu_vm_location"
@@ -58,9 +49,20 @@
             </menu>
         </item>
     </group>
+    <group
+        android:id="@+id/menu_group_component"
+        android:visible="false">
+        <item android:title="组件">
+            <menu>
+                <item
+                    android:id="@+id/menu_send_broadcast"
+                    android:title="发送广播" />
+            </menu>
+        </item>
+    </group>
 
     <item
-        android:visible="false"
         android:id="@+id/menu_vm_device"
-        android:title="虚拟设备信息"/>
+        android:title="虚拟设备信息"
+        android:visible="false" />
 </menu>

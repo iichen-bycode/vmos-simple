@@ -57,16 +57,16 @@ android {
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
+    implementation "androidx.startup:startup-runtime:1.1.1"
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-
+    implementation 'com.vmos:vmos-lite-sample:1.0.1'
     implementation "com.github.permissions-dispatcher:permissionsdispatcher:4.9.2"
     annotationProcessor "com.github.permissions-dispatcher:permissionsdispatcher-processor:4.9.2"
-
     implementation 'com.github.bumptech.glide:glide:4.13.2'
-    implementation 'com.tencent:mmkv:1.2.13'
-    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'com.tencent:mmkv:1.2.15'
+    implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'androidx.palette:palette:1.0.0'
     implementation 'com.github.princekin-f:EasyFloat:2.0.4'
 
@@ -74,7 +74,7 @@ dependencies {
         implementation project(path: ':vmos-lite-sdk')
         compileOnly project(path: ':hiddenapi-stub')
     } else {
-        implementation 'com.vmos:vmos-lite-sdk:1.0.6-beta20'
+        implementation 'com.vmos:vmos-lite-sdk:1.0.7-beta02'
         compileOnly 'com.vmos:hiddenapi-stub:1.0.8'
     }
 }

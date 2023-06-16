@@ -3,6 +3,7 @@ package com.vlite.app;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -222,6 +223,10 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.menu_vm_location:
                 showInputLocationDialog();
+                break;
+            // 发送广播
+            case R.id.menu_send_broadcast:
+                sendBroadcastToApp();
                 break;
             // 虚拟设备信息
             case R.id.menu_vm_device:
@@ -473,6 +478,11 @@ public class MainActivity extends AppCompatActivity {
                     SampleLocationStore.setFakeLocation(fakeLocation);
                     Toast.makeText(this, "设置位置信息 " + longitude + ", " + latitude, Toast.LENGTH_SHORT).show();
                 }).show();
+    }
+
+    private void sendBroadcastToApp() {
+        final Intent intent = new Intent("sample.register.test");
+        VLite.get().sendBroadcast(intent);
     }
 
     @SuppressLint("StaticFieldLeak")

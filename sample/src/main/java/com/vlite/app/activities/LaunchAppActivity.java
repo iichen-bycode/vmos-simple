@@ -3,6 +3,7 @@ package com.vlite.app.activities;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -61,7 +62,7 @@ public class LaunchAppActivity extends AppCompatActivity {
                 final String iconUri = (String) values[1];
                 final PackageInfo packageInfo = (PackageInfo) values[2];
 
-                GlideUtils.loadFade(binding.ivAppIcon, iconUri);
+                GlideUtils.loadFadeSkipCache(binding.ivAppIcon, iconUri);
                 binding.tvAppName.setText(appName);
                 binding.tvAppPackageName.setText(packageInfo.packageName);
                 binding.tvAppVersion.setText(String.format("%s（%s）", packageInfo.versionName, packageInfo.versionCode));
@@ -73,7 +74,8 @@ public class LaunchAppActivity extends AppCompatActivity {
                 final PackageInfo packageInfo = VLite.get().getPackageInfo(packageName, 0);
                 if (packageInfo != null) {
                     final String appName = packageInfo.applicationInfo.loadLabel(pm).toString();
-                    final String iconUri = SampleUtils.getIconCacheUri(pm, packageInfo.versionCode, packageInfo.applicationInfo);
+                    final ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+                    final String iconUri = SampleUtils.getIconCacheUri(pm, packageInfo.versionCode, applicationInfo,applicationInfo.loadIcon(pm));
                     publishProgress(appName, iconUri, packageInfo);
                 }
 
