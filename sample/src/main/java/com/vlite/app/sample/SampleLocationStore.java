@@ -6,7 +6,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.vlite.sdk.context.HostContext;
 
@@ -20,6 +19,7 @@ public class SampleLocationStore {
     private static SharedPreferences getSharedPreferences() {
         if (mLocationStore == null) {
             mLocationStore = HostContext.getContext().getSharedPreferences("location", Context.MODE_MULTI_PROCESS);
+
         }
         return mLocationStore;
     }
@@ -27,6 +27,7 @@ public class SampleLocationStore {
     public static void clear() {
         getSharedPreferences().edit().clear().apply();
     }
+
 
     public static void setFakeLocation(Location location) {
         getSharedPreferences().edit()
@@ -44,7 +45,7 @@ public class SampleLocationStore {
             final Location location = new Location(provider);
             location.setLatitude(preferences.getFloat("latitude", 0f));
             location.setLongitude(preferences.getFloat("longitude", 0f));
-//            location.setLongitude(116.275747);
+            //            location.setLongitude(116.275747);
 //            location.setLatitude(40.0006376);
 //            location.setAltitude(66.78003831673414);
 //            location.setSpeed(0f);

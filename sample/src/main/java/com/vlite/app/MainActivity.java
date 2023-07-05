@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -12,8 +13,10 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -59,9 +62,13 @@ import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
@@ -164,6 +171,8 @@ public class MainActivity extends AppCompatActivity {
                 .setUseInternalSdcard(false)
                 .build());
         VLite.get().setPackageConfiguration(new PackageConfiguration.Builder()
+                .setEnableTraceAnr(true)
+                .setEnableTraceNativeCrash(true)
                 .setApplicationLifecycleDelegate(SampleApplicationLifecycleDelegate.class)
                 .setIntentInterceptor(SampleIntentInterceptor.class)
                 .build());
@@ -277,7 +286,9 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void asyncUninstallAppAndRemoveItem(VmInstalledAppDialog dialog, String packageName, int position) {
-        new DialogAsyncTask<Void, Void, Boolean>(dialog.getContext()) {
+//        Context context = dialog!=null&&dialog.isVisible()?dialog.getContext():MainActivity.this;
+        Context context = MainActivity.this;
+        new DialogAsyncTask<Void, Void, Boolean>(context) {
             @Override
             protected void onPreExecute() {
                 super.showProgressDialog("正在卸载");
@@ -307,6 +318,33 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show();
             return;
         }
+        int minSDKVersion = getMinSDKVersion(src.getPath());
+        if (minSDKVersion > Build.VERSION.SDK_INT) {
+            Toast.makeText(this, "apk不支持安装", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String[] apkSupportedABIs = getApkSupportedABIs(src.getAbsolutePath());
+        if (0 < apkSupportedABIs.length) {
+            asyncInstallApkFileNotCheck(src.getAbsolutePath());
+        } else {
+            // 如果是分包的就 给文件夹路径
+            if (src.isDirectory()) {
+                asyncInstallApkFileNotCheck(src.getPath());
+            } else {
+                PackageManager packageManager = getPackageManager();
+                PackageInfo packageInfo = packageManager.getPackageArchiveInfo(src.getPath(), PackageManager.GET_META_DATA);
+                if (packageInfo != null) {
+                    if (null == packageInfo.applicationInfo.nativeLibraryDir) {
+                        asyncInstallApkFileNotCheck(src.getAbsolutePath());
+                    }
+                } else {
+                    Toast.makeText(this, "apk不支持安装", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+    @SuppressLint("StaticFieldLeak")
+    private void asyncInstallApkFileNotCheck(String uriString) {
         new DialogAsyncTask<Void, String, ResultParcel>(this) {
 
             @Override
@@ -321,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected ResultParcel doInBackground(Void... voids) {
-                return VLite.get().installPackage(src.getAbsolutePath());
+                return VLite.get().installPackage(uriString);
             }
 
             @Override
@@ -335,6 +373,48 @@ public class MainActivity extends AppCompatActivity {
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
+
+    public static String[] getApkSupportedABIs(String apkFilePath) {
+        try {
+            ZipFile zipFile = new ZipFile(apkFilePath);
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String name = entry.getName();
+                if (name.startsWith("lib/") && name.endsWith(".so")) {
+                    // 获取库文件的架构类型
+                    String[] parts = name.split("/");
+                    if (parts.length >= 3) {
+                        String abi = parts[1];
+                        if (!TextUtils.isEmpty(abi)) {
+                            // 只保留有效的架构类型
+                            if (abi.equals("arm64-v8a") || abi.equals("x86_64")) {
+                                return new String[]{abi};
+                            }
+                        }
+                    }
+                }
+            }
+            zipFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new String[0];
+    }
+
+    private int getMinSDKVersion(String filePath) {
+        try {
+            PackageInfo info = getPackageManager().getPackageArchiveInfo(filePath, PackageManager.GET_ACTIVITIES);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                return info.applicationInfo.minSdkVersion;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return -1;
+    }
+
 
     /**
      * 虚拟设备信息
@@ -460,7 +540,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showInputLocationDialog() {
-        if (!LiteConfig.get().getCustomServiceClassNames().containsKey(ServiceContext.LOCATION_SERVICE)){
+        if (!LiteConfig.get().getCustomServiceClassNames().containsKey(ServiceContext.LOCATION_SERVICE)) {
             Toast.makeText(this, "此示例需要解开registerCustomService注释", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -510,6 +590,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
+
 
     private void showSendMotionEventDialog() {
         FloatPointView.show(this);

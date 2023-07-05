@@ -16,7 +16,7 @@ android {
         targetSdk rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
-
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
 
@@ -64,6 +64,7 @@ dependencies {
     implementation 'com.vmos:vmos-lite-sample:1.0.1'
     implementation "com.github.permissions-dispatcher:permissionsdispatcher:4.9.2"
     annotationProcessor "com.github.permissions-dispatcher:permissionsdispatcher-processor:4.9.2"
+
     implementation 'com.github.bumptech.glide:glide:4.13.2'
     implementation 'com.tencent:mmkv:1.2.15'
     implementation 'com.google.code.gson:gson:2.10.1'
@@ -73,10 +74,20 @@ dependencies {
     if (localProject) {
         implementation project(path: ':vmos-lite-sdk')
         compileOnly project(path: ':hiddenapi-stub')
+        debugImplementation project(path: ':vmos-lite-shell')
     } else {
-        implementation 'com.vmos:vmos-lite-sdk:1.0.7-beta02'
+        debugImplementation'com.vmos:vmos-lite-shell:1.0.1'
+        implementation 'com.vmos:vmos-lite-sdk:1.0.8-beta02'
         compileOnly 'com.vmos:hiddenapi-stub:1.0.8'
     }
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+
+    //异常捕获库的引入
+    implementation 'com.iqiyi.xcrash:xcrash-android-lib:3.0.0'
+    implementation 'com.vmos:vmos-trace:1.0.0'
 }
 
 // 是否加入预置apk

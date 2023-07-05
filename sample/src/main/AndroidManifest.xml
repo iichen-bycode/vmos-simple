@@ -65,6 +65,24 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <!-- 用于处理Zoom使用Google等登录后，点击打开zoom的DeepLink链接-->
+        <activity android:name=".activities.DeeplinkActivity"
+            android:theme="@style/Theme.App"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask">
+            <!--Zoom-->
+            <intent-filter>
+                <action
+                    android:name="android.intent.action.VIEW" />
+                <category
+                    android:name="android.intent.category.BROWSABLE" />
+                <category
+                    android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:scheme="zoomus" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

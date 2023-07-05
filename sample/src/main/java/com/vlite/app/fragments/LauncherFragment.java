@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -68,6 +67,7 @@ public class LauncherFragment extends Fragment {
     private FragmentLauncherBinding binding;
 
     private AppItemAdapter adapter;
+
     private static int icon = 0;
     private static String componentChanged = "";
 
@@ -108,7 +108,6 @@ public class LauncherFragment extends Fragment {
         loadInstalledApps(view.getContext());
     }
 
-
     private void getAppLauncherIcon(String packageName) {
         if (TextUtils.isEmpty(packageName)){
             return;
@@ -136,8 +135,6 @@ public class LauncherFragment extends Fragment {
         }
 
     }
-
-
 
     private void bindViews() {
         binding.refreshLayout.setColorSchemeResources(R.color.colorPrimary);
@@ -174,12 +171,13 @@ public class LauncherFragment extends Fragment {
         } else if (BinderEvent.TYPE_PACKAGE_UNINSTALLED == type) {
             // 有应用卸载
             handlePackageUninstalledEvent(extras);
-        }else if (BinderEvent.TYPE_COMPONENT_CHANGE_ENABLED == type){
+        }else if (BinderEvent.TYPE_COMPONENT_SETTING_CHANGE == type){
             //更新应用icon
             if (extras != null){
-                String pkgName = extras.getString("packageName");
-                String clzName = extras.getString("className");
+                String pkgName = extras.getString(BinderEvent.KEY_PACKAGE_NAME);
+                String clzName = extras.getString(BinderEvent.KEY_CLASS_NAME);
                 getAppLauncherIcon(pkgName);
+//                loadInstalledApps(getContext());
             }
 
         }
@@ -214,7 +212,9 @@ public class LauncherFragment extends Fragment {
                 final ArrayList<AppItem> items = new ArrayList<>();
                 for (PackageInfo pkg : packages) {
                     final AppItem item = SampleUtils.newAppItem(pm, pkg);
-                    if (item != null) items.add(item);
+                    if (item != null){
+                        items.add(item);
+                    }
                 }
                 return items;
             }

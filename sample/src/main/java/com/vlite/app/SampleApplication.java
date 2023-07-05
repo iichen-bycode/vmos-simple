@@ -32,7 +32,7 @@ public class SampleApplication extends MultiDexApplication {
                         // 日志增加mars支持
 //                        .addLogger(new MarsLogger(this))
                 )
-                // 注册自定义服务 这里演示了自定义位置服务
+                // 注册自定义服务
 //                .registerCustomService(ServiceContext.LOCATION_SERVICE, SampleLocationManagerService.class)
                 // 设置系统服务客户端代理
 //                .registerSystemServiceClientProxy(ServiceContext.PACKAGE_SERVICE, PackageManagerProxySample.class)

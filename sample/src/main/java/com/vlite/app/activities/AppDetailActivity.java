@@ -34,6 +34,7 @@ public class AppDetailActivity extends AppCompatActivity {
         final Intent intent = new Intent(this, AppPermissionActivity.class);
         intent.putExtras(extras);
         startActivity(intent);
+        finish();//跳到App权限页面了，当前空白页面finish
     }
 
     @SuppressLint("StaticFieldLeak")

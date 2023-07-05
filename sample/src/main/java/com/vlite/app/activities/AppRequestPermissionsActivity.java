@@ -32,6 +32,7 @@ public class AppRequestPermissionsActivity extends AppCompatActivity {
         intent.putExtra("app_name", appName);
         intent.putExtra("permission_name", permissionName);
         intent.putExtra("permission_display_name", permissionDisplayName);
+        intent.putExtra("permissions",new String[]{permissionName});
         context.startActivity(intent);
     }
 
@@ -55,9 +56,12 @@ public class AppRequestPermissionsActivity extends AppCompatActivity {
         mPackageName = intent.getStringExtra("package_name");
         final String appName = intent.getStringExtra("app_name");
         final String[] permissions = intent.getStringArrayExtra("permissions");
-        for (String permission : permissions) {
-            mRequestPermissionQueue.offer(permission);
+        if (permissions != null && permissions.length > 0){
+            for (String permission : permissions) {
+                mRequestPermissionQueue.offer(permission);
+            }
         }
+
 
         mBinding.tvPermissionAllow.setOnClickListener(v -> {
             mRequestPermissionResults.put(mCurrentRequestPermission, PackageManager.PERMISSION_GRANTED);
