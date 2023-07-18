@@ -5,9 +5,10 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
-import com.vlite.app.bean.AppItem;
 import com.vlite.app.databinding.ItemAppBinding;
 import com.vlite.app.utils.GlideUtils;
+import com.vmos.samplekit.adapters.BaseBindingAdapter;
+import com.vmos.samplekit.bean.AppItem;
 
 import java.util.List;
 

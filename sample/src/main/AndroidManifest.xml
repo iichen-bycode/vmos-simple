@@ -23,6 +23,13 @@
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
+    <!--    适配安卓12&11获取当前已安装的所有应用列表-->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+        </intent>
+    </queries>
+
     <application
         android:name=".SampleApplication"
         android:allowBackup="true"
@@ -58,6 +65,7 @@
             android:name=".activities.AppPermissionActivity"
             android:theme="@style/Theme.App" />
         <activity
+            android:exported="true"
             android:name=".activities.AppRequestPermissionsActivity"
             android:theme="@style/Theme.App.Dialog">
             <intent-filter>
@@ -67,7 +75,9 @@
         </activity>
 
         <!-- 用于处理Zoom使用Google等登录后，点击打开zoom的DeepLink链接-->
-        <activity android:name=".activities.DeeplinkActivity"
+        <activity
+            android:exported="true"
+            android:name=".activities.DeeplinkActivity"
             android:theme="@style/Theme.App"
             android:excludeFromRecents="true"
             android:launchMode="singleTask">

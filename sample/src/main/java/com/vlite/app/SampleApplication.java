@@ -7,6 +7,8 @@ import androidx.multidex.MultiDexApplication;
 import com.tencent.mmkv.MMKV;
 import com.vlite.app.sample.PackageManagerProxySample;
 import com.vlite.app.sample.SampleLocationManagerService;
+import com.vlite.app.sample.TelephoneManagerProxySample;
+import com.vlite.app.sample.WifiManagerProxySample;
 import com.vlite.sdk.LiteConfig;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.context.HostContext;
@@ -36,6 +38,8 @@ public class SampleApplication extends MultiDexApplication {
 //                .registerCustomService(ServiceContext.LOCATION_SERVICE, SampleLocationManagerService.class)
                 // 设置系统服务客户端代理
 //                .registerSystemServiceClientProxy(ServiceContext.PACKAGE_SERVICE, PackageManagerProxySample.class)
+//                .registerSystemServiceClientProxy(ServiceContext.TELEPHONY_SERVICE, TelephoneManagerProxySample.class)
+//                .registerSystemServiceClientProxy(ServiceContext.WIFI_SERVICE, WifiManagerProxySample.class)
                 .build());
     }
 

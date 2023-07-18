@@ -1,28 +1,19 @@
 package com.vlite.app.sample;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 
-import com.tencent.mmkv.MMKV;
-import com.vlite.app.bean.AppItem;
-import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.context.HostContext;
-import com.vlite.sdk.logger.AppLogger;
-import com.vlite.sdk.model.DeviceEnvInfo;
 import com.vlite.sdk.utils.BitmapUtils;
-import com.vlite.sdk.utils.GsonUtils;
+import com.vmos.samplekit.bean.AppItem;
 
 import java.io.File;
 

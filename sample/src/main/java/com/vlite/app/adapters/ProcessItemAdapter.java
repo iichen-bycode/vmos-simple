@@ -11,6 +11,7 @@ import com.vlite.app.R;
 import com.vlite.app.bean.ProcessInfo;
 import com.vlite.app.databinding.ItemProcessInfoBinding;
 import com.vlite.app.utils.FileSizeFormat;
+import com.vmos.samplekit.adapters.BaseBindingAdapter;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class ProcessItemAdapter extends BaseBindingAdapter<ProcessInfo, ItemProc
 
     @NonNull
     @Override
-    public BindingHolder<ItemProcessInfoBinding> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public BaseBindingAdapter.BindingHolder<ItemProcessInfoBinding> onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new BindingHolder<>(ItemProcessInfoBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
     }
 

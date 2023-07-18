@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.vlite.app.bean.AppPermissionInfo;
 import com.vlite.app.databinding.ItemAppPermissionBinding;
+import com.vmos.samplekit.adapters.BaseBindingAdapter;
 
 import java.util.List;
 

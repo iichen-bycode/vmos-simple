@@ -2,10 +2,8 @@ package com.vlite.app.adapters;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
@@ -16,6 +14,7 @@ import com.vlite.app.bean.RunningInfo;
 import com.vlite.app.databinding.ItemRunningTaskCardBinding;
 import com.vlite.app.utils.GlideUtils;
 import com.vlite.sdk.context.HostContext;
+import com.vmos.samplekit.adapters.BaseBindingAdapter;
 
 import java.util.List;
 

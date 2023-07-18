@@ -32,7 +32,6 @@ import com.vlite.app.R;
 import com.vlite.app.activities.AppDetailActivity;
 import com.vlite.app.activities.LaunchAppActivity;
 import com.vlite.app.adapters.AppItemAdapter;
-import com.vlite.app.bean.AppItem;
 import com.vlite.app.databinding.FragmentLauncherBinding;
 import com.vlite.app.sample.SampleUtils;
 import com.vlite.app.utils.AssetsUtils;
@@ -45,6 +44,7 @@ import com.vlite.sdk.model.InstallConfig;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
 import com.vlite.sdk.utils.io.FileUtils;
+import com.vmos.samplekit.bean.AppItem;
 
 import org.json.JSONObject;
 

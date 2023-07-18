@@ -40,8 +40,6 @@ import com.vlite.app.databinding.ActivityMainBinding;
 import com.vlite.app.databinding.DialogInputLocationBinding;
 import com.vlite.app.databinding.DialogProcessListBinding;
 import com.vlite.app.databinding.LayoutNavigationHeaderBinding;
-import com.vlite.app.dialog.DeviceFileSelectorFragment;
-import com.vlite.app.dialog.DeviceInstalledAppDialog;
 import com.vlite.app.dialog.VmInstalledAppDialog;
 import com.vlite.app.fragments.RunningTaskFragment;
 import com.vlite.app.sample.SampleApplicationLifecycleDelegate;
@@ -60,6 +58,8 @@ import com.vlite.sdk.model.DeviceEnvInfo;
 import com.vlite.sdk.model.PackageConfiguration;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
+import com.vmos.samplekit.dialog.DeviceFileSelectorDialog;
+import com.vmos.samplekit.dialog.DeviceInstalledAppDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -250,12 +250,12 @@ public class MainActivity extends AppCompatActivity {
      * 选择apk
      */
     public void showChooseApkFragment() {
-        DeviceFileSelectorFragment fragment = DeviceFileSelectorFragment.newInstance("请选择Apk", new String[]{".apk"}, true);
-        fragment.setOnFileSelectorListener(item -> {
+        DeviceFileSelectorDialog dialog = DeviceFileSelectorDialog.newInstance("请选择Apk", new String[]{".apk"}, true);
+        dialog.setOnFileSelectorListener(item -> {
             // 安装apk
             asyncInstallApkFile(new File(item.getAbsolutePath()));
         });
-        fragment.show(getSupportFragmentManager());
+        dialog.show(getSupportFragmentManager());
     }
 
 

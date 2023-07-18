@@ -4,10 +4,11 @@ import android.content.pm.PackageInfo;
 
 import androidx.viewbinding.ViewBinding;
 
-import com.vlite.app.adapters.BaseBindingAdapter;
 import com.vlite.app.adapters.VmInstalledAppAdapter;
-import com.vlite.app.bean.InstalledInfo;
 import com.vlite.sdk.VLite;
+import com.vmos.samplekit.adapters.BaseBindingAdapter;
+import com.vmos.samplekit.bean.InstalledInfo;
+import com.vmos.samplekit.dialog.InstalledAppDialog;
 
 import java.util.List;
 
