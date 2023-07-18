@@ -18,7 +18,7 @@ public class TelephoneManagerProxySample extends SystemServiceClientProxy {
     private final Map<String, MethodOverrideHandler> methods = new HashMap<>();
 
     public TelephoneManagerProxySample() {
-        // 覆盖getPackageInfo原本逻辑 当参数是宿主包名时返回null
+        // 覆盖getAllCellInfo原本逻辑 当参数是宿主包名时返回null
         methods.put("getAllCellInfo", new MethodOverrideHandler() {
             @Override
             public Object doInvoke(Object obj, Method method, Object[] args) throws Throwable {
@@ -32,6 +32,7 @@ public class TelephoneManagerProxySample extends SystemServiceClientProxy {
             }
         });
 
+        // 覆盖getCellLocation原本逻辑 当参数是宿主包名时返回null
         methods.put("getCellLocation", new MethodOverrideHandler() {
             @Override
             public Object doInvoke(Object obj, Method method, Object[] args) throws Throwable {

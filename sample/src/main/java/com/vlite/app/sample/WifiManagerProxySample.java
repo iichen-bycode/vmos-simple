@@ -18,7 +18,7 @@ public class WifiManagerProxySample extends SystemServiceClientProxy {
     private final Map<String, MethodOverrideHandler> methods = new HashMap<>();
 
     public WifiManagerProxySample() {
-        // 覆盖getPackageInfo原本逻辑 当参数是宿主包名时返回null
+        // 覆盖getScanResults原本逻辑 当参数是宿主包名时返回null
         methods.put("getScanResults", new MethodOverrideHandler() {
             @Override
             public Object doInvoke(Object obj, Method method, Object[] args) throws Throwable {
