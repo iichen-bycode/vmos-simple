@@ -31,11 +31,13 @@
     <style name="Theme.App.Main" parent="Theme.App">
     </style>
 
-    <style name="Theme.Transparent" parent="android:Theme.Translucent.NoTitleBar">
+    <style name="Theme.App.Transparent"  parent="Theme.App">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <style name="Theme.App.Dialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">

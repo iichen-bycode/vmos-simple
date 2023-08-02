@@ -7,11 +7,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.samplekit.adapters.BaseBindingAdapter;
 import com.vlite.app.R;
 import com.vlite.app.bean.ProcessInfo;
 import com.vlite.app.databinding.ItemProcessInfoBinding;
 import com.vlite.app.utils.FileSizeFormat;
-import com.vmos.samplekit.adapters.BaseBindingAdapter;
 
 import java.util.List;
 

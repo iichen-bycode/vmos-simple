@@ -6,9 +6,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.samplekit.adapters.BaseBindingAdapter;
+import com.samplekit.bean.InstalledInfo;
 import com.vlite.app.databinding.ItemVmInstalledAppBinding;
-import com.vmos.samplekit.adapters.BaseBindingAdapter;
-import com.vmos.samplekit.bean.InstalledInfo;
 
 import java.util.List;
 

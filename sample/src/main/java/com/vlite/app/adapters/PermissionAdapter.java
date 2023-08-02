@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.samplekit.adapters.BaseBindingAdapter;
 import com.vlite.app.bean.AppPermissionInfo;
 import com.vlite.app.databinding.ItemAppPermissionBinding;
-import com.vmos.samplekit.adapters.BaseBindingAdapter;
 
 import java.util.List;
 

@@ -10,11 +10,10 @@ import android.graphics.drawable.Drawable;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.samplekit.bean.AppItem;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.context.HostContext;
 import com.vlite.sdk.utils.BitmapUtils;
-import com.vmos.samplekit.bean.AppItem;
-
 import java.io.File;
 
 public class SampleUtils {

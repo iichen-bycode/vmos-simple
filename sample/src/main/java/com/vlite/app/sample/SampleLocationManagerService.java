@@ -122,12 +122,8 @@ public class SampleLocationManagerService extends ILocationManager.Stub {
             return;
         }
         try {
-            final int maxUpdates;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                maxUpdates = getFieldValue(request, "mMaxUpdates", 1);
-            } else {
-                maxUpdates = getFieldValue(request, "mNumUpdates", 1);
-            }
+
+            final int maxUpdates = getFieldValue(request, "mMaxUpdates", 1);
             final long interval = getFieldValue(request, "mInterval", Long.MAX_VALUE);
             final LocationCallbackInfo callbackInfo = new LocationCallbackInfo(maxUpdates, interval, listener);
             final IBinder iBinder = listener.asBinder();

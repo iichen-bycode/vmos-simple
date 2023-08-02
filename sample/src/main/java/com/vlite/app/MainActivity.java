@@ -33,6 +33,8 @@ import androidx.multidex.BuildConfig;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.samplekit.dialog.DeviceFileSelectorDialog;
+import com.samplekit.dialog.DeviceInstalledAppDialog;
 import com.vlite.app.adapters.ProcessItemAdapter;
 import com.vlite.app.bean.ProcessInfo;
 import com.vlite.app.bean.RunningInfo;
@@ -58,8 +60,6 @@ import com.vlite.sdk.model.DeviceEnvInfo;
 import com.vlite.sdk.model.PackageConfiguration;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
-import com.vmos.samplekit.dialog.DeviceFileSelectorDialog;
-import com.vmos.samplekit.dialog.DeviceInstalledAppDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,6 +73,12 @@ import java.util.zip.ZipFile;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
+    static {
+        System.loadLibrary("mytestproject");
+    }
+
+    private static native void hookAndTestOpenat(long bhookPtr);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,6 +90,9 @@ public class MainActivity extends AppCompatActivity {
         applyConfiguration();
 
         asyncApplyVirtualDeviceInfo();
+
+        // bhook测试代码
+//        hookAndTestOpenat(Native.getBhookApi());
     }
 
     private void bindViews() {
@@ -167,8 +176,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void applyConfiguration() {
         SampleLocationStore.clear();
+        final File localTmp = new File(getExternalCacheDir(), "/data/local/tmp");
+        if (!localTmp.exists()) localTmp.mkdirs();
         VLite.get().setConfigurationContext(new ConfigurationContext.Builder()
                 .setUseInternalSdcard(false)
+                .setMaxPreheatProcessCount(2)
+                // 自定义io重定向规则示例
+                // 重定向文件 要重定向的文件/重定向的目标路径/是否白名单
+                .addFileRedirectRule("/proc/cpuinfo", new File(getExternalCacheDir(), "/proc/cpuinfo").getAbsolutePath(), false)
+                // 重定向目录 要重定向的目录/重定向的目标路径/是否白名单
+                .addDirectoryRedirectRule("/data/local/tmp", localTmp.getAbsolutePath(), false)
                 .build());
         VLite.get().setPackageConfiguration(new PackageConfiguration.Builder()
                 .setEnableTraceAnr(true)

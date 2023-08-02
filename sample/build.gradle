@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId "com.vlite.app"
         minSdk rootProject.ext.minSdkVersion
-        targetSdk rootProject.ext.targetSdkVersion
+        targetSdk rootProject.ext.sampleTargetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -43,7 +43,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.22.1'
+        }
+    }
     buildFeatures {
         viewBinding true
     }
@@ -61,9 +66,9 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    // 示例程序工具 仅用于示例程序
-    implementation 'com.vmos:vmos-lite-sample:1.0.2'
-    implementation 'com.vmos:sample-kit:1.0.3'
+    implementation 'com.vmos:sample-kit:1.0.4'
+    // 此依赖是示例程序的统计数据上报 仅用于本示例程序 如果不需要请注释此依赖
+    implementation 'com.vmos:vmos-lite-sample:1.0.5'
     implementation "com.github.permissions-dispatcher:permissionsdispatcher:4.9.2"
     annotationProcessor "com.github.permissions-dispatcher:permissionsdispatcher-processor:4.9.2"
     implementation 'com.github.bumptech.glide:glide:4.13.2'
@@ -87,7 +92,7 @@ dependencies {
         compileOnly project(path: ':hiddenapi-stub')
         debugImplementation project(path: ':vmos-lite-shell')
     } else {
-        implementation 'com.vmos:vmos-lite-sdk:1.0.8-beta10'
+        implementation 'com.vmos:vmos-lite-sdk:1.0.9-beta07'
         compileOnly 'com.vmos:hiddenapi-stub:1.0.8'
         debugImplementation'com.vmos:vmos-lite-shell:1.0.1'
     }

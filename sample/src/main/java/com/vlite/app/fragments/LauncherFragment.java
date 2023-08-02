@@ -28,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.samplekit.bean.AppItem;
 import com.vlite.app.R;
 import com.vlite.app.activities.AppDetailActivity;
 import com.vlite.app.activities.LaunchAppActivity;
@@ -44,7 +45,6 @@ import com.vlite.sdk.model.InstallConfig;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
 import com.vlite.sdk.utils.io.FileUtils;
-import com.vmos.samplekit.bean.AppItem;
 
 import org.json.JSONObject;
 

@@ -10,11 +10,12 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.samplekit.adapters.BaseBindingAdapter;
 import com.vlite.app.bean.RunningInfo;
 import com.vlite.app.databinding.ItemRunningTaskCardBinding;
 import com.vlite.app.utils.GlideUtils;
 import com.vlite.sdk.context.HostContext;
-import com.vmos.samplekit.adapters.BaseBindingAdapter;
+
 
 import java.util.List;
 
