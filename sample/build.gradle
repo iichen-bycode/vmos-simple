@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId "com.vlite.app"
         minSdk rootProject.ext.minSdkVersion
-        targetSdk rootProject.ext.sampleTargetSdkVersion
+        targetSdk  getProject().hasProperty("sampleTargetSdkVersion")?sampleTargetSdkVersion:targetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -66,7 +66,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'com.vmos:sample-kit:1.0.4'
+    implementation 'com.vmos:sample-kit:1.0.5'
     // 此依赖是示例程序的统计数据上报 仅用于本示例程序 如果不需要请注释此依赖
     implementation 'com.vmos:vmos-lite-sample:1.0.5'
     implementation "com.github.permissions-dispatcher:permissionsdispatcher:4.9.2"
@@ -92,8 +92,8 @@ dependencies {
         compileOnly project(path: ':hiddenapi-stub')
         debugImplementation project(path: ':vmos-lite-shell')
     } else {
-        implementation 'com.vmos:vmos-lite-sdk:1.0.9-beta07'
-        compileOnly 'com.vmos:hiddenapi-stub:1.0.8'
+        implementation 'com.vmos:vmos-lite-sdk:1.0.9-beta09'
+        compileOnly 'com.vmos:hiddenapi-stub:1.1.0'
         debugImplementation'com.vmos:vmos-lite-shell:1.0.1'
     }
 }

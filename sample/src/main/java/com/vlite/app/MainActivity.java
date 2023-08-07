@@ -29,7 +29,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
-import androidx.multidex.BuildConfig;
+import androidx.fragment.app.Fragment;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -43,6 +43,7 @@ import com.vlite.app.databinding.DialogInputLocationBinding;
 import com.vlite.app.databinding.DialogProcessListBinding;
 import com.vlite.app.databinding.LayoutNavigationHeaderBinding;
 import com.vlite.app.dialog.VmInstalledAppDialog;
+import com.vlite.app.fragments.LauncherFragment;
 import com.vlite.app.fragments.RunningTaskFragment;
 import com.vlite.app.sample.SampleApplicationLifecycleDelegate;
 import com.vlite.app.sample.SampleDeviceUtils;
@@ -51,22 +52,30 @@ import com.vlite.app.sample.SampleLocationStore;
 import com.vlite.app.sample.SampleUtils;
 import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.app.utils.FileSizeFormat;
+import com.vlite.app.utils.RuntimeUtils;
+import com.vlite.app.utils.ZipFileUtils;
 import com.vlite.app.view.FloatPointView;
 import com.vlite.sdk.LiteConfig;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.context.ServiceContext;
+import com.vlite.sdk.event.BinderEvent;
+import com.vlite.sdk.event.OnReceivedEventListener;
+import com.vlite.sdk.logger.AppLogger;
 import com.vlite.sdk.model.ConfigurationContext;
 import com.vlite.sdk.model.DeviceEnvInfo;
 import com.vlite.sdk.model.PackageConfiguration;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
+import com.vlite.sdk.utils.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -79,13 +88,36 @@ public class MainActivity extends AppCompatActivity {
 
     private static native void hookAndTestOpenat(long bhookPtr);
 
+    private final OnReceivedEventListener receivedEventListener = new OnReceivedEventListener() {
+        /**
+         * 接收到事件
+         * @param type 事件类型
+         * @param extras 事件额外信息
+         */
+        @Override
+        public void onReceivedEvent(int type, @NonNull Bundle extras) {
+            // 除特别说明的事件外 事件默认回调于子线程
+            AppLogger.d("onReceivedEvent -> type = " + BinderEvent.typeToString(type) + ", thread_name = " + Thread.currentThread().getName() + ", extras = " + SampleUtils.eventToPrintString(extras));
+
+            final Fragment fragment = getSupportFragmentManager().findFragmentById(binding.contentFragment.getId());
+            if (fragment instanceof LauncherFragment) {
+                ((LauncherFragment) fragment).handleBinderEvent(type, extras);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        final View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(decorView.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(LayoutInflater.from(this));
         setContentView(binding.getRoot());
 
         bindViews();
+
+        // 注册事件
+        VLite.get().registerReceivedEventListener(receivedEventListener);
 
         applyConfiguration();
 
@@ -97,21 +129,26 @@ public class MainActivity extends AppCompatActivity {
 
     private void bindViews() {
         try {
+            final Toolbar toolbar = binding.toolbar;
+            setSupportActionBar(toolbar);
             final String title = String.format("%s %s (%d) %s", getString(R.string.app_name), com.vlite.app.BuildConfig.VERSION_NAME, com.vlite.app.BuildConfig.VERSION_CODE, com.vlite.app.BuildConfig.BUILD_TYPE);
             setTitle(title);
-            final View toolbar = findViewById(androidx.appcompat.R.id.action_bar);
-            if (toolbar instanceof Toolbar) {
-                final Class<? extends View> cls = toolbar.getClass();
-                final Method getTitleTextViewMethod = cls.getDeclaredMethod("getTitleTextView");
-                getTitleTextViewMethod.setAccessible(true);
-                final TextView titleTextView = (TextView) getTitleTextViewMethod.invoke(toolbar);
-                if (titleTextView.getPaint().measureText(title) / getResources().getDisplayMetrics().widthPixels > 0.75f) {
-                    ((Toolbar) toolbar).setTitleTextAppearance(this, R.style.ToolbarTitleStyleSmall);
-                    ((Toolbar) toolbar).setSubtitleTextAppearance(this, R.style.ToolbarSubTitleStyleSmall);
-                } else {
-                    ((Toolbar) toolbar).setSubtitleTextAppearance(this, R.style.ToolbarSubTitleStyleNormal);
-                }
+            final Class<? extends View> cls = toolbar.getClass();
+            final Method getTitleTextViewMethod = cls.getDeclaredMethod("getTitleTextView");
+            getTitleTextViewMethod.setAccessible(true);
+            final TextView titleTextView = (TextView) getTitleTextViewMethod.invoke(toolbar);
+            if (titleTextView.getPaint().measureText(title) / getResources().getDisplayMetrics().widthPixels > 0.75f) {
+                toolbar.setTitleTextAppearance(this, R.style.ToolbarTitleStyleSmall);
+                toolbar.setSubtitleTextAppearance(this, R.style.ToolbarSubTitleStyleSmall);
+            } else {
+                toolbar.setSubtitleTextAppearance(this, R.style.ToolbarSubTitleStyleNormal);
             }
+            int statusBarHeight = 0;
+            int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+            if (resourceId > 0) {
+                statusBarHeight = getResources().getDimensionPixelSize(resourceId);
+            }
+            toolbar.setPadding(toolbar.getPaddingLeft(), toolbar.getPaddingTop() + statusBarHeight, toolbar.getPaddingRight(), toolbar.getPaddingBottom());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -122,8 +159,8 @@ public class MainActivity extends AppCompatActivity {
         headerBinding.getRoot().setOnClickListener(v -> {
             final StringBuilder sb = new StringBuilder("SDK版本：").append(com.vlite.sdk.BuildConfig.VERSION_NAME).append(" (")
                     .append(com.vlite.sdk.BuildConfig.VERSION_CODE).append(")\n")
-                    .append("示例版本：").append(BuildConfig.VERSION_NAME).append(" (")
-                    .append(BuildConfig.VERSION_CODE).append(")");
+                    .append("示例版本：").append(com.vlite.app.BuildConfig.VERSION_NAME).append(" (")
+                    .append(com.vlite.app.BuildConfig.VERSION_CODE).append(")");
             new AlertDialog.Builder(v.getContext())
                     .setTitle("版本信息")
                     .setMessage(sb.toString())
@@ -180,12 +217,14 @@ public class MainActivity extends AppCompatActivity {
         if (!localTmp.exists()) localTmp.mkdirs();
         VLite.get().setConfigurationContext(new ConfigurationContext.Builder()
                 .setUseInternalSdcard(false)
+                // 启用进程预热示例 最多预热2个进程
                 .setMaxPreheatProcessCount(2)
                 // 自定义io重定向规则示例
                 // 重定向文件 要重定向的文件/重定向的目标路径/是否白名单
-                .addFileRedirectRule("/proc/cpuinfo", new File(getExternalCacheDir(), "/proc/cpuinfo").getAbsolutePath(), false)
+                // 注释掉重定向功能，导致微信语音失效，目前发现/proc/cpuinfo 没有在对应的重定向目录找到对应的文件，手动补上对应的文件后微信语音正常
+                //.addFileRedirectRule("/proc/cpuinfo", new File(getExternalCacheDir(), "/proc/cpuinfo").getAbsolutePath(), false)
                 // 重定向目录 要重定向的目录/重定向的目标路径/是否白名单
-                .addDirectoryRedirectRule("/data/local/tmp", localTmp.getAbsolutePath(), false)
+                //.addDirectoryRedirectRule("/data/local/tmp", localTmp.getAbsolutePath(), false)
                 .build());
         VLite.get().setPackageConfiguration(new PackageConfiguration.Builder()
                 .setEnableTraceAnr(true)
@@ -267,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
      * 选择apk
      */
     public void showChooseApkFragment() {
-        DeviceFileSelectorDialog dialog = DeviceFileSelectorDialog.newInstance("请选择Apk", new String[]{".apk"}, true);
+        DeviceFileSelectorDialog dialog = DeviceFileSelectorDialog.newInstance("请选择Apk", new String[]{".apk", ".apks", ".xapk"}, true);
         dialog.setOnFileSelectorListener(item -> {
             // 安装apk
             asyncInstallApkFile(new File(item.getAbsolutePath()));
@@ -332,37 +371,10 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("StaticFieldLeak")
     public void asyncInstallApkFile(File src) {
         if (src == null || !src.exists()) {
-            Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show();
+            setSubtitle("文件不存在 " + (src == null ? null : src.getAbsolutePath()));
             return;
         }
-        int minSDKVersion = getMinSDKVersion(src.getPath());
-        if (minSDKVersion > Build.VERSION.SDK_INT) {
-            Toast.makeText(this, "apk不支持安装", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        String[] apkSupportedABIs = getApkSupportedABIs(src.getAbsolutePath());
-        if (0 < apkSupportedABIs.length) {
-            asyncInstallApkFileNotCheck(src.getAbsolutePath());
-        } else {
-            // 如果是分包的就 给文件夹路径
-            if (src.isDirectory()) {
-                asyncInstallApkFileNotCheck(src.getPath());
-            } else {
-                PackageManager packageManager = getPackageManager();
-                PackageInfo packageInfo = packageManager.getPackageArchiveInfo(src.getPath(), PackageManager.GET_META_DATA);
-                if (packageInfo != null) {
-                    if (null == packageInfo.applicationInfo.nativeLibraryDir) {
-                        asyncInstallApkFileNotCheck(src.getAbsolutePath());
-                    }
-                } else {
-                    Toast.makeText(this, "apk不支持安装", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
-    @SuppressLint("StaticFieldLeak")
-    private void asyncInstallApkFileNotCheck(String uriString) {
-        new DialogAsyncTask<Void, String, ResultParcel>(this) {
+        new DialogAsyncTask<String, String, ResultParcel>(this) {
 
             @Override
             protected void onPreExecute() {
@@ -375,61 +387,136 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            protected ResultParcel doInBackground(Void... voids) {
-                return VLite.get().installPackage(uriString);
+            protected ResultParcel doInBackground(String... uris) {
+                final String uri = uris[0];
+                if (uri.endsWith(".apks") || uri.endsWith(".xapk")) {
+                   return installXApks(uri);
+                }
+                checkFileEnableInstall(uri);
+                // 安装应用
+                return VLite.get().installPackage(uri);
+            }
+
+            private ResultParcel installXApks(String uri) {
+                installXApks(uri);
+                String unzipPath = uri.substring(0, uri.lastIndexOf('.')) + "/";
+                File unZipDir = new File(unzipPath);
+                //先删除残留文件
+                deleteUnZipFile(unZipDir);
+                //解压文件
+                boolean isSuccess = ZipFileUtils.unZip(uri, unzipPath);
+                ResultParcel resultParcel;
+                if (isSuccess) {
+                    //检测apk是否支持
+                    resultParcel = checkFileEnableInstall(unzipPath);
+                    if(resultParcel.isSucceed()){
+                        resultParcel = VLite.get().installPackage(unzipPath);
+                    }
+                } else {
+                    resultParcel = ResultParcel.failure(new Exception("文件解压失败"));
+                }
+                deleteUnZipFile(unZipDir);
+                return resultParcel;
+            }
+
+            private ResultParcel checkFileEnableInstall(String uri) {
+                File file = new File(uri);
+                if (file.isFile()) {
+                    return checkApkEnable(file.getAbsolutePath());
+                } else {
+                    File[] files = file.listFiles(child -> child.getName().endsWith(".apk"));
+                    if (files == null || files.length == 0) {
+                        return ResultParcel.failure(new Exception("没有检测到apk文件"));
+                    }
+                    ResultParcel resultParcel = null;
+                    for (File apkFile : files) {
+                        resultParcel = checkApkEnable(apkFile.getAbsolutePath());
+                        if (!resultParcel.isSucceed()) {
+                            break;
+                        }
+                    }
+                    return resultParcel;
+                }
+            }
+
+            private ResultParcel checkApkEnable(String uri) {
+                int minSDKVersion = getMinSdkVersion(uri);
+                if (minSDKVersion > Build.VERSION.SDK_INT) {
+                    // 检查apk要求的最低系统版本
+                    return ResultParcel.failure(new Exception("apk最低要求系统api版本 " + minSDKVersion + ", 当前 " + Build.VERSION.SDK_INT));
+                }
+                if (!isApkSupportedHost(uri)) {
+                    // 检查当前支持的abi
+                    return ResultParcel.failure(new Exception("apk不支持当前应用架构 " + ", 当前 " + (RuntimeUtils.is64bit() ? "64位" : "32位")));
+                }
+                return ResultParcel.succeed();
+            }
+
+            private void deleteUnZipFile(File unZipDir) {
+                if (unZipDir.exists()) {
+                    FileUtils.deleteQuietly(unZipDir);
+                }
             }
 
             @Override
             protected void onPostExecute(ResultParcel result) {
                 super.onPostExecute(result);
                 if (result.isSucceed()) {
-                    setSubtitle("应用安装成功");
+                    setSubtitle("应用安装成功 " + (result.getData() == null ? "" : result.getData().getString(BinderEvent.KEY_PACKAGE_NAME)));
                 } else {
                     setSubtitle("应用安装失败 " + result.getMessage());
                 }
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, src.getAbsolutePath());
     }
 
-    public static String[] getApkSupportedABIs(String apkFilePath) {
+    public static boolean isApkSupportedHost(String apkFilePath) {
+        final Set<String> supportedABIs = new HashSet<>();
+//        final List<String> abis =Arrays.asList(new String[]{"armeabi-v7a", "arm64-v8a"});
+        ZipFile zipFile = null;
         try {
-            ZipFile zipFile = new ZipFile(apkFilePath);
+            zipFile = new ZipFile(apkFilePath);
             Enumeration<? extends ZipEntry> entries = zipFile.entries();
             while (entries.hasMoreElements()) {
                 ZipEntry entry = entries.nextElement();
                 String name = entry.getName();
-                if (name.startsWith("lib/") && name.endsWith(".so")) {
+                if (name.startsWith("lib/")) {
                     // 获取库文件的架构类型
                     String[] parts = name.split("/");
                     if (parts.length >= 3) {
                         String abi = parts[1];
                         if (!TextUtils.isEmpty(abi)) {
-                            // 只保留有效的架构类型
-                            if (abi.equals("arm64-v8a") || abi.equals("x86_64")) {
-                                return new String[]{abi};
-                            }
+                            supportedABIs.add(abi);
                         }
                     }
                 }
             }
-            zipFile.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (zipFile != null) zipFile.close();
+            } catch (IOException ignored) {
+            }
         }
-        return new String[0];
+        if (RuntimeUtils.is64bit()) {
+            return supportedABIs.isEmpty() || supportedABIs.contains("arm64-v8a");
+        } else {
+            return supportedABIs.isEmpty() || supportedABIs.contains("armeabi-v7a");
+        }
     }
 
-    private int getMinSDKVersion(String filePath) {
+    private int getMinSdkVersion(String filePath) {
         try {
-            PackageInfo info = getPackageManager().getPackageArchiveInfo(filePath, PackageManager.GET_ACTIVITIES);
+            PackageInfo info = getPackageManager().getPackageArchiveInfo(filePath, 0);
+//            AppLogger.d("1-------------->"+info.applicationInfo.nativeLibraryDir);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 return info.applicationInfo.minSdkVersion;
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return -1;
         }
-        return -1;
+        return 0;
     }
 
 
@@ -615,6 +702,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void setSubtitle(CharSequence subtitle) {
         getSupportActionBar().setSubtitle(subtitle);
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        VLite.get().unregisterReceivedEventListener(receivedEventListener);
     }
 
 }

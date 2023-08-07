@@ -10,8 +10,10 @@
         <item name="colorSecondary">@color/colorPrimary</item>
         <item name="colorSecondaryVariant">@color/colorPrimary</item>
         <item name="colorOnSecondary">@color/black</item>
+        <item name="colorControlNormal">@android:color/white</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="android:navigationBarColor" >@android:color/transparent</item>
     </style>
 
     <style name="ToolbarTitleStyleSmall">
@@ -26,18 +28,23 @@
         <item name="android:textSize">13sp</item>
     </style>
 
-    <style name="Theme.App" parent="Theme.App.Base"></style>
-
-    <style name="Theme.App.Main" parent="Theme.App">
-    </style>
+    <style name="Theme.App" parent="Theme.App.Base" />
 
     <style name="Theme.App.Transparent"  parent="Theme.App">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor" >@android:color/transparent</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item>
-        <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+    </style>
+
+    <style name="Theme.App.Main" parent="Theme.App.Transparent">
+        <item name="android:windowShowWallpaper">true</item>
+    </style>
+
+    <style name="Theme.App.LaunchApp"  parent="Theme.App.Transparent">
+        <item name="android:navigationBarColor" >@android:color/white</item>
     </style>
 
     <style name="Theme.App.Dialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">

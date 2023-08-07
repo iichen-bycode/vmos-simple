@@ -38,6 +38,8 @@ public class SampleApplication extends MultiDexApplication {
 //                .registerCustomService(ServiceContext.LOCATION_SERVICE, SampleLocationManagerService.class)
                 // 设置系统服务客户端代理
 //                .registerSystemServiceClientProxy(ServiceContext.PACKAGE_SERVICE, PackageManagerProxySample.class)
+                    // 代理 TelephoneManagerService 的getAllCellInfo和 getCellLocation方法，
+                    // 代理WifiManagerService的getScanResults方法，可以使手机无法使用基站定位和wifi定位。
 //                .registerSystemServiceClientProxy(ServiceContext.TELEPHONY_SERVICE, TelephoneManagerProxySample.class)
 //                .registerSystemServiceClientProxy(ServiceContext.WIFI_SERVICE, WifiManagerProxySample.class)
                 .build());

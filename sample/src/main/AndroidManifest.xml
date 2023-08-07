@@ -46,7 +46,6 @@
 
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|smallestScreenSize|screenLayout"
             android:exported="true"
             android:theme="@style/Theme.App.Main">
             <intent-filter>
@@ -57,7 +56,7 @@
         </activity>
         <activity
             android:name=".activities.LaunchAppActivity"
-            android:theme="@style/Theme.App.Transparent" />
+            android:theme="@style/Theme.App.LaunchApp" />
         <activity
             android:name=".activities.AppDetailActivity"
             android:theme="@style/Theme.App" />

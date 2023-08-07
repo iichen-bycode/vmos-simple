@@ -1,17 +1,17 @@
 package com.vlite.app.fragments;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -38,12 +38,11 @@ import com.vlite.app.sample.SampleUtils;
 import com.vlite.app.utils.AssetsUtils;
 import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.sdk.VLite;
+import com.vlite.sdk.context.HostContext;
 import com.vlite.sdk.event.BinderEvent;
-import com.vlite.sdk.event.OnReceivedEventListener;
 import com.vlite.sdk.logger.AppLogger;
 import com.vlite.sdk.model.InstallConfig;
 import com.vlite.sdk.model.ResultParcel;
-import com.vlite.sdk.utils.BitmapUtils;
 import com.vlite.sdk.utils.io.FileUtils;
 
 import org.json.JSONObject;
@@ -56,34 +55,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.RuntimePermissions;
-
 /**
  * 模拟桌面的样式
  */
-@RuntimePermissions
+//@RuntimePermissions
 public class LauncherFragment extends Fragment {
     private FragmentLauncherBinding binding;
 
     private AppItemAdapter adapter;
 
-    private static int icon = 0;
-    private static String componentChanged = "";
-
-    private final OnReceivedEventListener receivedEventListener = new OnReceivedEventListener() {
-        /**
-         * 接收到事件
-         * @param type 事件类型
-         * @param extras 事件额外信息
-         */
-        @Override
-        public void onReceivedEvent(int type, @NonNull Bundle extras) {
-            // 除特别说明的事件外 事件默认回调于子线程
-            AppLogger.d("onReceivedEvent -> type = " + BinderEvent.typeToString(type) + ", extras = " + BinderEvent.bundleToString(extras) + ", thread_name = " + Thread.currentThread().getName());
-            handleBinderEvent(type, extras);
-        }
-    };
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Nullable
     @Override
@@ -97,9 +78,6 @@ public class LauncherFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         bindViews();
 
-        // 注册事件
-        VLite.get().registerReceivedEventListener(receivedEventListener);
-
         binding.refreshLayout.setOnRefreshListener(() -> {
             loadInstalledApps(view.getContext());
         });
@@ -108,32 +86,24 @@ public class LauncherFragment extends Fragment {
         loadInstalledApps(view.getContext());
     }
 
-    private void getAppLauncherIcon(String packageName) {
-        if (TextUtils.isEmpty(packageName)){
+    private void handleComponentSettingChangeEvent(Bundle extras) {
+        String packageName = extras.getString(BinderEvent.KEY_PACKAGE_NAME);
+        if (TextUtils.isEmpty(packageName)) {
             return;
         }
-        try {
-            componentChanged = packageName;
-
-            ActivityInfo launchActivityInfo = VLite.get().getLaunchActivityInfoForPackage(packageName);
-            //刷新界面，重新加载
-            List<AppItem> appItems = adapter.getData();
-            if (appItems != null && appItems.size() > 0){
-                for (AppItem item:appItems){
-                    if (item.getPackageName().equals(componentChanged)){
-                        String path = item.getIconUri();
-                        BitmapUtils.toFile(BitmapUtils.toBitmap(launchActivityInfo.loadIcon(getContext().getPackageManager())), path);
-                        item.setIconUri(path);
-                        break;
-                    }
-                }
+        int index = -1;
+        final List<AppItem> data = adapter.getData();
+        for (int i = 0; i < data.size(); i++) {
+            final AppItem item = data.get(i);
+            if (TextUtils.equals(packageName, item.getPackageName())) {
+                final PackageInfo pkg = VLite.get().getPackageInfo(packageName, 0);
+                final AppItem newItem = SampleUtils.newAppItem(HostContext.getContext().getPackageManager(), pkg);
+                item.setIconUri(newItem.getIconUri());
+                index = i;
+                break;
             }
-            adapter.notifyDataSetChanged();
-
-        }catch (Exception e){
-            AppLogger.w(e);
         }
-
+        notifyItemChanged(index);
     }
 
     private void bindViews() {
@@ -142,7 +112,7 @@ public class LauncherFragment extends Fragment {
         adapter.setOnItemClickListener((view, position) -> {
             final AppItem it = adapter.getData().get(position);
             if (it != null) {
-                LauncherFragmentPermissionsDispatcher.launchAppWithPermissionCheck(this, it.getPackageName());
+                launchApp(it);
             }
         });
         adapter.setOnItemLongClickListener((view, position) -> {
@@ -164,7 +134,7 @@ public class LauncherFragment extends Fragment {
      * @param type
      * @param extras
      */
-    private void handleBinderEvent(int type, Bundle extras) {
+    public void handleBinderEvent(int type, Bundle extras) {
         if (BinderEvent.TYPE_PACKAGE_INSTALLED == type) {
             // 有应用安装
             handlePackageInstalledEvent(extras);
@@ -172,13 +142,8 @@ public class LauncherFragment extends Fragment {
             // 有应用卸载
             handlePackageUninstalledEvent(extras);
         }else if (BinderEvent.TYPE_COMPONENT_SETTING_CHANGE == type){
-            //更新应用icon
-            if (extras != null){
-                String pkgName = extras.getString(BinderEvent.KEY_PACKAGE_NAME);
-                String clzName = extras.getString(BinderEvent.KEY_CLASS_NAME);
-                getAppLauncherIcon(pkgName);
-//                loadInstalledApps(getContext());
-            }
+            //组件状态变化
+            handleComponentSettingChangeEvent(extras);
 
         }
     }
@@ -233,13 +198,11 @@ public class LauncherFragment extends Fragment {
 
     /**
      * 启动应用
-     *
-     * @param packageName
      */
     @SuppressLint("StaticFieldLeak")
-    @NeedsPermission({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE})
-    public void launchApp(String packageName) {
-        startActivity(LaunchAppActivity.getIntent(packageName));
+//    @NeedsPermission({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE})
+    public void launchApp(AppItem item) {
+        startActivity(LaunchAppActivity.getIntent(item));
     }
 
     private void showAppOptionsDialog(String packageName, String appName) {
@@ -355,6 +318,19 @@ public class LauncherFragment extends Fragment {
         }
     }
 
+    private void notifyItemChanged(int index){
+        final Runnable runnable = () -> {
+            if (index >= 0) {
+                adapter.notifyItemChanged(index);
+            }
+        };
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            runnable.run();
+        } else {
+            mainHandler.post(runnable);
+        }
+    }
+
 
     private void setSubTitle(String subTitle) {
         final FragmentActivity activity = getActivity();
@@ -415,11 +391,10 @@ public class LauncherFragment extends Fragment {
         }
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        LauncherFragmentPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+//        LauncherFragmentPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
 
@@ -427,9 +402,4 @@ public class LauncherFragment extends Fragment {
         void onPreparePresetApp(String packageName);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        VLite.get().unregisterReceivedEventListener(receivedEventListener);
-    }
 }
