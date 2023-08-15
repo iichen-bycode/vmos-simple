@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="26dp"
+    android:paddingEnd="18dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:text="此下载地址仅用于DEMO测试用，请勿在生产环境使用"
+        android:textColor="#FF6666" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/google_app_info_rv"
+        android:layout_width="match_parent"
+        android:layout_marginEnd="8dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginBottom="8dp"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/install_all_tv"
+            android:layout_width="wrap_content"
+            android:padding="8dp"
+            android:textSize="15sp"
+            android:layout_height="wrap_content"
+            android:text="全部安装"
+            android:textColor="#58bc71" />
+
+        <TextView
+            android:id="@+id/uninstall_all_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="全部卸载"
+            android:layout_marginStart="4dp"
+            android:textSize="15sp"
+            android:padding="8dp"
+            android:textColor="#58bc71" />
+
+        <TextView
+            android:id="@+id/delete_apk_file_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="删除安装文件"
+            android:layout_marginStart="4dp"
+            android:textSize="15sp"
+            android:padding="8dp"
+            android:textColor="#58bc71" />
+    </LinearLayout>
+
+</LinearLayout>

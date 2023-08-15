@@ -2,7 +2,7 @@
 buildscript {
     dependencies {
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.15.2'
-        classpath 'com.vmos:vmos-build-gradle-plugin:1.2.8-beta12'
+        classpath 'com.vmos:vmos-build-gradle-plugin:1.2.9-beta01'
     }
 }
 plugins {
@@ -16,8 +16,8 @@ task clean(type: Delete) {
 }
 
 ext {
-    versionCode = 10910
-    versionName = "1.0.9-beta10"
+    versionCode = 10913
+    versionName = "1.0.9-beta13"
     minSdkVersion = 21
     targetSdkVersion = 28
     compileSdkVersion = 33

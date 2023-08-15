@@ -6,24 +6,33 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import androidx.appcompat.app.AlertDialog;
 
 import com.samplekit.bean.AppItem;
+import com.vlite.app.utils.RuntimeUtils;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.context.HostContext;
 import com.vlite.sdk.event.BinderEvent;
 import com.vlite.sdk.utils.BitmapUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class SampleUtils {
 
@@ -124,6 +133,65 @@ public class SampleUtils {
                     dialog.cancel();
                 })
                 .show();
+    }
+
+
+    private static void addAbiInfo(String apkFilePath ,Set<String> supportedABIs){
+        ZipFile zipFile = null;
+        try {
+            zipFile = new ZipFile(apkFilePath);
+            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String name = entry.getName();
+                if (name.startsWith("lib/")) {
+                    // 获取库文件的架构类型
+                    String[] parts = name.split("/");
+                    if (parts.length >= 3) {
+                        String abi = parts[1];
+                        if (!TextUtils.isEmpty(abi)) {
+                            supportedABIs.add(abi);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (zipFile != null) zipFile.close();
+            } catch (IOException ignored) {
+            }
+        }
+    }
+    public static boolean isApkSupportedHost(String apkFilePath) {
+        File file = new File(apkFilePath);
+        final Set<String> supportedABIs = new HashSet<>();
+        if(file.isDirectory()){
+            File[] files = file.listFiles(child -> child.getName().endsWith(".apk"));
+            for (File apkFile : files) {
+                addAbiInfo(apkFile.getAbsolutePath(),supportedABIs);
+            }
+        }else {
+            addAbiInfo(apkFilePath,supportedABIs);
+        }
+        if (RuntimeUtils.is64bit()) {
+            return supportedABIs.isEmpty() || supportedABIs.contains("arm64-v8a");
+        } else {
+            return supportedABIs.isEmpty() || supportedABIs.contains("armeabi-v7a");
+        }
+    }
+
+    public static int getMinSdkVersion(String filePath,Context context) {
+        try {
+            PackageInfo info = context.getPackageManager().getPackageArchiveInfo(filePath, 0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                return info.applicationInfo.minSdkVersion;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
 }

@@ -19,6 +19,18 @@
         </item>
     </group>
 
+    <group
+        android:id="@+id/menu_group_google">
+        <item
+            android:title="谷歌">
+            <menu>
+                <item
+                    android:id="@+id/menu_google_app_install"
+                    android:title="安装谷歌三件套" />
+            </menu>
+        </item>
+    </group>
+
 
     <group
         android:id="@+id/menu_group_vm_process">

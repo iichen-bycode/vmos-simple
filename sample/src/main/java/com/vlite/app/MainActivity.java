@@ -42,9 +42,11 @@ import com.vlite.app.databinding.ActivityMainBinding;
 import com.vlite.app.databinding.DialogInputLocationBinding;
 import com.vlite.app.databinding.DialogProcessListBinding;
 import com.vlite.app.databinding.LayoutNavigationHeaderBinding;
+import com.vlite.app.dialog.GoogleAppInfoDialog;
 import com.vlite.app.dialog.VmInstalledAppDialog;
 import com.vlite.app.fragments.LauncherFragment;
 import com.vlite.app.fragments.RunningTaskFragment;
+import com.vlite.app.sample.SampleActivityCallbackDelegate;
 import com.vlite.app.sample.SampleApplicationLifecycleDelegate;
 import com.vlite.app.sample.SampleDeviceUtils;
 import com.vlite.app.sample.SampleIntentInterceptor;
@@ -53,7 +55,6 @@ import com.vlite.app.sample.SampleUtils;
 import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.app.utils.FileSizeFormat;
 import com.vlite.app.utils.RuntimeUtils;
-import com.vlite.app.utils.ZipFileUtils;
 import com.vlite.app.view.FloatPointView;
 import com.vlite.sdk.LiteConfig;
 import com.vlite.sdk.VLite;
@@ -67,6 +68,9 @@ import com.vlite.sdk.model.PackageConfiguration;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
 import com.vlite.sdk.utils.io.FileUtils;
+import com.vlite.sdk.utils.io.FilenameUtils;
+
+import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +85,7 @@ import java.util.zip.ZipFile;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
+    private GoogleAppInfoDialog googleAppInfoDialog;
 
     static {
         System.loadLibrary("mytestproject");
@@ -230,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 .setEnableTraceAnr(true)
                 .setEnableTraceNativeCrash(true)
                 .setApplicationLifecycleDelegate(SampleApplicationLifecycleDelegate.class)
+                 .setActivityCallbackDelegate(SampleActivityCallbackDelegate.class)
                 .setIntentInterceptor(SampleIntentInterceptor.class)
                 .build());
     }
@@ -261,6 +267,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu_vm_install_app:
                 // 安装应用
                 showChooseApkFragment();
+                break;
+            case R.id.menu_google_app_install:
+                if (googleAppInfoDialog == null) {
+                    googleAppInfoDialog = new GoogleAppInfoDialog(this);
+                }
+                googleAppInfoDialog.show();
                 break;
             case R.id.menu_vm_install_app_from_device:
                 // 导入真机应用
@@ -388,73 +400,72 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected ResultParcel doInBackground(String... uris) {
-                final String uri = uris[0];
+                String uri = uris[0];
+                boolean isNeedDelAfterInstall = false;
+                //VLite.get().installPackage 接口支持传入apk文件路径和文件夹路径
+                //如果是apks和xapk文件，先解压，再安装
                 if (uri.endsWith(".apks") || uri.endsWith(".xapk")) {
-                   return installXApks(uri);
+                     isNeedDelAfterInstall = true;
+                     try {
+                         //解压文件
+                        uri = unZipFile(uri);
+                     }catch (Exception e){
+                         //解压异常，返回失败信息
+                        return ResultParcel.failure(e);
+                     }
                 }
-                checkFileEnableInstall(uri);
-                // 安装应用
-                return VLite.get().installPackage(uri);
-            }
-
-            private ResultParcel installXApks(String uri) {
-                installXApks(uri);
-                String unzipPath = uri.substring(0, uri.lastIndexOf('.')) + "/";
-                File unZipDir = new File(unzipPath);
-                //先删除残留文件
-                deleteUnZipFile(unZipDir);
-                //解压文件
-                boolean isSuccess = ZipFileUtils.unZip(uri, unzipPath);
-                ResultParcel resultParcel;
-                if (isSuccess) {
-                    //检测apk是否支持
-                    resultParcel = checkFileEnableInstall(unzipPath);
-                    if(resultParcel.isSucceed()){
-                        resultParcel = VLite.get().installPackage(unzipPath);
-                    }
-                } else {
-                    resultParcel = ResultParcel.failure(new Exception("文件解压失败"));
+                //安装前，检查apk是否支持当前系统
+                ResultParcel resultParcel = checkApkEnable(uri);
+                if(resultParcel.isSucceed()){
+                    //安装应用，传入apk路径 或者 apks/xapk解压后的文件夹路径
+                    resultParcel =  VLite.get().installPackage(uri);
                 }
-                deleteUnZipFile(unZipDir);
+                if(isNeedDelAfterInstall){
+                    //如果是apk和apks文件，安装完成后删除解压的文件
+                    deleteUnZipFile(uri);
+                }
                 return resultParcel;
             }
 
-            private ResultParcel checkFileEnableInstall(String uri) {
+            private String unZipFile(String uri) throws Exception {
                 File file = new File(uri);
-                if (file.isFile()) {
-                    return checkApkEnable(file.getAbsolutePath());
-                } else {
-                    File[] files = file.listFiles(child -> child.getName().endsWith(".apk"));
-                    if (files == null || files.length == 0) {
-                        return ResultParcel.failure(new Exception("没有检测到apk文件"));
-                    }
-                    ResultParcel resultParcel = null;
-                    for (File apkFile : files) {
-                        resultParcel = checkApkEnable(apkFile.getAbsolutePath());
-                        if (!resultParcel.isSucceed()) {
-                            break;
-                        }
-                    }
-                    return resultParcel;
+                String fileName = file.getName();
+                //去掉文件后缀名，作为解压的文件夹名称
+                String unZipDirName = FilenameUtils.getNameWithoutExtension(fileName);
+                //解压路径为 /data/user/0/com.vlite.app/cache/<your_file_name>/
+                File unZipFile = new File(getCacheDir(), unZipDirName);
+                String unZipFilePath = unZipFile.getAbsolutePath();
+                //删除残留文件
+                deleteUnZipFile(unZipFilePath);
+                try {
+                    //解压文件
+                    ZipUtil.unpack(new File(uri),unZipFile);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    //解压失败时，可能有残留文件，删除后，把异常抛出去显示提示信息
+                    deleteUnZipFile(unZipFilePath);
+                    throw new Exception(fileName+"解压失败");
                 }
+                return unZipFilePath;
             }
 
             private ResultParcel checkApkEnable(String uri) {
-                int minSDKVersion = getMinSdkVersion(uri);
+                int minSDKVersion = SampleUtils.getMinSdkVersion(uri,getApplicationContext());
                 if (minSDKVersion > Build.VERSION.SDK_INT) {
                     // 检查apk要求的最低系统版本
                     return ResultParcel.failure(new Exception("apk最低要求系统api版本 " + minSDKVersion + ", 当前 " + Build.VERSION.SDK_INT));
                 }
-                if (!isApkSupportedHost(uri)) {
+                if (!SampleUtils.isApkSupportedHost(uri)) {
                     // 检查当前支持的abi
                     return ResultParcel.failure(new Exception("apk不支持当前应用架构 " + ", 当前 " + (RuntimeUtils.is64bit() ? "64位" : "32位")));
                 }
                 return ResultParcel.succeed();
             }
 
-            private void deleteUnZipFile(File unZipDir) {
-                if (unZipDir.exists()) {
-                    FileUtils.deleteQuietly(unZipDir);
+            private void deleteUnZipFile(String path) {
+                File file = new File(path);
+                if (file.exists()) {
+                    FileUtils.deleteQuietly(file);
                 }
             }
 
@@ -469,56 +480,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, src.getAbsolutePath());
     }
-
-    public static boolean isApkSupportedHost(String apkFilePath) {
-        final Set<String> supportedABIs = new HashSet<>();
-//        final List<String> abis =Arrays.asList(new String[]{"armeabi-v7a", "arm64-v8a"});
-        ZipFile zipFile = null;
-        try {
-            zipFile = new ZipFile(apkFilePath);
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            while (entries.hasMoreElements()) {
-                ZipEntry entry = entries.nextElement();
-                String name = entry.getName();
-                if (name.startsWith("lib/")) {
-                    // 获取库文件的架构类型
-                    String[] parts = name.split("/");
-                    if (parts.length >= 3) {
-                        String abi = parts[1];
-                        if (!TextUtils.isEmpty(abi)) {
-                            supportedABIs.add(abi);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (zipFile != null) zipFile.close();
-            } catch (IOException ignored) {
-            }
-        }
-        if (RuntimeUtils.is64bit()) {
-            return supportedABIs.isEmpty() || supportedABIs.contains("arm64-v8a");
-        } else {
-            return supportedABIs.isEmpty() || supportedABIs.contains("armeabi-v7a");
-        }
-    }
-
-    private int getMinSdkVersion(String filePath) {
-        try {
-            PackageInfo info = getPackageManager().getPackageArchiveInfo(filePath, 0);
-//            AppLogger.d("1-------------->"+info.applicationInfo.nativeLibraryDir);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                return info.applicationInfo.minSdkVersion;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
 
     /**
      * 虚拟设备信息
