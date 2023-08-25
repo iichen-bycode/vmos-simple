@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources><string name="config_icon_mask" translatable="false">M0,20 q0,-20 20,-20 L80,0 q20,0 20,20 L100,80 q0,20 -20,20 L20,100 q-20,0 -20,-20 Z</string>
+
+</resources>

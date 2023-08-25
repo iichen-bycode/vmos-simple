@@ -2,6 +2,7 @@ package com.vlite.app.bean;
 
 public class AppPermissionInfo {
     private String permissionDisplayName;
+    private String permissionDescription;
     private String permission;
     private int permissionResult;
 
@@ -33,5 +34,13 @@ public class AppPermissionInfo {
 
     public void setPermissionDisplayName(String permissionDisplayName) {
         this.permissionDisplayName = permissionDisplayName;
+    }
+
+    public String getPermissionDescription() {
+        return permissionDescription;
+    }
+
+    public void setPermissionDescription(String permissionDescription) {
+        this.permissionDescription = permissionDescription;
     }
 }

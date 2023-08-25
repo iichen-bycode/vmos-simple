@@ -100,7 +100,7 @@ public class GoogleAppInfoDialog extends AlertDialog {
     }
 
     private File getGoogleApkDirectory() {
-        File cacheDir = getContext().getCacheDir();
+        File cacheDir = getContext().getExternalCacheDir();
         File googleApkDir = new File(cacheDir, "googleapk");
         // 确保目录存在
         if (!googleApkDir.exists()) {

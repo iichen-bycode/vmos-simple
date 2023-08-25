@@ -2,7 +2,6 @@ package com.vlite.app.sample;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -23,11 +22,8 @@ public class SampleActivityCallbackDelegate extends ActivityCallbackDelegate {
 
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-        Bundle extras = data.getExtras();
-        String bundle = "";
-        if (extras != null){
-            bundle = SampleUtils.eventToPrintString(extras);
-        }
+        final Bundle extras = data == null ? null : data.getExtras();
+        final String bundle = SampleUtils.eventToPrintString(extras);
         Log.d(TAG,"onActivityResult : requestCode: "+requestCode + " resultCode "+resultCode +"  extras: " +bundle +" activity: "+activity);
     }
 }

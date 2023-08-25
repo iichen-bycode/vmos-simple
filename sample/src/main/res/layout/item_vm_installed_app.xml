@@ -7,7 +7,9 @@
     android:foreground="?android:attr/selectableItemBackground"
     android:padding="8dp">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
+        app:shapeAppearance="@style/RoundedImage"
+        android:background="@android:color/white"
         android:id="@+id/iv_app_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"

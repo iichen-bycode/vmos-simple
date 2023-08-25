@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.samplekit.bean.AppItem;
 import com.vlite.app.utils.RuntimeUtils;
+import com.vlite.app.view.LauncherAdaptiveIconDrawable;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.context.HostContext;
 import com.vlite.sdk.event.BinderEvent;
@@ -101,15 +103,23 @@ public class SampleUtils {
     }
 
     public static String getIconCacheUri(String packageName, int versionCode, Drawable drawable, String imageKey) {
-        final File iconDir = new File(HostContext.getContext().getCacheDir(), "icon_cache");
+        final File iconDir = new File(HostContext.getContext().getCacheDir(), "icon_cache_v2");
         if (!iconDir.exists()) {
             iconDir.mkdirs();
         }
         final File iconFile = new File(iconDir, packageName + "_" + versionCode + "_" + imageKey + ".png");
         if (!iconFile.exists()) {
-            BitmapUtils.toFile(BitmapUtils.toBitmap(drawable), iconFile.getAbsolutePath());
+            BitmapUtils.toFile(BitmapUtils.toBitmap(convertLauncherDrawable(drawable)), iconFile.getAbsolutePath());
         }
         return iconFile.getAbsolutePath();
+    }
+
+    public static Drawable convertLauncherDrawable(final Drawable drawable) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && drawable instanceof AdaptiveIconDrawable) {
+            return new LauncherAdaptiveIconDrawable((AdaptiveIconDrawable) drawable);
+        } else {
+            return drawable;
+        }
     }
 
     public static File getSnapshotCacheFile(String packageName) {
@@ -178,7 +188,7 @@ public class SampleUtils {
         if (RuntimeUtils.is64bit()) {
             return supportedABIs.isEmpty() || supportedABIs.contains("arm64-v8a");
         } else {
-            return supportedABIs.isEmpty() || supportedABIs.contains("armeabi-v7a");
+            return supportedABIs.isEmpty() || supportedABIs.contains("armeabi-v7a") || supportedABIs.contains("armeabi");
         }
     }
 

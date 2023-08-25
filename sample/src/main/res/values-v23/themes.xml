@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.App.LaunchApp" parent="Theme.App.Transparent">
+    <style name="Theme_App_LaunchApp" parent="Theme_App_Transparent">
         <item name="android:navigationBarColor" >@android:color/white</item>
         <item name="android:windowLightStatusBar">true</item>
     </style>

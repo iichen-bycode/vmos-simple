@@ -5,7 +5,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -16,7 +15,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -73,19 +71,14 @@ import com.vlite.sdk.utils.io.FilenameUtils;
 import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private GoogleAppInfoDialog googleAppInfoDialog;
+    private DeviceFileSelectorDialog deviceFileSelectorDialog;
 
     static {
         System.loadLibrary("mytestproject");
@@ -318,12 +311,14 @@ public class MainActivity extends AppCompatActivity {
      * 选择apk
      */
     public void showChooseApkFragment() {
-        DeviceFileSelectorDialog dialog = DeviceFileSelectorDialog.newInstance("请选择Apk", new String[]{".apk", ".apks", ".xapk"}, true);
-        dialog.setOnFileSelectorListener(item -> {
-            // 安装apk
-            asyncInstallApkFile(new File(item.getAbsolutePath()));
-        });
-        dialog.show(getSupportFragmentManager());
+        if (deviceFileSelectorDialog == null) {
+            deviceFileSelectorDialog = DeviceFileSelectorDialog.newInstance("请选择Apk", new String[]{".apk", ".apks", ".xapk"}, true);
+            deviceFileSelectorDialog.setOnFileSelectorListener(item -> {
+                // 安装apk
+                asyncInstallApkFile(new File(item.getAbsolutePath()));
+            });
+        }
+        deviceFileSelectorDialog.show(getSupportFragmentManager());
     }
 
 
@@ -457,7 +452,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (!SampleUtils.isApkSupportedHost(uri)) {
                     // 检查当前支持的abi
-                    return ResultParcel.failure(new Exception("apk不支持当前应用架构 " + ", 当前 " + (RuntimeUtils.is64bit() ? "64位" : "32位")));
+                    return ResultParcel.failure(new Exception("apk不支持当前宿主架构 " + ", 当前 " + (RuntimeUtils.is64bit() ? "64位" : "32位")));
                 }
                 return ResultParcel.succeed();
             }
@@ -573,7 +568,7 @@ public class MainActivity extends AppCompatActivity {
                     final RunningInfo item = new RunningInfo();
 
                     final ApplicationInfo info = VLite.get().getApplicationInfo(packageName, 0);
-                    final Drawable drawable = info.loadIcon(pm);
+                    final Drawable drawable = SampleUtils.convertLauncherDrawable(info.loadIcon(pm));
                     final Bitmap bitmap = BitmapUtils.toBitmap(drawable);
                     if (bitmap != null) {
                         final Palette palette = Palette.from(bitmap).generate();
@@ -643,7 +638,7 @@ public class MainActivity extends AppCompatActivity {
             protected Void doInBackground(Void... voids) {
                 final List<String> packageNames = VLite.get().getRunningPackageNames();
                 for (String packageName : packageNames) {
-                    VLite.get().killApplication(packageName);
+                    VLite.get().forceStopPackage(packageName);
                 }
                 return null;
             }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ProgressButton">
+        <attr name="android:text"/>
+        <attr name="styleType" format="enum">
+            <enum name="primary" value="0"/>
+            <enum name="info" value="1"/>
+        </attr>
+        <attr name="plain" format="boolean"/>
+    </declare-styleable>
+</resources>
