@@ -1,6 +1,6 @@
 package com.vlite.app.sample;
 
-import com.vlite.sdk.annotation.Nullable;
+import androidx.annotation.Nullable;
 import com.vlite.sdk.application.DeviceEnvOverrider;
 import com.vlite.sdk.model.DeviceEnvInfo;
 

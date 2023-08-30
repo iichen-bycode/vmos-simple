@@ -73,6 +73,8 @@ import org.zeroturnaround.zip.ZipUtil;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -123,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
         // bhook测试代码
 //        hookAndTestOpenat(Native.getBhookApi());
+
     }
 
     private void bindViews() {
@@ -214,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
         final File localTmp = new File(getExternalCacheDir(), "/data/local/tmp");
         if (!localTmp.exists()) localTmp.mkdirs();
         VLite.get().setConfigurationContext(new ConfigurationContext.Builder()
+                .setPackageBlacklist(new HashSet<>(Arrays.asList("com.android.vending", "com.google.android.gsf", "com.google.android.gms")))
                 .setUseInternalSdcard(false)
                 // 启用进程预热示例 最多预热2个进程
                 .setMaxPreheatProcessCount(2)

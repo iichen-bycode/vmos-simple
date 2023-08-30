@@ -1,6 +1,7 @@
 package com.vlite.app.dialog;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -18,6 +19,7 @@ import com.vlite.app.bean.GoogleInstallInfo;
 import com.vlite.app.download.DownloadHttpClient;
 import com.vlite.app.utils.FileSizeFormat;
 import com.vlite.sdk.VLite;
+import com.vlite.sdk.model.InstallConfig;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.io.FileUtils;
 
@@ -139,7 +141,7 @@ public class GoogleAppInfoDialog extends AlertDialog {
 
                 ResultParcel resultParcel;
                 if (result) {
-                    resultParcel = VLite.get().installPackage(apkFile.getAbsolutePath());
+                    resultParcel = VLite.get().installPackage(apkFile.getAbsolutePath(), new InstallConfig.Builder().setIgnorePackageList(true).build());
                     if (resultParcel.isSucceed()) {
                         installInfo.setPackageInfo(VLite.get().getPackageInfo(installInfo.getPackageName(), 0));
                     }

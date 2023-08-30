@@ -138,7 +138,7 @@ public class LauncherAdaptiveIconDrawable extends AdaptiveIconDrawable implement
     LauncherAdaptiveIconDrawable(@Nullable LayerState state, @Nullable Resources res) {
         super(null, null);
         if (!sInitialized) {
-            Log.e("AdaptiveIconDrawable", "shape not initialized", new Throwable());
+//            Log.e("AdaptiveIconDrawable", "shape not initialized", new Throwable());
         }
         mLayerState = createConstantState(state, res);
 

@@ -41,7 +41,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/progress">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
+                app:shapeAppearance="@style/RoundedImage"
+                android:background="@android:color/white"
                 android:id="@+id/iv_app_icon"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
