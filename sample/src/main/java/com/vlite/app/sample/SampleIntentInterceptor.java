@@ -7,7 +7,7 @@ import android.os.Bundle;
 
 import com.vlite.app.activities.AppInstallerActivity;
 import com.vlite.sdk.VLite;
-import androidx.annotation.NonNull;
+import com.vlite.sdk.annotation.NonNull;
 import com.vlite.sdk.application.IntentInterceptor;
 import com.vlite.sdk.context.HostContext;
 

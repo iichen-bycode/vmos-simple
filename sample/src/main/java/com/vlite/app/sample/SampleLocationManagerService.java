@@ -11,6 +11,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 
+import com.vlite.sdk.logger.AppLogger;
 import com.vlite.sdk.server.virtualservice.location.ILocationManager;
 
 import java.lang.reflect.Field;
@@ -122,9 +123,13 @@ public class SampleLocationManagerService extends ILocationManager.Stub {
             return;
         }
         try {
-
             final int maxUpdates = getFieldValue(request, "mMaxUpdates", 1);
-            final long interval = getFieldValue(request, "mInterval", Long.MAX_VALUE);
+            final long interval;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                interval = getFieldValue(request, "mIntervalMillis", Long.MAX_VALUE);
+            } else {
+                interval = getFieldValue(request, "mInterval", Long.MAX_VALUE);
+            }
             final LocationCallbackInfo callbackInfo = new LocationCallbackInfo(maxUpdates, interval, listener);
             final IBinder iBinder = listener.asBinder();
             synchronized (mListeners) {

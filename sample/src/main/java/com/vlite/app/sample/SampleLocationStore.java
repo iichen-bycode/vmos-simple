@@ -48,7 +48,7 @@ public class SampleLocationStore {
             //            location.setLongitude(116.275747);
 //            location.setLatitude(40.0006376);
 //            location.setAltitude(66.78003831673414);
-//            location.setSpeed(0f);
+            location.setSpeed(10f); // 这里设置为0时设置了虚拟地址可能也会跳转到真实地址
 //            location.setBearing(0);
             location.setAccuracy(1f);
             location.setTime(System.currentTimeMillis());

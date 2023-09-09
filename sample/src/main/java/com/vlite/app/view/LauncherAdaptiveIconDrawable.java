@@ -20,6 +20,7 @@ import android.graphics.Shader.TileMode;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.system.Os;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
