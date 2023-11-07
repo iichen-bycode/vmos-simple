@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -37,10 +38,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class SampleUtils {
+    public static final String GP_PACKAGE_NAME = "com.android.vending";
+    public static final String GMS_PACKAGE_NAME = "com.google.android.gms";
+    public static final String GSF_PACKAGE_NAME = "com.google.android.gsf";
 
     public static String eventToPrintString(Bundle bundle) {
         final String[] sortOrder = {BinderEvent.KEY_EVENT_ID, BinderEvent.KEY_PACKAGE_NAME, BinderEvent.KEY_PACKAGE_NAME_ARRAY,
-                BinderEvent.KEY_PROCESS_NAME, BinderEvent.KEY_CLASS_NAME, BinderEvent.KEY_METHOD_NAME};
+                BinderEvent.KEY_PROCESS_NAME, BinderEvent.KEY_CLASS_NAME, BinderEvent.KEY_METHOD_NAME, BinderEvent.KEY_OBJECT_ID};
         final Map<String, Integer> sortOrderMap = new HashMap<>();
         for (int i = sortOrder.length - 1; i >= 0; i--) {
             sortOrderMap.put(sortOrder[i], i);
@@ -202,6 +206,20 @@ public class SampleUtils {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public static boolean isMicroG(PackageInfo info) {
+        if (info != null) {
+            final ProviderInfo[] providers = info.providers;
+            if (providers != null) {
+                for (ProviderInfo provider : providers) {
+                    if (provider.name.startsWith("org.microg")) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
 }

@@ -41,6 +41,7 @@ import com.vlite.app.databinding.DialogInputLocationBinding;
 import com.vlite.app.databinding.DialogProcessListBinding;
 import com.vlite.app.databinding.LayoutNavigationHeaderBinding;
 import com.vlite.app.dialog.GoogleAppInfoDialog;
+import com.vlite.app.dialog.MicroGInstallDialog;
 import com.vlite.app.dialog.VmInstalledAppDialog;
 import com.vlite.app.fragments.LauncherFragment;
 import com.vlite.app.fragments.RunningTaskFragment;
@@ -80,6 +81,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private GoogleAppInfoDialog googleAppInfoDialog;
+    private MicroGInstallDialog microGInfoDialog;
     private DeviceFileSelectorDialog deviceFileSelectorDialog;
 
     static {
@@ -173,6 +175,10 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     private void asyncApplyVirtualDeviceInfo() {
+        // 华为手机用不了google服务 让华为才用虚拟设备信息
+        if (!Build.BRAND.equalsIgnoreCase("huawei")){
+            return;
+        }
         new AsyncTask<Void, Object, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -181,11 +187,16 @@ public class MainActivity extends AppCompatActivity {
                 if (deviceInfo == null) {
                     deviceInfo = DeviceEnvInfo.random();
 
-                    String brand = "HUAWEI";
-                    String model = "VOG-TL00";
-                    String product = "VOG-TL00";
-                    String device = "HWVOG";
-                    String fingerprint = "HUAWEI/VOG-TL00/HWVOG:10/HUAWEIVOG-TL00/10.1.0.162C01:user/release-keys";
+//                    String brand = "OPPO";
+//                    String model = "PDRM00";
+//                    String product = "PDRM00";
+//                    String device = "OP4EA7";
+//                    String fingerprint = "OPPO/PDRM00/OP4EA7:12/SKQ1.210216.001/R.202201162315:user/release-keys";
+                    String brand = "google";
+                    String model = "Pixel 4 XL";
+                    String product = "coral";
+                    String device = "coral";
+                    String fingerprint = "google/coral/coral:13/TP1A.221005.002.B2/9382335:user/release-keys";
 
                     deviceInfo.putBuildField("BRAND", brand);
                     deviceInfo.putBuildField("MANUFACTURER", brand);
@@ -212,29 +223,36 @@ public class MainActivity extends AppCompatActivity {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void applyConfiguration() {
-        SampleLocationStore.clear();
-        final File localTmp = new File(getExternalCacheDir(), "/data/local/tmp");
-        if (!localTmp.exists()) localTmp.mkdirs();
-        VLite.get().setConfigurationContext(new ConfigurationContext.Builder()
-                .setPackageBlacklist(new HashSet<>(Arrays.asList("com.android.vending", "com.google.android.gsf", "com.google.android.gms")))
-                .setUseInternalSdcard(false)
-                // 启用进程预热示例 最多预热2个进程
-                .setMaxPreheatProcessCount(2)
-                // 自定义io重定向规则示例
-                // 重定向文件 要重定向的文件/重定向的目标路径/是否白名单
-                // 注释掉重定向功能，导致微信语音失效，目前发现/proc/cpuinfo 没有在对应的重定向目录找到对应的文件，手动补上对应的文件后微信语音正常
-                //.addFileRedirectRule("/proc/cpuinfo", new File(getExternalCacheDir(), "/proc/cpuinfo").getAbsolutePath(), false)
-                // 重定向目录 要重定向的目录/重定向的目标路径/是否白名单
-                //.addDirectoryRedirectRule("/data/local/tmp", localTmp.getAbsolutePath(), false)
-                .build());
-        VLite.get().setPackageConfiguration(new PackageConfiguration.Builder()
-                .setEnableTraceAnr(true)
-                .setEnableTraceNativeCrash(true)
-                .setApplicationLifecycleDelegate(SampleApplicationLifecycleDelegate.class)
-                 .setActivityCallbackDelegate(SampleActivityCallbackDelegate.class)
-                .setIntentInterceptor(SampleIntentInterceptor.class)
-                .build());
+        new AsyncTask<Void, Object, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                SampleLocationStore.clear();
+                final File localTmp = new File(getExternalCacheDir(), "/data/local/tmp");
+                if (!localTmp.exists()) localTmp.mkdirs();
+                VLite.get().setConfigurationContext(new ConfigurationContext.Builder()
+                        .setPackageBlacklist(new HashSet<>(Arrays.asList("com.android.vending", "com.google.android.gsf", "com.google.android.gms")))
+                        .setUseInternalSdcard(false)
+                        // 启用进程预热示例 最多预热2个进程
+                        .setMaxPreheatProcessCount(2)
+                        // 自定义io重定向规则示例
+                        // 重定向文件 要重定向的文件/重定向的目标路径/是否白名单
+                        // 注释掉重定向功能，导致微信语音失效，目前发现/proc/cpuinfo 没有在对应的重定向目录找到对应的文件，手动补上对应的文件后微信语音正常
+                        //.addFileRedirectRule("/proc/cpuinfo", new File(getExternalCacheDir(), "/proc/cpuinfo").getAbsolutePath(), false)
+                        // 重定向目录 要重定向的目录/重定向的目标路径/是否白名单
+                        //.addDirectoryRedirectRule("/data/local/tmp", localTmp.getAbsolutePath(), false)
+                        .build());
+                VLite.get().setPackageConfiguration(new PackageConfiguration.Builder()
+                        .setEnableTraceAnr(true)
+                        .setEnableTraceNativeCrash(true)
+                        .setApplicationLifecycleDelegate(SampleApplicationLifecycleDelegate.class)
+                        .setActivityCallbackDelegate(SampleActivityCallbackDelegate.class)
+                        .setIntentInterceptor(SampleIntentInterceptor.class)
+                        .build());
+                return null;
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private void toggleDrawer() {
@@ -270,6 +288,12 @@ public class MainActivity extends AppCompatActivity {
                     googleAppInfoDialog = new GoogleAppInfoDialog(this);
                 }
                 googleAppInfoDialog.show();
+                break;
+            case R.id.menu_microg_install:
+                if (microGInfoDialog == null) {
+                    microGInfoDialog = new MicroGInstallDialog(this);
+                }
+                microGInfoDialog.show();
                 break;
             case R.id.menu_vm_install_app_from_device:
                 // 导入真机应用
@@ -609,6 +633,12 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         final DialogInputLocationBinding dialogBinding = DialogInputLocationBinding.inflate(LayoutInflater.from(this));
+        Location lastFakeLocation = SampleLocationStore.getFakeLocation();
+        if (lastFakeLocation != null){
+            dialogBinding.etLongitude.setText(String.valueOf(lastFakeLocation.getLongitude()).replaceAll("\\.?0*$", ""));
+            dialogBinding.edLatitude.setText(String.valueOf(lastFakeLocation.getLatitude()).replaceAll("\\.?0*$", ""));
+        }
+
         new AlertDialog.Builder(this)
                 .setView(dialogBinding.getRoot())
                 .setTitle("手动输入经纬度")

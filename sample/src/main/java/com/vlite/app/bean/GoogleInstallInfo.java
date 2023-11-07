@@ -1,87 +1,83 @@
 package com.vlite.app.bean;
 
 import android.content.pm.PackageInfo;
-
-
-import java.util.Objects;
+import android.text.TextUtils;
 
 public class GoogleInstallInfo {
-    private String name;
+
+    private String statusString;
+    private String appName;
     private String packageName;
     private String downloadUrl;
-    private String describe;
-    private int position;
-    private PackageInfo packageInfo = null;
+    private String versionName;
+    private int versionCode;
 
-    public GoogleInstallInfo(String name, String packageName, String downloadUrl) {
-        this.name = name;
+    public GoogleInstallInfo(String packageName, String appName, String downloadUrl) {
         this.packageName = packageName;
+        this.appName = appName;
         this.downloadUrl = downloadUrl;
     }
 
-    public String getName() {
-        return name;
+    public void setPackageInfo(PackageInfo pkgInfo) {
+        if (pkgInfo != null) {
+            this.versionName = pkgInfo.versionName;
+            this.versionCode = pkgInfo.versionCode;
+        }else{
+            this.versionName = null;
+            this.versionCode = 0;
+        }
+        this.setStatusString(null);
+    }
+
+    public boolean isInstalled() {
+        return !TextUtils.isEmpty(this.versionName);
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     public String getPackageName() {
         return packageName;
     }
 
-    public String getDownloadUrl() {
-        return downloadUrl;
-    }
-
-    public String getDescribe() {
-        return describe != null ? describe : (isInstalled()
-                ? packageInfo.versionName : "未安装");
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
 
-    public boolean isInstalled() {
-        return packageInfo != null;
-    }
-
-    public PackageInfo getPackageInfo() {
-        return packageInfo;
-    }
-
-    public void setPackageInfo(PackageInfo packageInfo) {
-        this.packageInfo = packageInfo;
-    }
-
-    public void setDescribe(String describe) {
-        this.describe = describe;
+    public String getDownloadUrl() {
+        return downloadUrl;
     }
 
     public void setDownloadUrl(String downloadUrl) {
         this.downloadUrl = downloadUrl;
     }
 
-    public int getPosition() {
-        return position;
+    public String getVersionName() {
+        return versionName;
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    public void setVersionName(String versionName) {
+        this.versionName = versionName;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        GoogleInstallInfo that = (GoogleInstallInfo) o;
-        return getPackageName().equals(that.getPackageName());
+    public int getVersionCode() {
+        return versionCode;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(packageName);
+    public void setVersionCode(int versionCode) {
+        this.versionCode = versionCode;
+    }
+
+    public String getStatusString() {
+        return statusString;
+    }
+
+    public void setStatusString(String statusString) {
+        this.statusString = statusString;
     }
 }

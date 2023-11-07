@@ -32,8 +32,8 @@ public class SampleLocationStore {
     public static void setFakeLocation(Location location) {
         getSharedPreferences().edit()
                 .putString("provider", location.getProvider())
-                .putFloat("latitude", (float) location.getLatitude())
-                .putFloat("longitude", (float) location.getLongitude())
+                .putString("latitude", String.valueOf(location.getLatitude()))
+                .putString("longitude", String.valueOf(location.getLongitude()))
                 .apply();
     }
 
@@ -43,8 +43,10 @@ public class SampleLocationStore {
         final String provider = preferences.getString("provider", null);
         if (!TextUtils.isEmpty(provider) && preferences.contains("latitude") && preferences.contains("longitude")) {
             final Location location = new Location(provider);
-            location.setLatitude(preferences.getFloat("latitude", 0f));
-            location.setLongitude(preferences.getFloat("longitude", 0f));
+
+          //  double   float 互相转换会出现精度缺失
+            location.setLatitude(Double.parseDouble(preferences.getString("latitude","0")));
+            location.setLongitude(Double.parseDouble(preferences.getString("longitude", "0")));
             //            location.setLongitude(116.275747);
 //            location.setLatitude(40.0006376);
 //            location.setAltitude(66.78003831673414);

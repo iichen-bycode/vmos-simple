@@ -20,16 +20,9 @@ public class GoogleInstallAdapter extends BaseBindingAdapter<GoogleInstallInfo, 
 
     @Override
     public void onBindViewHolder(@NonNull BindingHolder<ItemGoogleAppInstallBinding> holder, GoogleInstallInfo item, int position) {
-        holder.binding.appNameTv.setText(item.getName());
-        holder.binding.describeTv.setText(item.getDescribe());
-        item.setPosition(position);
-        if (item.getPackageInfo() == null) {
-            holder.binding.packageNameTv.setVisibility(View.INVISIBLE);
-        } else {
-            holder.binding.packageNameTv.setVisibility(View.VISIBLE);
-            holder.binding.packageNameTv.setText(item.getPackageInfo().packageName);
-        }
-
+        holder.binding.appNameTv.setText(item.getAppName());
+        holder.binding.describeTv.setText(item.getStatusString());
+        holder.binding.packageNameTv.setText(item.getPackageName());
     }
 
     @NonNull

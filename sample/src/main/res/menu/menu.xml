@@ -22,11 +22,14 @@
     <group
         android:id="@+id/menu_group_google">
         <item
-            android:title="谷歌">
+            android:title="谷歌服务">
             <menu>
                 <item
                     android:id="@+id/menu_google_app_install"
                     android:title="安装谷歌三件套" />
+                <item
+                    android:id="@+id/menu_microg_install"
+                    android:title="安装microG" />
             </menu>
         </item>
     </group>

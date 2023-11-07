@@ -22,7 +22,6 @@
             android:layout_width="0dp"
             android:layout_weight="1"
             android:text="com."
-            android:visibility="invisible"
             android:textSize="11sp"
             android:layout_height="wrap_content"/>
 

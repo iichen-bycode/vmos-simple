@@ -47,6 +47,7 @@
             android:textColor="#58bc71" />
 
         <TextView
+            android:visibility="gone"
             android:id="@+id/delete_apk_file_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
