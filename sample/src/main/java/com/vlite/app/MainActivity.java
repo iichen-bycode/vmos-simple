@@ -2,8 +2,10 @@ package com.vlite.app;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -11,10 +13,15 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.PowerManager;
+import android.provider.Settings;
+import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,23 +36,31 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.lzf.easyfloat.EasyFloat;
+import com.lzf.easyfloat.enums.ShowPattern;
+import com.lzf.easyfloat.enums.SidePattern;
 import com.samplekit.dialog.DeviceFileSelectorDialog;
 import com.samplekit.dialog.DeviceInstalledAppDialog;
+import com.vlite.app.adapters.FloatMenuAdapter;
 import com.vlite.app.adapters.ProcessItemAdapter;
+import com.vlite.app.bean.FloatMenuItem;
 import com.vlite.app.bean.ProcessInfo;
 import com.vlite.app.bean.RunningInfo;
 import com.vlite.app.databinding.ActivityMainBinding;
 import com.vlite.app.databinding.DialogInputLocationBinding;
 import com.vlite.app.databinding.DialogProcessListBinding;
 import com.vlite.app.databinding.LayoutNavigationHeaderBinding;
+import com.vlite.app.databinding.LayoutWindowMenuBinding;
 import com.vlite.app.dialog.GoogleAppInfoDialog;
 import com.vlite.app.dialog.MicroGInstallDialog;
 import com.vlite.app.dialog.VmInstalledAppDialog;
 import com.vlite.app.fragments.LauncherFragment;
 import com.vlite.app.fragments.RunningTaskFragment;
 import com.vlite.app.sample.SampleActivityCallbackDelegate;
+import com.vlite.app.sample.SampleAppManager;
 import com.vlite.app.sample.SampleApplicationLifecycleDelegate;
 import com.vlite.app.sample.SampleDeviceUtils;
 import com.vlite.app.sample.SampleIntentInterceptor;
@@ -101,12 +116,14 @@ public class MainActivity extends AppCompatActivity {
             // 除特别说明的事件外 事件默认回调于子线程
             AppLogger.d("onReceivedEvent -> type = " + BinderEvent.typeToString(type) + ", thread_name = " + Thread.currentThread().getName() + ", extras = " + SampleUtils.eventToPrintString(extras));
 
+            handleReceivedEvent(type, extras);
             final Fragment fragment = getSupportFragmentManager().findFragmentById(binding.contentFragment.getId());
             if (fragment instanceof LauncherFragment) {
                 ((LauncherFragment) fragment).handleBinderEvent(type, extras);
             }
         }
     };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
 
         // bhook测试代码
 //        hookAndTestOpenat(Native.getBhookApi());
-
     }
 
     private void bindViews() {
@@ -163,7 +179,8 @@ public class MainActivity extends AppCompatActivity {
             final StringBuilder sb = new StringBuilder("SDK版本：").append(com.vlite.sdk.BuildConfig.VERSION_NAME).append(" (")
                     .append(com.vlite.sdk.BuildConfig.VERSION_CODE).append(")\n")
                     .append("示例版本：").append(com.vlite.app.BuildConfig.VERSION_NAME).append(" (")
-                    .append(com.vlite.app.BuildConfig.VERSION_CODE).append(")");
+                    .append(com.vlite.app.BuildConfig.VERSION_CODE).append(")\n")
+                    .append(VLite.get().getSDKIdentifier());
             new AlertDialog.Builder(v.getContext())
                     .setTitle("版本信息")
                     .setMessage(sb.toString())
@@ -278,6 +295,10 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu:
                 toggleDrawer();
                 return true;
+            case R.id.menu_float_menu:
+                // 悬浮菜单
+                showFloatMenu();
+                break;
             // 应用管理
             case R.id.menu_vm_install_app:
                 // 安装应用
@@ -424,74 +445,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected ResultParcel doInBackground(String... uris) {
                 String uri = uris[0];
-                boolean isNeedDelAfterInstall = false;
-                //VLite.get().installPackage 接口支持传入apk文件路径和文件夹路径
-                //如果是apks和xapk文件，先解压，再安装
-                if (uri.endsWith(".apks") || uri.endsWith(".xapk")) {
-                     isNeedDelAfterInstall = true;
-                     try {
-                         //解压文件
-                        uri = unZipFile(uri);
-                     }catch (Exception e){
-                         //解压异常，返回失败信息
-                        return ResultParcel.failure(e);
-                     }
-                }
-                //安装前，检查apk是否支持当前系统
-                ResultParcel resultParcel = checkApkEnable(uri);
-                if(resultParcel.isSucceed()){
-                    //安装应用，传入apk路径 或者 apks/xapk解压后的文件夹路径
-                    resultParcel =  VLite.get().installPackage(uri);
-                }
-                if(isNeedDelAfterInstall){
-                    //如果是apk和apks文件，安装完成后删除解压的文件
-                    deleteUnZipFile(uri);
-                }
-                return resultParcel;
+                return SampleUtils.installApk(MainActivity.this,uri,false);
             }
-
-            private String unZipFile(String uri) throws Exception {
-                File file = new File(uri);
-                String fileName = file.getName();
-                //去掉文件后缀名，作为解压的文件夹名称
-                String unZipDirName = FilenameUtils.getNameWithoutExtension(fileName);
-                //解压路径为 /data/user/0/com.vlite.app/cache/<your_file_name>/
-                File unZipFile = new File(getCacheDir(), unZipDirName);
-                String unZipFilePath = unZipFile.getAbsolutePath();
-                //删除残留文件
-                deleteUnZipFile(unZipFilePath);
-                try {
-                    //解压文件
-                    ZipUtil.unpack(new File(uri),unZipFile);
-                }catch (Exception e){
-                    e.printStackTrace();
-                    //解压失败时，可能有残留文件，删除后，把异常抛出去显示提示信息
-                    deleteUnZipFile(unZipFilePath);
-                    throw new Exception(fileName+"解压失败");
-                }
-                return unZipFilePath;
-            }
-
-            private ResultParcel checkApkEnable(String uri) {
-                int minSDKVersion = SampleUtils.getMinSdkVersion(uri,getApplicationContext());
-                if (minSDKVersion > Build.VERSION.SDK_INT) {
-                    // 检查apk要求的最低系统版本
-                    return ResultParcel.failure(new Exception("apk最低要求系统api版本 " + minSDKVersion + ", 当前 " + Build.VERSION.SDK_INT));
-                }
-                if (!SampleUtils.isApkSupportedHost(uri)) {
-                    // 检查当前支持的abi
-                    return ResultParcel.failure(new Exception("apk不支持当前宿主架构 " + ", 当前 " + (RuntimeUtils.is64bit() ? "64位" : "32位")));
-                }
-                return ResultParcel.succeed();
-            }
-
-            private void deleteUnZipFile(String path) {
-                File file = new File(path);
-                if (file.exists()) {
-                    FileUtils.deleteQuietly(file);
-                }
-            }
-
             @Override
             protected void onPostExecute(ResultParcel result) {
                 super.onPostExecute(result);
@@ -688,6 +643,79 @@ public class MainActivity extends AppCompatActivity {
 
     private void showSendMotionEventDialog() {
         FloatPointView.show(this);
+    }
+
+    private void handleReceivedEvent(int type, Bundle extras) {
+        if (BinderEvent.TYPE_ACTIVITY_LIFECYCLE == type) {
+            final String packageName = extras.getString(BinderEvent.KEY_BASE_INFO_PACKAGE_NAME);
+            final String methodName = extras.getString(BinderEvent.KEY_METHOD_NAME);
+            SampleAppManager.onActivityLifecycle(packageName, methodName);
+        }
+    }
+
+    private void showFloatMenu() {
+        int offsetY = (int) (getResources().getDisplayMetrics().heightPixels * 0.2f);
+        EasyFloat.with(this)
+                .setShowPattern(ShowPattern.ALL_TIME)
+                .setSidePattern(SidePattern.LEFT)
+                .setTag("menu")
+                .setDragEnable(true)
+                .setGravity(Gravity.START | Gravity.TOP, 0, offsetY)
+                .setLayout(R.layout.layout_window_menu, view -> {
+                    handleInflateWindowView(view.findViewById(R.id.layout_window_content));
+                })
+                .show();
+    }
+
+    private void handleInflateWindowView(View view) {
+        final LayoutWindowMenuBinding menuBinding = LayoutWindowMenuBinding.bind(view);
+        menuBinding.layoutClickMenu.setOnClickListener(v -> {
+            menuBinding.layoutMenuContent.setVisibility(View.VISIBLE);
+            menuBinding.layoutClickMenu.setVisibility(View.GONE);
+        });
+        menuBinding.ivClose.setOnClickListener(v -> {
+            menuBinding.layoutClickMenu.setVisibility(View.VISIBLE);
+            menuBinding.layoutMenuContent.setVisibility(View.GONE);
+        });
+        final List<FloatMenuItem> items = new ArrayList<>();
+        items.add(new FloatMenuItem(R.drawable.ic_landscape, "强制横屏", v -> {
+            sendForceOrientationCommand(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, "force_landscape");
+        }));
+        items.add(new FloatMenuItem(R.drawable.ic_portrait, "强制竖屏", v -> {
+            sendForceOrientationCommand(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, "force_portrait");
+        }));
+        /*items.add(new FloatMenuItem(R.mipmap.ic_launcher, "画中画", v -> {
+            final Intent intent = new Intent("command_" + "com.vlite.unittest");
+            intent.putExtra("command_id", "force_pip");
+            VLite.get().sendBinderBroadcast(intent);
+            final ConfigurationContext configurationContext = VLite.get().getConfigurationContext();
+            final ConfigurationContext newConfigurationContext = configurationContext.newBuilder()
+                    .setForcePictureInPicture(true)
+                    .build();
+            VLite.get().setConfigurationContext(newConfigurationContext);
+        }));*/
+        menuBinding.rvMenuList.setLayoutManager(new GridLayoutManager(view.getContext(), Math.min(4, items.size())));
+        final FloatMenuAdapter floatMenuAdapter = new FloatMenuAdapter(items);
+        floatMenuAdapter.setOnItemClickListener((itemView, position) -> {
+            items.get(position).getClickListener().onClick(itemView);
+        });
+        menuBinding.rvMenuList.setAdapter(floatMenuAdapter);
+    }
+
+    private void sendForceOrientationCommand(int orientation, String command_id) {
+        final ConfigurationContext configurationContext = VLite.get().getConfigurationContext();
+        if (orientation != configurationContext.getForceOrientation()){
+            final ConfigurationContext newConfigurationContext = configurationContext.newBuilder()
+                    .setForceOrientation(orientation)
+                    .build();
+            VLite.get().setConfigurationContext(newConfigurationContext);
+        }
+        final String foregroundPackageName = SampleAppManager.getForegroundPackageName();
+        if (!TextUtils.isEmpty(foregroundPackageName)) {
+            final Intent intent = new Intent("command_" + foregroundPackageName);
+            intent.putExtra("command_id", command_id);
+            VLite.get().sendBinderBroadcast(intent);
+        }
     }
 
     private void setSubtitle(CharSequence subtitle) {

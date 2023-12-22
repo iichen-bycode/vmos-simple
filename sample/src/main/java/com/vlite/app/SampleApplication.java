@@ -28,7 +28,7 @@ public class SampleApplication extends MultiDexApplication {
         // 以下配置供参考 请根据实际场景进行配置
         VLite.attachBaseContext(base, new LiteConfig.Builder()
                 // 指定服务端包名
-//                .setServerPackageName(BuildConfig.APPLICATION_ID)
+                .setServerPackageName(BuildConfig.SERVER_PACKAGE_NAME)
                 // 日志配置
                 .setLoggerConfig(new AppLogger.Config(BuildConfig.DEBUG)
                         // 日志增加mars支持

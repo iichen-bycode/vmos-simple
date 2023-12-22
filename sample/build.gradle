@@ -11,13 +11,14 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId "com.vlite.app"
+        applicationId rootProject.ext.applicationId
         minSdk rootProject.ext.minSdkVersion
         targetSdk  getProject().hasProperty("sampleTargetSdkVersion")?rootProject.ext.sampleTargetSdkVersion:rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        buildConfigField "String", "SERVER_PACKAGE_NAME", "\"${rootProject.ext.applicationId}\""
     }
 
 
@@ -64,21 +65,35 @@ android {
         }
     }
 
-    flavorDimensions "abi"
+    flavorDimensions "abi", "background"
     productFlavors {
 
         universal {
             isDefault true
+            dimension 'abi'
             ndk {
                 abiFilters "arm64-v8a", "armeabi-v7a"
             }
         }
+
         arm32 {
             applicationIdSuffix ".arm32"
+            dimension 'abi'
             ndk {
                 abiFilters "armeabi-v7a"
             }
         }
+
+        // 用手机壁纸
+        wallpaper {
+            dimension 'background'
+        }
+
+        // 用纯色背景
+        color {
+            dimension 'background'
+        }
+
     }
 }
 
@@ -89,7 +104,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'com.vmos:sample-kit:1.0.9'
+    implementation 'com.vmos:sample-kit:1.1.0'
     // 此依赖是示例程序的统计数据上报 仅用于本示例程序 如果不需要请注释此依赖
     implementation 'com.vmos:vmos-lite-sample:1.0.7'
     implementation "com.github.permissions-dispatcher:permissionsdispatcher:4.9.2"
@@ -125,13 +140,15 @@ dependencies {
             exclude group: 'com.vmos', module: 'vmos-lite-extension-vpn'
         }*/
         compileOnly 'com.vmos:hiddenapi-stub:1.1.0'
-        debugImplementation'com.vmos:vmos-lite-shell:1.0.1'
+        debugImplementation'com.vmos:vmos-lite-shell:1.0.2'
     }
+
 }
 
 // 是否加入预置apk
 def includePresetApps = true
 android.applicationVariants.all { variant ->
+    def buildTypeName = variant.buildType.name
     if (!includePresetApps) {
         variant.mergeAssets.doLast {
             def presetAppsDir = new File(variant.mergeAssets.outputDir.get().getAsFile(), "preset_apps")
@@ -140,7 +157,13 @@ android.applicationVariants.all { variant ->
     }
     def versionCode = android.defaultConfig.versionCode
     variant.outputs.all {
-        outputFileName = "${rootProject.name}-${project.name}_${buildType.name}_${versionName}_${versionCode}.apk"
+        outputFileName = "${rootProject.name}-${project.name}_${buildType.name}_${flavorName}_${versionName}_${versionCode}.apk"
+
+        processManifestProvider.get().doLast { pmp ->
+            if (localProject && 'release' == buildTypeName) {
+                throw new GradleException("为了保证与线上一致，release版本需要用远程依赖的版本")
+            }
+        }
     }
 }
 

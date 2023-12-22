@@ -15,12 +15,19 @@ import android.text.TextUtils;
 import androidx.appcompat.app.AlertDialog;
 
 import com.samplekit.bean.AppItem;
+import com.vlite.app.BuildConfig;
 import com.vlite.app.utils.RuntimeUtils;
 import com.vlite.app.view.LauncherAdaptiveIconDrawable;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.context.HostContext;
 import com.vlite.sdk.event.BinderEvent;
+import com.vlite.sdk.model.InstallConfig;
+import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
+import com.vlite.sdk.utils.io.FileUtils;
+import com.vlite.sdk.utils.io.FilenameUtils;
+
+import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +48,7 @@ public class SampleUtils {
     public static final String GP_PACKAGE_NAME = "com.android.vending";
     public static final String GMS_PACKAGE_NAME = "com.google.android.gms";
     public static final String GSF_PACKAGE_NAME = "com.google.android.gsf";
+    public static final String PLUGIN_PACKAGE_NAME = BuildConfig.SERVER_PACKAGE_NAME+".arm32";
 
     public static String eventToPrintString(Bundle bundle) {
         final String[] sortOrder = {BinderEvent.KEY_EVENT_ID, BinderEvent.KEY_PACKAGE_NAME, BinderEvent.KEY_PACKAGE_NAME_ARRAY,
@@ -135,6 +143,87 @@ public class SampleUtils {
     }
 
 
+    public static ResultParcel installApk(Context context,String uri,boolean isIgnorePackageList){
+        try {
+            boolean isNeedDelAfterInstall = false;
+            //VLite.get().installPackage 接口支持传入apk文件路径和文件夹路径
+            //如果是apks和xapk文件，先解压，再安装
+            if (uri.endsWith(".apks") || uri.endsWith(".xapk")) {
+                isNeedDelAfterInstall = true;
+                uri = unZipFile(context,uri);
+            }
+            //安装前，检查apk是否支持当前系统
+            checkApkEnable(context,uri);
+            String referrer = getReferrer(context,uri);
+            //安装应用，传入apk路径 或者 apks/xapk解压后的文件夹路径
+            ResultParcel resultParcel =  VLite.get().installPackage(uri,new InstallConfig.Builder()
+                    .setIgnorePackageList(isIgnorePackageList)
+                    .setReferrer(referrer)
+                    .build());
+            if(isNeedDelAfterInstall){
+                // 拷贝obb文件
+                copyObbFile(uri);
+                //如果是xapk和apks文件，安装完成后删除解压的文件
+                deleteUnZipFile(uri);
+            }
+            return resultParcel;
+        } catch (Exception e) {
+            return ResultParcel.failure(e);
+        }
+    }
+
+    private static void copyObbFile(String uri) {
+        try {
+            String obbFolderPath = uri + File.separator + "Android" + File.separator + "obb";
+            File obbFolder = new File(obbFolderPath);
+            if (obbFolder.exists() && obbFolder.isDirectory()) {
+                FileUtils.copyDirectory(obbFolder, VLite.get().getHostDir("", VLite.DIRECTORY_KEY_SDCARD_EXTERNAL_OBB));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void checkApkEnable(Context context,String uri) {
+        int minSDKVersion =  getMinSdkVersion(uri,context);
+        if (minSDKVersion > Build.VERSION.SDK_INT) {
+            // 检查apk要求的最低系统版本
+            throw  new RuntimeException("apk最低要求系统api版本 " + minSDKVersion + ", 当前 " + Build.VERSION.SDK_INT);
+        }
+    }
+
+
+
+    private static String unZipFile(Context context,String uri) throws Exception {
+        File file = new File(uri);
+        String fileName = file.getName();
+        //去掉文件后缀名，作为解压的文件夹名称
+        String unZipDirName = FilenameUtils.getNameWithoutExtension(fileName);
+        //解压路径为 /data/user/0/com.vlite.app/cache/<your_file_name>/
+        File unZipFile = new File(context.getCacheDir(), unZipDirName);
+        String unZipFilePath = unZipFile.getAbsolutePath();
+        //删除残留文件
+        deleteUnZipFile(unZipFilePath);
+        try {
+            //解压文件
+            ZipUtil.unpack(new File(uri),unZipFile);
+        }catch (Exception e){
+            e.printStackTrace();
+            //解压失败时，可能有残留文件，删除后，把异常抛出去显示提示信息
+            deleteUnZipFile(unZipFilePath);
+            throw new Exception(fileName+"解压失败");
+        }
+        return unZipFilePath;
+    }
+
+    private static void deleteUnZipFile(String path) {
+        File file = new File(path);
+        if (file.exists()) {
+            FileUtils.deleteQuietly(file);
+        }
+    }
+
+
     /**
      * 卸载应用
      */
@@ -179,6 +268,37 @@ public class SampleUtils {
         }
     }
     public static boolean isApkSupportedHost(String apkFilePath) {
+        final Set<String> supportedABIs = getSupportedABIs(apkFilePath);
+        if (RuntimeUtils.is64bit()) {
+            return supportedABIs.isEmpty() || supportedABIs.contains("arm64-v8a");
+        } else {
+            return supportedABIs.isEmpty() || supportedABIs.contains("armeabi-v7a") || supportedABIs.contains("armeabi");
+        }
+    }
+
+    public static String getReferrer(Context context ,String apkFilePath){
+
+        Set<String> supportedABIs = getSupportedABIs(apkFilePath);
+        if (RuntimeUtils.is64bit()){
+            if (supportedABIs.isEmpty() || supportedABIs.contains("arm64-v8a")){
+                return HostContext.getPackageName();
+            }else if (supportedABIs.contains("armeabi-v7a") || supportedABIs.contains("armeabi")){
+                try {
+                    context.getPackageManager().getPackageInfo(PLUGIN_PACKAGE_NAME,0);
+                } catch (PackageManager.NameNotFoundException e) {
+                    throw new RuntimeException("当前apk为 32位架构，请安装32位插件后重试");
+                }
+                return PLUGIN_PACKAGE_NAME;
+            }
+        }else if (supportedABIs.contains("armeabi-v7a") || supportedABIs.contains("armeabi")) {
+            return HostContext.getPackageName();
+        }
+        throw new RuntimeException("apk不支持当前宿主架构 " + ", 当前 " + (RuntimeUtils.is64bit() ? "64位" : "32位"));
+    }
+
+
+
+    public static Set<String> getSupportedABIs(String apkFilePath){
         File file = new File(apkFilePath);
         final Set<String> supportedABIs = new HashSet<>();
         if(file.isDirectory()){
@@ -189,12 +309,9 @@ public class SampleUtils {
         }else {
             addAbiInfo(apkFilePath,supportedABIs);
         }
-        if (RuntimeUtils.is64bit()) {
-            return supportedABIs.isEmpty() || supportedABIs.contains("arm64-v8a");
-        } else {
-            return supportedABIs.isEmpty() || supportedABIs.contains("armeabi-v7a") || supportedABIs.contains("armeabi");
-        }
+        return supportedABIs;
     }
+
 
     public static int getMinSdkVersion(String filePath,Context context) {
         try {

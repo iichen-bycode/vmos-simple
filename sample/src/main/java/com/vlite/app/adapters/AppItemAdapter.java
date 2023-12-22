@@ -27,6 +27,6 @@ public class AppItemAdapter extends BaseBindingAdapter<AppItem, ItemAppBinding> 
     @Override
     public void onBindViewHolder(@NonNull BindingHolder<ItemAppBinding> holder, AppItem item, int position) {
         GlideUtils.loadFadeSkipCache(holder.binding.ivLogo, item == null ? null : item.getIconUri());
-        holder.binding.tvAppname.setText(item == null ? null : item.getAppName());
+        holder.binding.tvAppName.setText(item == null ? null : item.getAppName());
     }
 }

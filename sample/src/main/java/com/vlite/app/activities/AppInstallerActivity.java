@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -36,7 +37,9 @@ import com.vlite.app.utils.FileSizeFormat;
 import com.vlite.app.utils.UriUtils;
 import com.vlite.app.view.ProgressButton;
 import com.vlite.sdk.VLite;
+import com.vlite.sdk.context.HostContext;
 import com.vlite.sdk.event.BinderEvent;
+import com.vlite.sdk.logger.AppLogger;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.io.FileUtils;
 
@@ -212,11 +215,17 @@ public class AppInstallerActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void loadInstallInfoApi30() {
-        if (Environment.isExternalStorageManager()) {
-            loadInstallInfo();
+        // 有的系统上没这个界面
+        final Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+        final ResolveInfo resolveInfo = getPackageManager().resolveActivity(intent, 0);
+        if (resolveInfo == null) {
+            AppInstallerActivityPermissionsDispatcher.loadInstallInfoWithPermissionCheck(this);
         } else {
-            final Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-            startActivityForResult(intent, REQUEST_CODE_PERMISSION);
+            if (Environment.isExternalStorageManager()) {
+                loadInstallInfo();
+            } else {
+                startActivityForResult(intent, REQUEST_CODE_PERMISSION);
+            }
         }
     }
 
@@ -228,7 +237,7 @@ public class AppInstallerActivity extends AppCompatActivity {
         new AsyncTask<Void, Object, ResultParcel>() {
             @Override
             protected ResultParcel doInBackground(Void... voids) {
-                return VLite.get().installPackage(requestInstallFile.getAbsolutePath());
+                return SampleUtils.installApk(AppInstallerActivity.this, requestInstallFile.getAbsolutePath(), false);
             }
 
             @Override

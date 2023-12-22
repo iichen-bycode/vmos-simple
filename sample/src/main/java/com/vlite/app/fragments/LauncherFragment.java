@@ -374,8 +374,7 @@ public class LauncherFragment extends Fragment {
                         FileUtils.deleteQuietly(packageCache);
                         // 再复制到缓存
                         AssetsUtils.copyTo(assets, assetPath, packageCache);
-
-                        final ResultParcel result = VLite.get().installPackage(packageCache.getAbsolutePath(), new InstallConfig.Builder().setIgnorePackageList(true).build());
+                        final ResultParcel result = SampleUtils.installApk(getContext(),packageCache.getAbsolutePath(),true);
                         if (result.isSucceed()) {
                             AppLogger.i("prepare preset [" + packageName + "] success -> " + packageCache.getAbsolutePath() + " - " + (SystemClock.uptimeMillis() - _start) + "ms");
                         } else {

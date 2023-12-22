@@ -27,4 +27,6 @@
 
     <color name="colorTextShadow">#80000000</color>
 
+    <color name="colorFloatMenu">#1b1e2f</color>
+
 </resources>
