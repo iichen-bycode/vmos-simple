@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
    >
-    <item
-        android:id="@+id/menu_float_menu"
-        android:title="应用内菜单" />
     <group android:id="@+id/menu_group_vm_app">
         <item
             android:title="应用管理">
@@ -79,6 +76,9 @@
         </item>
     </group>
 
+    <item
+        android:id="@+id/menu_float_menu"
+        android:title="应用内菜单" />
 
     <group
         android:id="@+id/menu_group_component"

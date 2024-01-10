@@ -99,12 +99,6 @@ public class MainActivity extends AppCompatActivity {
     private MicroGInstallDialog microGInfoDialog;
     private DeviceFileSelectorDialog deviceFileSelectorDialog;
 
-    static {
-        System.loadLibrary("mytestproject");
-    }
-
-    private static native void hookAndTestOpenat(long bhookPtr);
-
     private final OnReceivedEventListener receivedEventListener = new OnReceivedEventListener() {
         /**
          * 接收到事件
@@ -141,9 +135,6 @@ public class MainActivity extends AppCompatActivity {
         applyConfiguration();
 
         asyncApplyVirtualDeviceInfo();
-
-        // bhook测试代码
-//        hookAndTestOpenat(Native.getBhookApi());
     }
 
     private void bindViews() {

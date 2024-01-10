@@ -22,45 +22,23 @@ import com.vlite.app.utils.ViewUtils;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.application.ApplicationLifecycleDelegate;
 import com.vlite.sdk.context.systemservice.HostActivityManager;
-import com.vlite.sdk.logger.AppLogger;
 import com.vlite.sdk.utils.BitmapUtils;
 
 import java.util.Stack;
 
 public class SampleApplicationLifecycleDelegate implements Application.ActivityLifecycleCallbacks, ApplicationLifecycleDelegate {
+
     private final Stack<Activity> stack = new Stack<>();
 
     @Override
     public void onApplicationCreate(@NonNull Application app) {
         app.registerActivityLifecycleCallbacks(this);
 
-        // 注册虚拟广播 让主进程可以发指令到app进程
-        final String action = "command_" + app.getPackageName();
-        VLite.get().registerBinderBroadcastReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final String commandId = intent.getStringExtra("command_id");
-                handleCommandId(commandId);
-            }
-        }, new IntentFilter(action));
+//        BHookSample.init();
+
+        registerSampleCommandBroadcastReceiver(app);
     }
 
-    @SuppressLint("SourceLockedOrientationActivity")
-    private void handleCommandId(String commandId) {
-        final Activity activity = peekActivity();
-        if (activity == null) {
-            return;
-        }
-        if ("force_portrait".equals(commandId)) {
-            HostActivityManager.get().setRequestedOrientation(activity, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        } else if ("force_landscape".equals(commandId)) {
-            HostActivityManager.get().setRequestedOrientation(activity, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        } else if ("force_pip".equals(commandId)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                activity.enterPictureInPictureMode();
-            }
-        }
-    }
 
     @Override
     public void onActivityCreated(@NonNull Activity activity, @Nullable Bundle savedInstanceState) {
@@ -100,6 +78,39 @@ public class SampleApplicationLifecycleDelegate implements Application.ActivityL
     @Override
     public void onActivityDestroyed(@NonNull Activity activity) {
 
+    }
+
+    /**
+     * 接收来自主进程的指令的示例
+     * @param app
+     */
+    private void registerSampleCommandBroadcastReceiver(@NonNull Application app) {
+        // 注册虚拟广播 让主进程可以发指令到app进程
+        final String action = "command_" + app.getPackageName();
+        VLite.get().registerBinderBroadcastReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String commandId = intent.getStringExtra("command_id");
+                handleCommandId(commandId);
+            }
+        }, new IntentFilter(action));
+    }
+
+    @SuppressLint("SourceLockedOrientationActivity")
+    private void handleCommandId(String commandId) {
+        final Activity activity = peekActivity();
+        if (activity == null) {
+            return;
+        }
+        if ("force_portrait".equals(commandId)) {
+            HostActivityManager.get().setRequestedOrientation(activity, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else if ("force_landscape".equals(commandId)) {
+            HostActivityManager.get().setRequestedOrientation(activity, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        } else if ("force_pip".equals(commandId)) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                activity.enterPictureInPictureMode();
+            }
+        }
     }
 
     /**

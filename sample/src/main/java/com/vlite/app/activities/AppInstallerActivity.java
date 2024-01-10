@@ -37,9 +37,7 @@ import com.vlite.app.utils.FileSizeFormat;
 import com.vlite.app.utils.UriUtils;
 import com.vlite.app.view.ProgressButton;
 import com.vlite.sdk.VLite;
-import com.vlite.sdk.context.HostContext;
 import com.vlite.sdk.event.BinderEvent;
-import com.vlite.sdk.logger.AppLogger;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.io.FileUtils;
 
@@ -187,9 +185,13 @@ public class AppInstallerActivity extends AppCompatActivity {
             // file:///sdcard/Download/amap.apk
             // content://com.xxx.xxx/storage/emulated/0/Download/xxxx.apk
             // content://com.xxx.xxx.file.path.share/file_path/DownloadPrivate/xxxxxx.apk
+            // content://downloads/all_downloads/11
             final String scheme = uri.getScheme();
-            if (("content".equals(scheme) && "media".equals(uri.getAuthority()))
-                    || "file".equals(scheme)
+            final boolean isContentUri = "content".equals(scheme);
+            final boolean isMediaUri = isContentUri && "media".equals(uri.getAuthority());
+            final boolean isFileUri = "file".equals(scheme);
+            final boolean isDownloadsUri = isContentUri && "downloads".equals(uri.getAuthority());
+            if (isMediaUri || isDownloadsUri || isFileUri
                     || TextUtils.isEmpty(origin)) {
                 // content://media file:// 即使是应用内的也可以直接取
                 // 没有来源说明是真机来的 直接获取

@@ -206,7 +206,7 @@ static int open_proxy_auto(const char *pathname, int flags, mode_t modes) {
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_vlite_app_MainActivity_hookAndTestOpenat(JNIEnv *env, jclass clazz, jlong bhook_ptr) {
+Java_com_vlite_app_sample_BHookSample_hookAndTestOpenat(JNIEnv *env, jclass clazz, jlong bhook_ptr) {
     void** bhookFuncs = (void**)bhook_ptr;
     bytehook_get_version = (typeof(bytehook_get_version))bhookFuncs[0];
     bytehook_init = (typeof(bytehook_init))bhookFuncs[1];
