@@ -94,7 +94,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'com.vmos:sample-kit:1.1.0'
+    implementation 'com.vmos:sample-kit:1.1.1'
     // 此依赖是示例程序的统计数据上报 仅用于本示例程序 如果不需要请注释此依赖
     implementation 'com.vmos:vmos-lite-sample:1.0.7'
     implementation "com.github.permissions-dispatcher:permissionsdispatcher:4.9.2"
@@ -129,7 +129,7 @@ dependencies {
             // google play上架时会对 vpn代理有限制，如果不需要运行vpn相关软件，可以去掉这个模块
             exclude group: 'com.vmos', module: 'vmos-lite-extension-vpn'
         }*/
-        compileOnly 'com.vmos:hiddenapi-stub:1.1.0'
+        compileOnly 'com.vmos:hiddenapi-stub:1.1.5'
         debugImplementation'com.vmos:vmos-lite-shell:1.0.2'
     }
 

@@ -2,8 +2,8 @@ package com.vlite.app;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.app.AlarmManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -13,13 +13,10 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
-import android.os.PowerManager;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -42,8 +39,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.lzf.easyfloat.EasyFloat;
 import com.lzf.easyfloat.enums.ShowPattern;
 import com.lzf.easyfloat.enums.SidePattern;
+import com.samplekit.bean.InstalledInfo;
 import com.samplekit.dialog.DeviceFileSelectorDialog;
 import com.samplekit.dialog.DeviceInstalledAppDialog;
+import com.samplekit.utils.GsonUtils;
 import com.vlite.app.adapters.FloatMenuAdapter;
 import com.vlite.app.adapters.ProcessItemAdapter;
 import com.vlite.app.bean.FloatMenuItem;
@@ -68,7 +67,6 @@ import com.vlite.app.sample.SampleLocationStore;
 import com.vlite.app.sample.SampleUtils;
 import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.app.utils.FileSizeFormat;
-import com.vlite.app.utils.RuntimeUtils;
 import com.vlite.app.view.FloatPointView;
 import com.vlite.sdk.LiteConfig;
 import com.vlite.sdk.VLite;
@@ -81,23 +79,22 @@ import com.vlite.sdk.model.DeviceEnvInfo;
 import com.vlite.sdk.model.PackageConfiguration;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
-import com.vlite.sdk.utils.io.FileUtils;
-import com.vlite.sdk.utils.io.FilenameUtils;
-
-import org.zeroturnaround.zip.ZipUtil;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private GoogleAppInfoDialog googleAppInfoDialog;
     private MicroGInstallDialog microGInfoDialog;
     private DeviceFileSelectorDialog deviceFileSelectorDialog;
+    private VmInstalledAppDialog vmInstalledAppDialog;
 
     private final OnReceivedEventListener receivedEventListener = new OnReceivedEventListener() {
         /**
@@ -242,8 +239,6 @@ public class MainActivity extends AppCompatActivity {
                 VLite.get().setConfigurationContext(new ConfigurationContext.Builder()
                         .setPackageBlacklist(new HashSet<>(Arrays.asList("com.android.vending", "com.google.android.gsf", "com.google.android.gms")))
                         .setUseInternalSdcard(false)
-                        // 启用进程预热示例 最多预热2个进程
-                        .setMaxPreheatProcessCount(2)
                         // 自定义io重定向规则示例
                         // 重定向文件 要重定向的文件/重定向的目标路径/是否白名单
                         // 注释掉重定向功能，导致微信语音失效，目前发现/proc/cpuinfo 没有在对应的重定向目录找到对应的文件，手动补上对应的文件后微信语音正常
@@ -378,17 +373,47 @@ public class MainActivity extends AppCompatActivity {
      */
     @SuppressLint("StaticFieldLeak")
     private void showInstalledAppDialog() {
-        VmInstalledAppDialog dialog = new VmInstalledAppDialog("已安装的应用");
-        dialog.setOnClickInstalledItemListener((item, position) -> {
+        if (vmInstalledAppDialog == null) {
+            vmInstalledAppDialog = new VmInstalledAppDialog("已安装的应用");
+        }
+        vmInstalledAppDialog.setOnClickInstalledItemListener((item, position) -> {
+            showInstalledAppMenuDialog(item, position);
+        });
+        vmInstalledAppDialog.show(getSupportFragmentManager());
+    }
+
+    private void showInstalledAppMenuDialog(InstalledInfo item, final int position){
+        final Map<String, DialogInterface.OnClickListener> menus = new HashMap<>();
+        menus.put("卸载应用", (dialog, which) -> {
+            dialog.dismiss();
             SampleUtils.showUninstallAppDialog(this, item.getAppName(), (dialog_, which_) -> {
-                asyncUninstallAppAndRemoveItem(dialog, item.getPackageName(), position);
+                asyncUninstallAppAndRemoveItem(item.getPackageName(), position);
             });
         });
-        dialog.show(getSupportFragmentManager());
+        menus.put("查看信息", (dialog, which) -> {
+            dialog.dismiss();
+            final AlertDialog infoDialog = new AlertDialog.Builder(this)
+                    .setTitle(item.getAppName())
+                    .setMessage(GsonUtils.toPrettyJson(item))
+                    .show();
+            final TextView tv = infoDialog.findViewById(android.R.id.message);
+            tv.setTextIsSelectable(true);
+        });
+        menus.put("安装到真机", (dialog, which) -> {
+            dialog.dismiss();
+            SampleUtils.installApkToHost(this, new File(item.getSourcePath()));
+        });
+        final String[] labels = menus.keySet().toArray(new String[0]);
+        final DialogInterface.OnClickListener[] listeners = menus.values().toArray(new DialogInterface.OnClickListener[0]);
+        new AlertDialog.Builder(this)
+                .setTitle(item.getAppName())
+                .setItems(labels, (dialog, which) -> listeners[which].onClick(dialog, which))
+                .setNegativeButton("关闭", null)
+                .show();
     }
 
     @SuppressLint("StaticFieldLeak")
-    private void asyncUninstallAppAndRemoveItem(VmInstalledAppDialog dialog, String packageName, int position) {
+    private void asyncUninstallAppAndRemoveItem(String packageName, int position) {
 //        Context context = dialog!=null&&dialog.isVisible()?dialog.getContext():MainActivity.this;
         Context context = MainActivity.this;
         new DialogAsyncTask<Void, Void, Boolean>(context) {
@@ -405,7 +430,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(Boolean result) {
                 super.onPostExecute(result);
-                dialog.removeItem(position);
+                if (vmInstalledAppDialog != null) {
+                    vmInstalledAppDialog.removeItem(position);
+                }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }

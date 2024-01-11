@@ -1,6 +1,7 @@
 package com.vlite.app.dialog;
 
 import android.content.pm.PackageInfo;
+import android.view.View;
 
 import androidx.viewbinding.ViewBinding;
 
@@ -35,6 +36,17 @@ public class VmInstalledAppDialog extends InstalledAppDialog {
     protected BaseBindingAdapter<InstalledInfo, ? extends ViewBinding> newRecyclerViewAdapter(List<InstalledInfo> result) {
         mAdapter = new VmInstalledAppAdapter(result);
         return mAdapter;
+    }
+
+    @Override
+    protected void applyInstalledAdapterConfig(BaseBindingAdapter<InstalledInfo, ? extends ViewBinding> installedAdapter) {
+        mAdapter.setOnItemClickListener((view, position) -> {
+            final OnClickInstalledItemListener listener = getOnClickInstalledItemListener();
+            if (listener != null) {
+                listener.onClickInstalledItem(mAdapter.getData().get(position), position);
+            }
+        });
+        mAdapter.setOnItemLongClickListener(null);
     }
 
     @Override
