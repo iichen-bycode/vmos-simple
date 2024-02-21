@@ -162,6 +162,12 @@ public class SampleUtils {
             ResultParcel resultParcel =  VLite.get().installPackage(uri,new InstallConfig.Builder()
                     .setIgnorePackageList(isIgnorePackageList)
                     .setReferrer(referrer)
+                    // 是否禁用dex2oat优化
+                    // .setDisableDex2Oat(false)
+                    // 是否启用移动文件的模式
+                    // .setEnableMoveFileMode(false)
+                    // 是否禁用解压so库
+                    // .setDisableExtractNativeLibs(false)
                     .build());
             if(isNeedDelAfterInstall){
                 // 拷贝obb文件

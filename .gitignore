@@ -22,3 +22,4 @@ vmos-lite-sdk/build
 stub/build
 *.wakatime-project
 ./run
+vmos-lite-apr/build/

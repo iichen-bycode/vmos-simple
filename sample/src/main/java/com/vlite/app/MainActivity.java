@@ -2,6 +2,7 @@ package com.vlite.app;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -150,6 +151,12 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 toolbar.setSubtitleTextAppearance(this, R.style.ToolbarSubTitleStyleNormal);
             }
+            titleTextView.setShadowLayer(1f, 1, 1, Color.GRAY);
+//            final Method getSubtitleTextViewMethod = cls.getDeclaredMethod("getSubtitleTextView");
+//            getSubtitleTextViewMethod.setAccessible(true);
+//            final TextView subtitleTextView = (TextView) getSubtitleTextViewMethod.invoke(toolbar);
+//            if (subtitleTextView != null) subtitleTextView.setShadowLayer(1f, 1, 1, Color.GRAY);
+
             int statusBarHeight = 0;
             int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
             if (resourceId > 0) {

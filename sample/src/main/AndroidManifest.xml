@@ -46,6 +46,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:memtagMode="off"
+        android:hasFragileUserData="true"
         android:allowNativeHeapPointerTagging="false"
         android:theme="@style/Theme_App"
         android:usesCleartextTraffic="true">
