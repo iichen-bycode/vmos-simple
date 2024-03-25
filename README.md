@@ -9,3 +9,5 @@
 artifactory.user=xxx
 artifactory.password=xxx
 ```
+### 环境要求
+- **CMake 3.22.1** - 本工程编译需要 CMake 的 3.22.1 版本，请确保你的 IDE 或开发环境中安装并配置了正确版本的CMake。

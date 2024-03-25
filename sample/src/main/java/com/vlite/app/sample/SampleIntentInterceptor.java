@@ -24,7 +24,7 @@ public class SampleIntentInterceptor extends IntentInterceptor {
         intent.putExtra("package_name", applicationInfo.packageName);
         intent.putExtra("permissions", permissions);
         intent.setPackage(HostContext.getPackageName());
-//        return intent;
+        if (SampleUtils.isHostGranularExternalStoragePermission())  return intent;
         return null;
     }
 

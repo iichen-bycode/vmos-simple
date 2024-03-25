@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionInfo;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 
 import androidx.annotation.Nullable;
@@ -14,6 +16,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.vlite.app.databinding.ActivityRequestPermissionBinding;
+import com.vlite.app.sample.SampleUtils;
 import com.vlite.sdk.VLite;
 
 import java.util.LinkedHashMap;
@@ -99,20 +102,32 @@ public class AppRequestPermissionsActivity extends AppCompatActivity {
                 // 宿主有权限 虚拟权限也有 才算有权限
                 boolean isGranted = ContextCompat.checkSelfPermission(this, mCurrentRequestPermission) == PackageManager.PERMISSION_GRANTED &&
                         VLite.get().checkPermission(mPackageName, mCurrentRequestPermission) == PackageManager.PERMISSION_GRANTED;
-                if (ContextCompat.checkSelfPermission(this, mCurrentRequestPermission) == PackageManager.PERMISSION_GRANTED) {
+                if (checkSelfPermissionCompat(mCurrentRequestPermission)) {
                     // 宿主有权限 就显示自定义的权限框
                     final PackageManager packageManager = getPackageManager();
                     final PermissionInfo permissionInfo = packageManager.getPermissionInfo(mCurrentRequestPermission, 0);
                     final String permissionDisplayName = permissionInfo.loadLabel(packageManager).toString();
                     mBinding.tvPermissionMessage.setText(String.format("是否允许“%s”%s权限？", appName, permissionDisplayName));
                 } else {
-                    // 宿主没权限 直接申请宿主权限
-                    ActivityCompat.requestPermissions(this, new String[]{mCurrentRequestPermission}, REQUEST_CODE);
+                    if (SampleUtils.isHostGranularWriteExternalStoragePermission(mCurrentRequestPermission)){
+                        final Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                        startActivityForResult(intent,0);
+                    }else {
+                        // 宿主没权限 直接申请宿主权限
+                        ActivityCompat.requestPermissions(this, new String[]{mCurrentRequestPermission}, REQUEST_CODE);
+                    }
                 }
             }
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean checkSelfPermissionCompat(String permission){
+        if (SampleUtils.isHostGranularWriteExternalStoragePermission(permission)){
+            return Environment.isExternalStorageManager();
+        }
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED;
     }
 
 }

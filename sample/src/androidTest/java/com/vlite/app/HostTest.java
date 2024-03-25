@@ -7,7 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 
-import com.vlite.sdk.client.hook.unittest.LiteInstrumentStarter;
+import com.vlite.sdk.VLite;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +18,6 @@ public class HostTest {
     public void test() {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         Bundle args = InstrumentationRegistry.getArguments();
-        LiteInstrumentStarter liteInstrumentStarter = new LiteInstrumentStarter(instrumentation, args);
-        liteInstrumentStarter.start();
+        VLite.get().startUnitTest(instrumentation, args);
     }
 }

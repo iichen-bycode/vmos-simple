@@ -2,7 +2,6 @@ package com.vlite.app;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -51,6 +50,7 @@ import com.vlite.app.bean.ProcessInfo;
 import com.vlite.app.bean.RunningInfo;
 import com.vlite.app.databinding.ActivityMainBinding;
 import com.vlite.app.databinding.DialogInputLocationBinding;
+import com.vlite.app.databinding.DialogInstallConfigBinding;
 import com.vlite.app.databinding.DialogProcessListBinding;
 import com.vlite.app.databinding.LayoutNavigationHeaderBinding;
 import com.vlite.app.databinding.LayoutWindowMenuBinding;
@@ -66,6 +66,7 @@ import com.vlite.app.sample.SampleDeviceUtils;
 import com.vlite.app.sample.SampleIntentInterceptor;
 import com.vlite.app.sample.SampleLocationStore;
 import com.vlite.app.sample.SampleUtils;
+import com.vlite.app.service.AppKeepAliveService;
 import com.vlite.app.utils.DialogAsyncTask;
 import com.vlite.app.utils.FileSizeFormat;
 import com.vlite.app.view.FloatPointView;
@@ -77,6 +78,7 @@ import com.vlite.sdk.event.OnReceivedEventListener;
 import com.vlite.sdk.logger.AppLogger;
 import com.vlite.sdk.model.ConfigurationContext;
 import com.vlite.sdk.model.DeviceEnvInfo;
+import com.vlite.sdk.model.InstallConfig;
 import com.vlite.sdk.model.PackageConfiguration;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
@@ -133,12 +135,17 @@ public class MainActivity extends AppCompatActivity {
         applyConfiguration();
 
         asyncApplyVirtualDeviceInfo();
+
+        //用于解决服务进程意外死亡
+        Intent intent = new Intent(this, AppKeepAliveService.class);
+        startService(intent);
     }
 
     private void bindViews() {
         try {
             final Toolbar toolbar = binding.toolbar;
             setSupportActionBar(toolbar);
+            setSubtitle(BuildConfig.APPLICATION_ID);
             final String title = String.format("%s %s (%d) %s", getString(R.string.app_name), com.vlite.app.BuildConfig.VERSION_NAME, com.vlite.app.BuildConfig.VERSION_CODE, com.vlite.app.BuildConfig.BUILD_TYPE);
             setTitle(title);
             final Class<? extends View> cls = toolbar.getClass();
@@ -152,10 +159,10 @@ public class MainActivity extends AppCompatActivity {
                 toolbar.setSubtitleTextAppearance(this, R.style.ToolbarSubTitleStyleNormal);
             }
             titleTextView.setShadowLayer(1f, 1, 1, Color.GRAY);
-//            final Method getSubtitleTextViewMethod = cls.getDeclaredMethod("getSubtitleTextView");
-//            getSubtitleTextViewMethod.setAccessible(true);
-//            final TextView subtitleTextView = (TextView) getSubtitleTextViewMethod.invoke(toolbar);
-//            if (subtitleTextView != null) subtitleTextView.setShadowLayer(1f, 1, 1, Color.GRAY);
+            final Method getSubTitleTextViewMethod = cls.getDeclaredMethod("getSubtitleTextView");
+            getSubTitleTextViewMethod.setAccessible(true);
+            final TextView subTitleTextView = (TextView) getSubTitleTextViewMethod.invoke(toolbar);
+            if (subTitleTextView != null) subTitleTextView.setShadowLayer(1f, 1, 1, Color.GRAY);
 
             int statusBarHeight = 0;
             int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
@@ -293,6 +300,10 @@ public class MainActivity extends AppCompatActivity {
                 showFloatMenu();
                 break;
             // 应用管理
+            case R.id.menu_vm_install_config:
+                // 修改安装配置
+                showUpdateInstallConfigDialog();
+                break;
             case R.id.menu_vm_install_app:
                 // 安装应用
                 showChooseApkFragment();
@@ -347,6 +358,33 @@ public class MainActivity extends AppCompatActivity {
         }
         binding.drawerLayout.closeDrawer(GravityCompat.END);
         return true;
+    }
+
+    private void showUpdateInstallConfigDialog(){
+        final InstallConfig config = SampleUtils.getGlobalInstallConfig();
+        final DialogInstallConfigBinding dialogBinding = DialogInstallConfigBinding.inflate(LayoutInflater.from(this));
+        dialogBinding.cbmDisableDex2oat.setChecked(config.isDisableDex2Oat());
+        dialogBinding.cbmDisableDex2oat.setEnabled(!config.isLazyDex2Oat());
+        dialogBinding.cbmLazyDex2oat.setChecked(config.isLazyDex2Oat());
+        dialogBinding.cbmLazyDex2oat.setEnabled(!config.isDisableDex2Oat());
+        dialogBinding.cbmMoveFile.setChecked(config.isEnableMoveFileMode());
+        final InstallConfig.Builder builder = config.newBuilder();
+        dialogBinding.cbmDisableDex2oat.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            builder.setDisableDex2Oat(isChecked);
+            dialogBinding.cbmLazyDex2oat.setEnabled(!isChecked);
+        });
+        dialogBinding.cbmLazyDex2oat.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            builder.setLazyDex2Oat(isChecked);
+            dialogBinding.cbmDisableDex2oat.setEnabled(!isChecked);
+        });
+        dialogBinding.cbmMoveFile.setOnCheckedChangeListener((buttonView, isChecked) -> builder.setEnableMoveFileMode(isChecked));
+        new AlertDialog.Builder(this)
+                .setView(dialogBinding.getRoot())
+                .setTitle("修改安装配置")
+                .setNegativeButton("取消", null)
+                .setPositiveButton("确定", (dialog, which) -> {
+                    SampleUtils.setGlobalInstallConfig(builder.build());
+                }).show();
     }
 
     /**

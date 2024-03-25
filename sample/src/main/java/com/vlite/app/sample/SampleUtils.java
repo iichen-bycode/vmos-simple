@@ -1,5 +1,6 @@
 package com.vlite.app.sample;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -52,6 +53,8 @@ public class SampleUtils {
     public static final String GMS_PACKAGE_NAME = "com.google.android.gms";
     public static final String GSF_PACKAGE_NAME = "com.google.android.gsf";
     public static final String PLUGIN_PACKAGE_NAME = BuildConfig.SERVER_PACKAGE_NAME+".arm32";
+
+    private static InstallConfig mGlobalInstallConfig = new InstallConfig.Builder().build();
 
     public static String eventToPrintString(Bundle bundle) {
         final String[] sortOrder = {BinderEvent.KEY_EVENT_ID, BinderEvent.KEY_PACKAGE_NAME, BinderEvent.KEY_PACKAGE_NAME_ARRAY,
@@ -153,21 +156,21 @@ public class SampleUtils {
             //如果是apks和xapk文件，先解压，再安装
             if (uri.endsWith(".apks") || uri.endsWith(".xapk")) {
                 isNeedDelAfterInstall = true;
+
                 uri = unZipFile(context,uri);
             }
             //安装前，检查apk是否支持当前系统
             checkApkEnable(context,uri);
             String referrer = getReferrer(context,uri);
             //安装应用，传入apk路径 或者 apks/xapk解压后的文件夹路径
-            ResultParcel resultParcel =  VLite.get().installPackage(uri,new InstallConfig.Builder()
+            ResultParcel resultParcel =  VLite.get().installPackage(uri, mGlobalInstallConfig.newBuilder()
+                    // 是否忽略黑白名单限制
                     .setIgnorePackageList(isIgnorePackageList)
-                    .setReferrer(referrer)
                     // 是否禁用dex2oat优化
                     // .setDisableDex2Oat(false)
-                    // 是否启用移动文件的模式
+                    // 是否启用剪切源文件的模式
                     // .setEnableMoveFileMode(false)
-                    // 是否禁用解压so库
-                    // .setDisableExtractNativeLibs(false)
+                    .setReferrer(referrer)
                     .build());
             if(isNeedDelAfterInstall){
                 // 拷贝obb文件
@@ -365,6 +368,27 @@ public class SampleUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    public static InstallConfig getGlobalInstallConfig() {
+        return mGlobalInstallConfig;
+    }
+
+    public static void setGlobalInstallConfig(InstallConfig newConfig) {
+        if (newConfig == null) return;
+        mGlobalInstallConfig = newConfig;
+    }
+
+    public static boolean isHostGranularExternalStoragePermission(){
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU  && HostContext.getTargetSdkVersion() >= Build.VERSION_CODES.TIRAMISU;
+    }
+
+    public static boolean isHostGranularWriteExternalStoragePermission(String permission){
+        if (isHostGranularExternalStoragePermission() && Manifest.permission.WRITE_EXTERNAL_STORAGE.equals(permission)){
+            return true;
+        }
+        return false;
     }
 
 }

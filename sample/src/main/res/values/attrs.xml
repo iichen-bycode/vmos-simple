@@ -8,4 +8,10 @@
         </attr>
         <attr name="plain" format="boolean"/>
     </declare-styleable>
+
+    <declare-styleable name="CheckBoxMenuView">
+        <attr name="android:title"/>
+        <attr name="android:subtitle"/>
+        <attr name="android:checked"/>
+    </declare-styleable>
 </resources>

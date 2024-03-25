@@ -34,8 +34,6 @@ public class SampleApplicationLifecycleDelegate implements Application.ActivityL
     public void onApplicationCreate(@NonNull Application app) {
         app.registerActivityLifecycleCallbacks(this);
 
-//        BHookSample.init();
-
         registerSampleCommandBroadcastReceiver(app);
     }
 

@@ -23,7 +23,7 @@
     <color name="colorPrimaryTranslucent10">#1a13BF69</color>
     <color name="colorPrimaryTranslucent50">#8013BF69</color>
     <color name="colorMainBackground">#f4eff5</color>
-    <color name="colorToolbarSubTitle">#B3FFFFFF</color>
+    <color name="colorToolbarSubTitle">#f0f0f0</color>
 
     <color name="colorTextShadow">#80000000</color>
 
