@@ -56,10 +56,5 @@ public class SampleApplication extends MultiDexApplication {
         if (HostContext.isMainProcess()) {
             MMKV.initialize(this);
         }
-
-
-        VLite.get().setLoggerEnabled(true, true);
-
-        // after
     }
 }
