@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.vlite.app.view.CheckBoxMenuView
+        android:id="@+id/cbm_disable_dex2oat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:subtitle="禁用dex2oat优化可以提升安装效率，但可能导致应用运行效率下降"
+        android:title="禁用dex2oat优化"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.vlite.app.view.CheckBoxMenuView
+        android:id="@+id/cbm_lazy_dex2oat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:subtitle="延迟dex2oat优化可以提升安装效率，但可能导致应用前期运行效率下降"
+        android:title="延迟dex2oat优化"
+        app:layout_constraintTop_toBottomOf="@id/cbm_disable_dex2oat" />
+
+    <com.vlite.app.view.CheckBoxMenuView
+        android:id="@+id/cbm_move_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:subtitle="启用后安装时将会剪切源文件"
+        android:title="剪切源文件"
+        app:layout_constraintTop_toBottomOf="@id/cbm_lazy_dex2oat" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
