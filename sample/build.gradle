@@ -111,7 +111,7 @@ dependencies {
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 
     //异常捕获库的引入
-    implementation 'com.iqiyi.xcrash:xcrash-android-lib:3.0.0'
+    implementation 'com.vmos:xcrash-android-lib:3.1.1'
 //    implementation 'com.vmos:vmos-trace:1.0.0'
     //文件压缩/解压
     implementation 'org.zeroturnaround:zt-zip:1.16'

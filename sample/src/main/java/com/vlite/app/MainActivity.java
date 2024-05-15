@@ -253,6 +253,8 @@ public class MainActivity extends AppCompatActivity {
                 VLite.get().setConfigurationContext(new ConfigurationContext.Builder()
                         .setPackageBlacklist(new HashSet<>(Arrays.asList("com.android.vending", "com.google.android.gsf", "com.google.android.gms")))
                         .setUseInternalSdcard(false)
+                        //开启支持画中画功能
+                        .setForcePictureInPicture(true)
                         // 自定义io重定向规则示例
                         // 重定向文件 要重定向的文件/重定向的目标路径/是否白名单
                         // 注释掉重定向功能，导致微信语音失效，目前发现/proc/cpuinfo 没有在对应的重定向目录找到对应的文件，手动补上对应的文件后微信语音正常
@@ -712,7 +714,8 @@ public class MainActivity extends AppCompatActivity {
         if (BinderEvent.TYPE_ACTIVITY_LIFECYCLE == type) {
             final String packageName = extras.getString(BinderEvent.KEY_BASE_INFO_PACKAGE_NAME);
             final String methodName = extras.getString(BinderEvent.KEY_METHOD_NAME);
-            SampleAppManager.onActivityLifecycle(packageName, methodName);
+            final String className = extras.getString(BinderEvent.KEY_CLASS_NAME);
+            SampleAppManager.onActivityLifecycle(packageName, methodName, className);
         }
     }
 
@@ -747,8 +750,9 @@ public class MainActivity extends AppCompatActivity {
         items.add(new FloatMenuItem(R.drawable.ic_portrait, "强制竖屏", v -> {
             sendForceOrientationCommand(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, "force_portrait");
         }));
-        /*items.add(new FloatMenuItem(R.mipmap.ic_launcher, "画中画", v -> {
-            final Intent intent = new Intent("command_" + "com.vlite.unittest");
+        items.add(new FloatMenuItem(R.drawable.ic_pip, "画中画", v -> {
+            final String foregroundPackageName = SampleAppManager.getForegroundPackageName();
+            Intent intent = new Intent("command_" + foregroundPackageName);
             intent.putExtra("command_id", "force_pip");
             VLite.get().sendBinderBroadcast(intent);
             final ConfigurationContext configurationContext = VLite.get().getConfigurationContext();
@@ -756,7 +760,7 @@ public class MainActivity extends AppCompatActivity {
                     .setForcePictureInPicture(true)
                     .build();
             VLite.get().setConfigurationContext(newConfigurationContext);
-        }));*/
+        }));
         menuBinding.rvMenuList.setLayoutManager(new GridLayoutManager(view.getContext(), Math.min(4, items.size())));
         final FloatMenuAdapter floatMenuAdapter = new FloatMenuAdapter(items);
         floatMenuAdapter.setOnItemClickListener((itemView, position) -> {

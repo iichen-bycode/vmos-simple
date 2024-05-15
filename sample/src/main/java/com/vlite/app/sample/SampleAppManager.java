@@ -1,5 +1,7 @@
 package com.vlite.app.sample;
 
+import android.content.ComponentName;
+
 import com.vlite.sdk.event.BinderEvent;
 import com.vlite.sdk.logger.AppLogger;
 
@@ -7,22 +9,22 @@ import java.util.Stack;
 
 public class SampleAppManager {
     private static final Stack<String> stack = new Stack<>();
-    private static String foregroundPackageName ;
+    private static ComponentName foregroundComponentName;
 
-    public static void onActivityLifecycle(String packageName, String methodName) {
-//        AppLogger.d("onActivityLifecycle packageName = " + packageName+", methodName = "+methodName);
+    public static void onActivityLifecycle(String packageName, String methodName, String className) {
+        final ComponentName lifecycleComponentName = new ComponentName(packageName, className);
         if (BinderEvent.VALUE_METHOD_NAME_ON_START.equals(methodName)) {
-            foregroundPackageName = packageName;
-            AppLogger.d("onActivityLifecycle foregroundPackageName = " + foregroundPackageName);
+            foregroundComponentName = lifecycleComponentName;
+            AppLogger.d("onActivityLifecycle foregroundPackageName = " + foregroundComponentName);
         } else if (BinderEvent.VALUE_METHOD_NAME_ON_STOP.equals(methodName)) {
-            if (foregroundPackageName.equals(packageName)) {
-                foregroundPackageName = null;
+            if (lifecycleComponentName.equals(foregroundComponentName)) {
+                foregroundComponentName = null;
                 AppLogger.d("onActivityLifecycle foregroundPackageName = null");
             }
         }
     }
 
     public static String getForegroundPackageName() {
-        return foregroundPackageName;
+        return foregroundComponentName == null ? null : foregroundComponentName.getPackageName();
     }
 }

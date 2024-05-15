@@ -2,6 +2,7 @@ package com.vlite.app.sample;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -26,4 +27,11 @@ public class SampleActivityCallbackDelegate extends ActivityCallbackDelegate {
         final String bundle = SampleUtils.eventToPrintString(extras);
         Log.d(TAG,"onActivityResult : requestCode: "+requestCode + " resultCode "+resultCode +"  extras: " +bundle +" activity: "+activity);
     }
+
+    @Override
+    public boolean onConfigurationChanged(Activity activity, Configuration configuration) {
+        Activity fontActivity = ActivityLifecycleManager.getInstance().peekActivity();
+        return fontActivity == activity;
+    }
+
 }

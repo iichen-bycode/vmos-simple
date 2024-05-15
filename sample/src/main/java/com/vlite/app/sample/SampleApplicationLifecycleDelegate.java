@@ -35,6 +35,7 @@ public class SampleApplicationLifecycleDelegate implements Application.ActivityL
         app.registerActivityLifecycleCallbacks(this);
 
         registerSampleCommandBroadcastReceiver(app);
+        ActivityLifecycleManager.getInstance().register(app);
     }
 
 
@@ -105,9 +106,7 @@ public class SampleApplicationLifecycleDelegate implements Application.ActivityL
         } else if ("force_landscape".equals(commandId)) {
             HostActivityManager.get().setRequestedOrientation(activity, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         } else if ("force_pip".equals(commandId)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                activity.enterPictureInPictureMode();
-            }
+            HostActivityManager.get().enterPictureInPictureMode(activity);
         }
     }
 
