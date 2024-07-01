@@ -129,7 +129,7 @@ dependencies {
             // google play上架时会对 vpn代理有限制，如果不需要运行vpn相关软件，可以去掉这个模块
             exclude group: 'com.vmos', module: 'vmos-lite-extension-vpn'
         }*/
-        compileOnly 'com.vmos:hiddenapi-stub:1.1.5'
+        compileOnly 'com.vmos:hiddenapi-stub:1.1.6'
         debugImplementation'com.vmos:vmos-lite-shell:1.0.2'
     }
 
