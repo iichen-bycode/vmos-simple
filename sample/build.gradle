@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId rootProject.ext.applicationId
         minSdk rootProject.ext.minSdkVersion
-        targetSdk  getProject().hasProperty("sampleTargetSdkVersion")?rootProject.ext.sampleTargetSdkVersion:rootProject.ext.targetSdkVersion
+        targetSdk getProject().hasProperty("sampleTargetSdkVersion") ? rootProject.ext.sampleTargetSdkVersion : rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -44,12 +44,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    externalNativeBuild {
-        cmake {
-            path file('src/main/cpp/CMakeLists.txt')
-            version '3.22.1'
-        }
-    }
+//    externalNativeBuild {
+//        cmake {
+//            path file('src/main/cpp/CMakeLists.txt')
+//            version '3.22.1'
+//        }
+//    }
     buildFeatures {
         viewBinding true
     }
@@ -58,33 +58,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    packagingOptions {
-        jniLibs {
-            useLegacyPackaging = true
-        }
-    }
-
-    flavorDimensions "abi"
-    productFlavors {
-
-        universal {
-            isDefault true
-            dimension 'abi'
-            ndk {
-                abiFilters "arm64-v8a", "armeabi-v7a"
-            }
-        }
-
-        arm32 {
-            applicationIdSuffix ".arm32"
-            dimension 'abi'
-            ndk {
-                abiFilters "armeabi-v7a"
-            }
-        }
-
-    }
+//
+//    packagingOptions {
+//        jniLibs {
+//            useLegacyPackaging = true
+//        }
+//    }}
 }
 
 dependencies {
@@ -95,8 +74,6 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'com.vmos:sample-kit:1.1.1'
-    // 此依赖是示例程序的统计数据上报 仅用于本示例程序 如果不需要请注释此依赖
-    implementation 'com.vmos:vmos-lite-sample:1.0.7'
     implementation "com.github.permissions-dispatcher:permissionsdispatcher:4.9.2"
     annotationProcessor "com.github.permissions-dispatcher:permissionsdispatcher-processor:4.9.2"
     implementation 'com.github.bumptech.glide:glide:4.13.2'
@@ -119,20 +96,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
 
-    //vmos lite
-    if (localProject) {
-        implementation project(path: ':vmos-lite-sdk')
-        compileOnly project(path: ':hiddenapi-stub')
-        debugImplementation project(path: ':vmos-lite-shell')
-    } else {
-        implementation ("com.vmos:vmos-lite-sdk:${rootProject.ext.versionName}")/*{
-            // google play上架时会对 vpn代理有限制，如果不需要运行vpn相关软件，可以去掉这个模块
-            exclude group: 'com.vmos', module: 'vmos-lite-extension-vpn'
-        }*/
-        compileOnly 'com.vmos:hiddenapi-stub:1.1.6'
-        debugImplementation'com.vmos:vmos-lite-shell:1.0.2'
-    }
-
+    implementation("com.vmos:vmos-lite-sdk:${rootProject.ext.versionName}")
 }
 
 // 是否加入预置apk

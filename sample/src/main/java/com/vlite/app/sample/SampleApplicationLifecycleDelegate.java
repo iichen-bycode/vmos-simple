@@ -3,6 +3,7 @@ package com.vlite.app.sample;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
+import android.app.PictureInPictureParams;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Rational;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -106,7 +108,10 @@ public class SampleApplicationLifecycleDelegate implements Application.ActivityL
         } else if ("force_landscape".equals(commandId)) {
             HostActivityManager.get().setRequestedOrientation(activity, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         } else if ("force_pip".equals(commandId)) {
-            HostActivityManager.get().enterPictureInPictureMode(activity);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                PictureInPictureParams params = new PictureInPictureParams.Builder().setAspectRatio(new Rational(9,16)).build();
+                HostActivityManager.get().enterPictureInPictureMode(activity,params);
+            }
         }
     }
 

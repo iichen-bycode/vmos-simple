@@ -5,15 +5,9 @@ import android.content.Context;
 import androidx.multidex.MultiDexApplication;
 
 import com.tencent.mmkv.MMKV;
-import com.vlite.app.sample.ActivityManagerProxySample;
-import com.vlite.app.sample.PackageManagerProxySample;
-import com.vlite.app.sample.SampleLocationManagerService;
-import com.vlite.app.sample.TelephoneManagerProxySample;
-import com.vlite.app.sample.WifiManagerProxySample;
 import com.vlite.sdk.LiteConfig;
 import com.vlite.sdk.VLite;
 import com.vlite.sdk.context.HostContext;
-import com.vlite.sdk.context.ServiceContext;
 import com.vlite.sdk.logger.AppLogger;
 
 public class SampleApplication extends MultiDexApplication {
