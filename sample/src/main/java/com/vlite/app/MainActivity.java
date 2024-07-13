@@ -36,13 +36,15 @@ import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.gmspace.sdk.callback.GmSpaceActivityCallbackDelegate;
+import com.gmspace.sdk.callback.GmSpaceApplicationLifecycleDelegate;
 import com.lzf.easyfloat.EasyFloat;
 import com.lzf.easyfloat.enums.ShowPattern;
 import com.lzf.easyfloat.enums.SidePattern;
+
 import com.samplekit.bean.InstalledInfo;
 import com.samplekit.dialog.DeviceFileSelectorDialog;
 import com.samplekit.dialog.DeviceInstalledAppDialog;
-import com.samplekit.utils.GsonUtils;
 import com.vlite.app.adapters.FloatMenuAdapter;
 import com.vlite.app.adapters.ProcessItemAdapter;
 import com.vlite.app.bean.FloatMenuItem;
@@ -82,6 +84,7 @@ import com.vlite.sdk.model.InstallConfig;
 import com.vlite.sdk.model.PackageConfiguration;
 import com.vlite.sdk.model.ResultParcel;
 import com.vlite.sdk.utils.BitmapUtils;
+import com.vlite.sdk.utils.GsonUtils;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -265,8 +268,10 @@ public class MainActivity extends AppCompatActivity {
                 VLite.get().setPackageConfiguration(new PackageConfiguration.Builder()
                         .setEnableTraceAnr(true)
                         .setEnableTraceNativeCrash(true)
-                        .setApplicationLifecycleDelegate(SampleApplicationLifecycleDelegate.class)
-                        .setActivityCallbackDelegate(SampleActivityCallbackDelegate.class)
+//                        .setApplicationLifecycleDelegate(SampleApplicationLifecycleDelegate.class)
+                        .setApplicationLifecycleDelegate(GmSpaceApplicationLifecycleDelegate.class)
+                        .setActivityCallbackDelegate(GmSpaceActivityCallbackDelegate.class)
+//                        .setActivityCallbackDelegate(SampleActivityCallbackDelegate.class)
                         .setIntentInterceptor(SampleIntentInterceptor.class)
                         .build());
                 return null;

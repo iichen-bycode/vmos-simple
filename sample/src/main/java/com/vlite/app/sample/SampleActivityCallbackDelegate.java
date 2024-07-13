@@ -23,9 +23,6 @@ public class SampleActivityCallbackDelegate extends ActivityCallbackDelegate {
 
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-        final Bundle extras = data == null ? null : data.getExtras();
-        final String bundle = SampleUtils.eventToPrintString(extras);
-        Log.d(TAG,"onActivityResult : requestCode: "+requestCode + " resultCode "+resultCode +"  extras: " +bundle +" activity: "+activity);
     }
 
     @Override

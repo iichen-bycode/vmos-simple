@@ -25,19 +25,7 @@ public class SampleApplication extends MultiDexApplication {
                 // 指定服务端包名
                 .setServerPackageName(BuildConfig.SERVER_PACKAGE_NAME)
                 // 日志配置
-                .setLoggerConfig(new AppLogger.Config(BuildConfig.DEBUG)
-                        // 日志增加mars支持
-//                        .addLogger(new MarsLogger(this))
-                )
-                // 注册自定义服务
-//                .registerCustomService(ServiceContext.LOCATION_SERVICE, SampleLocationManagerService.class)
-                // 设置系统服务客户端代理
-//                .registerSystemServiceClientProxy(ServiceContext.PACKAGE_SERVICE, PackageManagerProxySample.class)
-//                .registerSystemServiceClientProxy(ServiceContext.ACTIVITY_SERVICE, ActivityManagerProxySample.class)
-                    // 代理 TelephoneManagerService 的getAllCellInfo和 getCellLocation方法，
-                    // 代理WifiManagerService的getScanResults方法，可以使手机无法使用基站定位和wifi定位。
-//                .registerSystemServiceClientProxy(ServiceContext.TELEPHONY_SERVICE, TelephoneManagerProxySample.class)
-//                .registerSystemServiceClientProxy(ServiceContext.WIFI_SERVICE, WifiManagerProxySample.class)
+                .setLoggerConfig(new AppLogger.Config(BuildConfig.DEBUG))
                 .build());
     }
 

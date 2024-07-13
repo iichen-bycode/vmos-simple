@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.widget.EditText;
@@ -91,7 +92,11 @@ public class FloatPointView extends FloatBaseView {
             protected Void doInBackground(Void... voids) {
                 final MotionEvent obtain = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
                         action, x, y, 0);
-                VLite.get().getInstrumentation().sendPointerSync(obtain);
+                try {
+                    VLite.get().getInstrumentation().sendPointerSync(obtain);
+                }catch (SecurityException securityException) {
+                    Log.d("iichen", securityException.getMessage());
+                }
                 return null;
             }
         }.executeOnExecutor(mSingleThread);
