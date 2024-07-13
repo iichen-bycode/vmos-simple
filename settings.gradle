@@ -32,6 +32,7 @@ localProperties.load(new File(rootDir, 'local.properties').newDataInputStream())
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
+        maven { url 'mavenLocal'}
         google()
         mavenCentral()
         maven { url 'https://maven.aliyun.com/repository/public' }

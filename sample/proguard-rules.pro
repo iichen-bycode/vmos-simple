@@ -84,4 +84,4 @@
 -keep class com.github.promeg.pinyinhelper.** { *; }
 -keep class com.bumptech.glide.** { *; }
 
--keep class com.vlite.app.bean.** { *; }
+-keep class com.gmspace.app.bean.** { *; }

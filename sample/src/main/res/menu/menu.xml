@@ -6,9 +6,6 @@
             android:title="应用管理">
             <menu>
                 <item
-                    android:id="@+id/menu_vm_install_config"
-                    android:title="修改安装配置" />
-                <item
                     android:id="@+id/menu_vm_install_app"
                     android:title="安装应用" />
                 <item
@@ -94,9 +91,4 @@
             </menu>
         </item>
     </group>
-
-    <item
-        android:visible="false"
-        android:id="@+id/menu_vm_device"
-        android:title="虚拟设备信息"/>
 </menu>

@@ -1,0 +1,10 @@
+# vmos license file
+expiryDate=2024-7-20
+productId=vmos_lite_sdk
+package=com.gmspace.app
+licensee=杭州数爆科技有限公司
+customerID=VMSDK10119
+contact=倪总
+contactEmail=hi@xinstall.com
+publicKey=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJtUEGPgkmNaii5HUrsQWnxH1kThuUw0CPhLbasH+CzNyn6zuzK3Y49hOtnn9Q2zmh/ylpuM9k4DKjSbYVBTTo8CAwEAAQ==
+licenseKey=54776165426f742f67584e734a7445367264654866387574662b457556534e75446974506c65454767532f4867335461726b546634797862706b546c657336427a61716a384d6b434e4e37494d4331766d72517268673d3d

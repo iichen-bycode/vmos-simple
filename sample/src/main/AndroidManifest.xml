@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.vlite.app"
-    >
+    xmlns:tools="http://schemas.android.com/tools">
 <!--  android:sharedUserId="com.vlite.shared"-->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -127,7 +126,7 @@
         </activity>
 
         <service android:name=".service.AppKeepAliveService"
-            android:process="@string/vlite_server_process_name"/>
+            android:process=":GmSpace"/>
     </application>
 
 </manifest>

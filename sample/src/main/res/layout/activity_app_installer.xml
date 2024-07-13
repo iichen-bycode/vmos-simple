@@ -113,7 +113,7 @@
         app:layout_constraintBottom_toTopOf="@+id/btn_install_confirm"
         app:layout_constraintTop_toBottomOf="@id/tv_app_permissions" />
 
-    <com.vlite.app.view.ProgressButton
+    <com.gmspace.app.view.ProgressButton
         android:id="@+id/btn_install_confirm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

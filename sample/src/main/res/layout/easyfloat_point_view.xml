@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.vlite.app.view.FloatPointView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.gmspace.app.view.FloatPointView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:id="@+id/float_view"
     android:layout_height="wrap_content">
 
-</com.vlite.app.view.FloatPointView>
+</com.gmspace.app.view.FloatPointView>

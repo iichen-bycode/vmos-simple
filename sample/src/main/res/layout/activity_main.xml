@@ -27,7 +27,7 @@
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/content_fragment"
-            android:name="com.vlite.app.fragments.LauncherFragment"
+            android:name="com.gmspace.app.fragments.LauncherFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
