@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name" translatable="false">VMOS Lite</string>
+    <string name="app_name" translatable="false">盖米双开空间</string>
 <!--    <string name="config_icon_mask" translatable="false">M0,20 q0,-20 20,-20 L80,0 q20,0 20,20 L100,80 q0,20 -20,20 L20,100 q-20,0 -20,-20 Z</string>-->
-    <string name="title_installer">VMOS Lite 安装器</string>
+    <string name="title_installer">GMSpace 安装器</string>
     <string name="message_loading_start">正在启动</string>
     <string name="label_install_version_info">版本：</string>
     <string name="label_install_size_Info" translatable="false">%s\u0020|\u0020</string>

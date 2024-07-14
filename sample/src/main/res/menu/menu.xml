@@ -19,20 +19,20 @@
         </item>
     </group>
 
-    <group
-        android:id="@+id/menu_group_google">
-        <item
-            android:title="谷歌服务">
-            <menu>
-                <item
-                    android:id="@+id/menu_google_app_install"
-                    android:title="安装谷歌三件套" />
-                <item
-                    android:id="@+id/menu_microg_install"
-                    android:title="安装microG" />
-            </menu>
-        </item>
-    </group>
+<!--    <group-->
+<!--        android:id="@+id/menu_group_google">-->
+<!--        <item-->
+<!--            android:title="谷歌服务">-->
+<!--            <menu>-->
+<!--                <item-->
+<!--                    android:id="@+id/menu_google_app_install"-->
+<!--                    android:title="安装谷歌三件套" />-->
+<!--                <item-->
+<!--                    android:id="@+id/menu_microg_install"-->
+<!--                    android:title="安装microG" />-->
+<!--            </menu>-->
+<!--        </item>-->
+<!--    </group>-->
 
 
     <group
@@ -53,32 +53,21 @@
         </item>
     </group>
 
-    <group
-        android:id="@+id/menu_group_ui">
-        <item
-            android:title="事件">
-            <menu>
-                <item
-                    android:id="@+id/menu_touch"
-                    android:title="发送触摸事件" />
-            </menu>
-        </item>
-    </group>
-    <group
-        android:id="@+id/menu_group_location">
-        <item
-            android:title="定位">
-            <menu>
-                <item
-                    android:id="@+id/menu_vm_location"
-                    android:title="设置位置信息" />
-            </menu>
-        </item>
-    </group>
+<!--    <group-->
+<!--        android:id="@+id/menu_group_ui">-->
+<!--        <item-->
+<!--            android:title="事件">-->
+<!--            <menu>-->
+<!--                <item-->
+<!--                    android:id="@+id/menu_touch"-->
+<!--                    android:title="发送触摸事件" />-->
+<!--            </menu>-->
+<!--        </item>-->
+<!--    </group>-->
 
-    <item
-        android:id="@+id/menu_float_menu"
-        android:title="应用内菜单" />
+<!--    <item-->
+<!--        android:id="@+id/menu_float_menu"-->
+<!--        android:title="应用内菜单" />-->
 
     <group
         android:id="@+id/menu_group_component"

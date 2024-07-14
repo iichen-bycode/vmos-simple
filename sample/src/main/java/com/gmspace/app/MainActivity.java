@@ -13,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Debug;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,6 +37,7 @@ import com.gmspace.sdk.GmSpaceConfigContextBuilder;
 import com.gmspace.sdk.GmSpaceEvent;
 import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.GmSpacePackageBuilder;
+import com.gmspace.sdk.GmSpacePackageConfiguration;
 import com.gmspace.sdk.GmSpaceResultParcel;
 import com.gmspace.sdk.OnGmSpaceReceivedEventListener;
 import com.gmspace.sdk.proxy.GmSpaceBitmapUtils;
@@ -178,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 gmSpacePackageBuilder.setGmSpaceEnableTraceNativeCrash(true);
 //                gmSpacePackageBuilder.setGmSpaceIntentInterceptor(SampleIntentInterceptor.class);
                 GmSpaceObject.setGmSpacePackageConfiguration(gmSpacePackageBuilder);
+                Log.d("iichen",">>>>>>>接入setGmSpacePackageConfiguration");
                 return null;
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -206,27 +209,27 @@ public class MainActivity extends AppCompatActivity {
             case R.id.menu:
                 toggleDrawer();
                 return true;
-            case R.id.menu_float_menu:
-                // 悬浮菜单
-                showFloatMenu();
-                break;
+//            case R.id.menu_float_menu:
+//                // 悬浮菜单
+//                showFloatMenu();
+//                break;
             // 应用管理
             case R.id.menu_vm_install_app:
                 // 安装应用
                 showChooseApkFragment();
                 break;
-            case R.id.menu_google_app_install:
-                if (googleAppInfoDialog == null) {
-                    googleAppInfoDialog = new GoogleAppInfoDialog(this);
-                }
-                googleAppInfoDialog.show();
-                break;
-            case R.id.menu_microg_install:
-                if (microGInfoDialog == null) {
-                    microGInfoDialog = new MicroGInstallDialog(this);
-                }
-                microGInfoDialog.show();
-                break;
+//            case R.id.menu_google_app_install:
+//                if (googleAppInfoDialog == null) {
+//                    googleAppInfoDialog = new GoogleAppInfoDialog(this);
+//                }
+//                googleAppInfoDialog.show();
+//                break;
+//            case R.id.menu_microg_install:
+//                if (microGInfoDialog == null) {
+//                    microGInfoDialog = new MicroGInstallDialog(this);
+//                }
+//                microGInfoDialog.show();
+//                break;
             case R.id.menu_vm_install_app_from_device:
                 // 导入真机应用
                 showDeviceInstalledAppDialog();
@@ -248,9 +251,9 @@ public class MainActivity extends AppCompatActivity {
                 showKillAppDialog();
                 break;
             // 触摸事件
-            case R.id.menu_touch:
-                showSendMotionEventDialog();
-                break;
+//            case R.id.menu_touch:
+//                showSendMotionEventDialog();
+//                break;
             // 发送广播
             case R.id.menu_send_broadcast:
                 sendBroadcastToApp();
@@ -547,6 +550,10 @@ public class MainActivity extends AppCompatActivity {
             final String methodName = extras.getString(GmSpaceEvent.KEY_METHOD_NAME);
             final String className = extras.getString(GmSpaceEvent.KEY_CLASS_NAME);
             SampleAppManager.onActivityLifecycle(packageName, methodName, className);
+
+        } else if(type == GmSpaceEvent.TYPE_APPLICATION_CREATE) {
+            GmSpacePackageConfiguration configuration = GmSpaceObject.getPackageConfiguration();
+            Log.d("iichen",">>>>>>>>handleReceivedEvent getGmSpaceApplicationLifecycleDelegateClassName " + configuration.getGmSpaceApplicationLifecycleDelegateClassName());
         }
     }
 
