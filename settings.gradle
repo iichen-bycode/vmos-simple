@@ -1,26 +1,16 @@
 pluginManagement {
-    Properties localProperties = new Properties()
-    localProperties.load(new File(rootDir, 'local.properties').newDataInputStream())
-    def artifactoryUsername = localProperties.getProperty("artifactory.user")
-    def artifactoryPassword = localProperties.getProperty("artifactory.password")
-    if (!artifactoryUsername && !artifactoryPassword){
-        throw new GradleException("""
-请在local.properties配置Maven用户名和密码
-artifactory.user=
-artifactory.password=\n
-""")
-    }
-
     repositories {
         gradlePluginPortal()
         google()
+        mavenLocal()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
         maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
         maven {
             url "https://maven.vmos.pro"
             credentials {
-                username artifactoryUsername
-                password artifactoryPassword
+                username = 'hangzhoushubao'
+                password = 'j1p4sm5A'
             }
         }
     }
@@ -30,18 +20,20 @@ Properties localProperties = new Properties()
 localProperties.load(new File(rootDir, 'local.properties').newDataInputStream())
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         maven { url 'mavenLocal'}
         google()
+        mavenLocal()
         mavenCentral()
         maven { url 'https://maven.aliyun.com/repository/public' }
         maven { url 'https://jitpack.io' }
         maven {
             url "https://maven.vmos.pro"
             credentials {
-                username localProperties.getProperty("artifactory.user")
-                password localProperties.getProperty("artifactory.password")
+                username = 'hangzhoushubao'
+                password = 'j1p4sm5A'
             }
         }
     }
