@@ -17,7 +17,7 @@ public class AppKeepAliveService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        ServiceUtils.startForeground(this, "AppKeepAlive", "AppKeepAlive", R.mipmap.ic_launcher, "服务正在运行");
+        ServiceUtils.startForeground(this, "AppKeepAlive", "AppKeepAlive", R.mipmap.icon_launcher, "服务正在运行");
         return super.onStartCommand(intent, flags, startId);
     }
 

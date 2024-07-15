@@ -15,13 +15,6 @@ public class SampleApplication extends MultiDexApplication {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-
-        // 使用默认配置执行准备工作
-//        VLite.attachBaseContext(base, BuildConfig.DEBUG);
-
-        // 使用自定义配置执行准备工作
-        // 以下配置供参考 请根据实际场景进行配置
-
         GmSpaceObject.attachBaseContext(base);
     }
 
@@ -38,7 +31,6 @@ public class SampleApplication extends MultiDexApplication {
             @Override
             public void initResult(boolean b, int i, String s) {
                 Log.i("csc","初始化有没有成功"+b);
-
             }
         });
     }

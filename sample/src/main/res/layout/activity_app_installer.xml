@@ -22,7 +22,7 @@
             app:shapeAppearanceOverlay="@style/RoundedImage"
             app:strokeColor="@color/colorDividerDark"
             app:strokeWidth="1dp"
-            tools:src="@mipmap/ic_launcher" />
+            tools:src="@mipmap/icon_launcher" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"

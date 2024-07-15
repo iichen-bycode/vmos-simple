@@ -15,7 +15,7 @@
         android:layout_height="40dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:src="@mipmap/ic_launcher" />
+        tools:src="@mipmap/icon_launcher" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
