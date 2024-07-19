@@ -173,12 +173,15 @@ public class MainActivity extends AppCompatActivity {
                 GmSpaceConfigContextBuilder builder = new GmSpaceConfigContextBuilder();
                 builder.setGmSpaceForcePictureInPicture(true);
                 builder.setGmSpaceUseInternalSdcard(true);
+                builder.setGmSpaceIsolatedHost(true);
+                builder.setGmSpaceKeepPackageSessionCache(true);
                 GmSpaceObject.setGmSpaceConfigurationContext(builder);
 
                 GmSpacePackageBuilder gmSpacePackageBuilder = new GmSpacePackageBuilder();
                 gmSpacePackageBuilder.setGmSpaceEnableTraceAnr(true);
+                gmSpacePackageBuilder.setGmSpaceAllowCreateShortcut(true);
+                gmSpacePackageBuilder.setGmSpaceAllowCreateDynamicShortcut(true);
                 gmSpacePackageBuilder.setGmSpaceEnableTraceNativeCrash(true);
-//                gmSpacePackageBuilder.setGmSpaceIntentInterceptor(SampleIntentInterceptor.class);
                 GmSpaceObject.setGmSpacePackageConfiguration(gmSpacePackageBuilder);
                 Log.d("iichen",">>>>>>>接入setGmSpacePackageConfiguration");
                 return null;

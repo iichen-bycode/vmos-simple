@@ -20,10 +20,25 @@ android {
         buildConfigField "String", "SERVER_PACKAGE_NAME", "\"${rootProject.ext.applicationId}\""
     }
 
+    signingConfigs {
+        release {
+            keyAlias 'gmspace'
+            keyPassword '123456'
+            storeFile file('./gmspace.jks')
+            storePassword '123456'
+        }
+        debug {
+            keyAlias 'gmspace'
+            keyPassword '123456'
+            storeFile file('./gmspace.jks')
+            storePassword '123456'
+        }
+    }
     buildTypes {
         release {
-            minifyEnabled false
+            signingConfig signingConfigs.release
             zipAlignEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -75,5 +90,8 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
-    implementation 'com.sample.app:sdk:1.0.0'
+
+    implementation("com.vmos:vmos-lite-sdk:1.1.4-beta03")
+    compileOnly 'com.vmos:hiddenapi-stub:1.1.5'
+    implementation files("libs/sdk-1.0.0.aar")
 }
