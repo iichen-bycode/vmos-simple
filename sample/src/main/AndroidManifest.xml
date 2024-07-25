@@ -49,6 +49,7 @@
         android:theme="@style/Theme_App"
         android:usesCleartextTraffic="true">
         <activity
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize"
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme_App_Main">
@@ -60,6 +61,9 @@
         </activity>
         <activity
             android:name=".activities.LaunchAppActivity"
+            android:excludeFromRecents="true"
+            android:configChanges="orientation|keyboardHidden"
+            android:launchMode="singleTop"
             android:theme="@style/Theme_App_LaunchApp" />
         <activity
             android:name=".activities.AppDetailActivity"
@@ -94,16 +98,6 @@
             </intent-filter>
         </activity>
 
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-
         <!-- 用于处理Zoom使用Google等登录后，点击打开zoom的DeepLink链接-->
         <activity
             android:exported="true"
@@ -126,6 +120,17 @@
 
         <service android:name=".service.AppKeepAliveService"
             android:process=":GmSpace"/>
+
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="gmspace.record.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

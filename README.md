@@ -548,4 +548,51 @@ private static String unZipFile(Context context, String uri) throws Exception {
     return unZipFilePath;
 }
 ```
+### 游戏录屏需要  
+```
+/**
+    gmspace.record.provider 不可变
+    
+    开放：
+            <external-cache-path
+                name="external_cache"
+                path="." />
+**/
+     <provider
+        android:name="androidx.core.content.FileProvider"
+        android:authorities="gmspace.record.provider"
+        android:exported="false"
+        android:grantUriPermissions="true">
+        <meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/file_paths" />
+    </provider>
+```
 
+```agsl
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <files-path
+        name="files"
+        path="." />
+    <cache-path
+        name="cache"
+        path="." />
+    <external-path
+        name="external_storage"
+        path="." />
+    <external-files-path
+        name="external_files"
+        path="." />
+    <external-cache-path
+        name="external_cache"
+        path="." />
+    <external-media-path
+        name="external_media"
+        path="." />
+    <root-path
+        name="root"
+        path="." />
+</paths>
+
+```

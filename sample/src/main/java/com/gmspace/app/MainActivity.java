@@ -42,9 +42,6 @@ import com.gmspace.sdk.GmSpaceResultParcel;
 import com.gmspace.sdk.OnGmSpaceReceivedEventListener;
 import com.gmspace.sdk.proxy.GmSpaceBitmapUtils;
 import com.gmspace.sdk.proxy.GmSpaceUtils;
-import com.lzf.easyfloat.EasyFloat;
-import com.lzf.easyfloat.enums.ShowPattern;
-import com.lzf.easyfloat.enums.SidePattern;
 
 import com.samplekit.bean.InstalledInfo;
 import com.samplekit.dialog.DeviceFileSelectorDialog;
@@ -69,7 +66,6 @@ import com.gmspace.app.sample.SampleUtils;
 import com.gmspace.app.service.AppKeepAliveService;
 import com.gmspace.app.utils.DialogAsyncTask;
 import com.gmspace.app.utils.FileSizeFormat;
-import com.gmspace.app.view.FloatPointView;
 
 
 import java.io.File;
@@ -543,10 +539,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void showSendMotionEventDialog() {
-        FloatPointView.show(this);
-    }
-
     private void handleReceivedEvent(int type, Bundle extras) {
         if (GmSpaceEvent.TYPE_ACTIVITY_LIFECYCLE == type) {
             final String packageName = extras.getString(GmSpaceEvent.KEY_BASE_INFO_PACKAGE_NAME);
@@ -558,48 +550,6 @@ public class MainActivity extends AppCompatActivity {
             GmSpacePackageConfiguration configuration = GmSpaceObject.getPackageConfiguration();
             Log.d("iichen",">>>>>>>>handleReceivedEvent getGmSpaceApplicationLifecycleDelegateClassName " + configuration.getGmSpaceApplicationLifecycleDelegateClassName());
         }
-    }
-
-    private void showFloatMenu() {
-        int offsetY = (int) (getResources().getDisplayMetrics().heightPixels * 0.2f);
-        EasyFloat.with(this)
-                .setShowPattern(ShowPattern.ALL_TIME)
-                .setSidePattern(SidePattern.LEFT)
-                .setTag("menu")
-                .setDragEnable(true)
-                .setGravity(Gravity.START | Gravity.TOP, 0, offsetY)
-                .setLayout(R.layout.layout_window_menu, view -> {
-                    handleInflateWindowView(view.findViewById(R.id.layout_window_content));
-                })
-                .show();
-    }
-
-    private void handleInflateWindowView(View view) {
-        final LayoutWindowMenuBinding menuBinding = LayoutWindowMenuBinding.bind(view);
-        menuBinding.layoutClickMenu.setOnClickListener(v -> {
-            menuBinding.layoutMenuContent.setVisibility(View.VISIBLE);
-            menuBinding.layoutClickMenu.setVisibility(View.GONE);
-        });
-        menuBinding.ivClose.setOnClickListener(v -> {
-            menuBinding.layoutClickMenu.setVisibility(View.VISIBLE);
-            menuBinding.layoutMenuContent.setVisibility(View.GONE);
-        });
-        final List<FloatMenuItem> items = new ArrayList<>();
-        items.add(new FloatMenuItem(R.drawable.ic_landscape, "强制横屏", v -> {
-
-        }));
-        items.add(new FloatMenuItem(R.drawable.ic_portrait, "强制竖屏", v -> {
-
-        }));
-        items.add(new FloatMenuItem(R.drawable.ic_pip, "画中画", v -> {
-
-        }));
-        menuBinding.rvMenuList.setLayoutManager(new GridLayoutManager(view.getContext(), Math.min(4, items.size())));
-        final FloatMenuAdapter floatMenuAdapter = new FloatMenuAdapter(items);
-        floatMenuAdapter.setOnItemClickListener((itemView, position) -> {
-            items.get(position).getClickListener().onClick(itemView);
-        });
-        menuBinding.rvMenuList.setAdapter(floatMenuAdapter);
     }
 
     private void setSubtitle(CharSequence subtitle) {

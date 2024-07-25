@@ -1,8 +1,7 @@
-import org.json.JSONObject
-
 plugins {
     id 'com.android.application'
     id 'vmos-build'
+    id 'org.jetbrains.kotlin.android'
 }
 
 android {
@@ -37,8 +36,12 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            zipAlignEnabled true
-            minifyEnabled false
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.release
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -55,6 +58,9 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '17'
     }
 //
 //    packagingOptions {
@@ -78,12 +84,10 @@ dependencies {
     implementation 'com.tencent:mmkv:1.2.15'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'androidx.palette:palette:1.0.0'
-    implementation 'com.github.princekin-f:EasyFloat:2.0.4'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 
     //文件压缩/解压
     implementation 'org.zeroturnaround:zt-zip:1.16'
