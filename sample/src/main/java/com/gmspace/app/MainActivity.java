@@ -2,14 +2,17 @@ package com.gmspace.app;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Debug;
@@ -23,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -33,6 +37,7 @@ import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.gmspace.app.bean.AppItemEnhance;
 import com.gmspace.sdk.GmSpaceConfigContextBuilder;
 import com.gmspace.sdk.GmSpaceEvent;
 import com.gmspace.sdk.GmSpaceObject;
@@ -46,6 +51,7 @@ import com.lzf.easyfloat.EasyFloat;
 import com.lzf.easyfloat.enums.ShowPattern;
 import com.lzf.easyfloat.enums.SidePattern;
 
+import com.samplekit.bean.AppItem;
 import com.samplekit.bean.InstalledInfo;
 import com.samplekit.dialog.DeviceFileSelectorDialog;
 import com.samplekit.dialog.DeviceInstalledAppDialog;
@@ -70,6 +76,8 @@ import com.gmspace.app.service.AppKeepAliveService;
 import com.gmspace.app.utils.DialogAsyncTask;
 import com.gmspace.app.utils.FileSizeFormat;
 import com.gmspace.app.view.FloatPointView;
+import com.tencent.mmkv.MMKV;
+import com.vlite.sdk.context.HostContext;
 
 
 import java.io.File;
@@ -183,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
                 gmSpacePackageBuilder.setGmSpaceAllowCreateDynamicShortcut(true);
                 gmSpacePackageBuilder.setGmSpaceEnableTraceNativeCrash(true);
                 GmSpaceObject.setGmSpacePackageConfiguration(gmSpacePackageBuilder);
-                Log.d("iichen",">>>>>>>接入setGmSpacePackageConfiguration");
+                Log.d("iichen", ">>>>>>>接入setGmSpacePackageConfiguration");
                 return null;
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -306,7 +314,7 @@ public class MainActivity extends AppCompatActivity {
         vmInstalledAppDialog.show(getSupportFragmentManager());
     }
 
-    private void showInstalledAppMenuDialog(InstalledInfo item, final int position){
+    private void showInstalledAppMenuDialog(InstalledInfo item, final int position) {
         final Map<String, DialogInterface.OnClickListener> menus = new HashMap<>();
         menus.put("卸载应用", (dialog, which) -> {
             dialog.dismiss();
@@ -387,22 +395,62 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected GmSpaceResultParcel doInBackground(String... uris) {
                 String uri = uris[0];
-                return SampleUtils.installApk(MainActivity.this,uri,false);
+                return SampleUtils.installApk(MainActivity.this, uri, false);
             }
+
             @Override
             protected void onPostExecute(GmSpaceResultParcel result) {
                 super.onPostExecute(result);
                 if (result.isSucceed()) {
                     setSubtitle("应用安装成功 " + (result.getData() == null ? "" : result.getData().getString(GmSpaceEvent.KEY_PACKAGE_NAME)));
                 } else {
+                    Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>安装失败 " + result.getMessage());
+                    test(src.getAbsolutePath());
                     setSubtitle("应用安装失败 " + result.getMessage());
                 }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, src.getAbsolutePath());
     }
 
+    private void test(String absolutePath) {
+        if(isAppInstalled("com.gmspace.sdk")) {
+            Intent intent = new Intent();
+            intent.putExtra("mPath", absolutePath);
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setComponent(new ComponentName("com.gmspace.sdk", "com.gmspace.ext.PluginInstallActivity"));
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivityForResult(intent, 0x0001);
+        } else {
+            Toast.makeText(this,"请先安装32位插件",Toast.LENGTH_SHORT).show();
+        }
+    }
 
+    public boolean isAppInstalled(String packageName) {
+        PackageManager pm = getPackageManager();
+        try {
+            pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 0x0001 && resultCode == 0x0002 && data != null) {
+            String json = data.getStringExtra("mAppItem");
+            Uri uri = data.getData();
+            AppItemEnhance mAppItem = GsonUtils.toObject(json,AppItemEnhance.class);
+            if (mAppItem != null && uri != null) {
+                getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                final Fragment fragment = getSupportFragmentManager().findFragmentById(binding.contentFragment.getId());
+                if (fragment instanceof LauncherFragment) {
+                    ((LauncherFragment) fragment).notify32AppInstall(mAppItem);
+                }
+            }
+        }
+    }
 
     /**
      * 运行中的进程信息
@@ -554,9 +602,9 @@ public class MainActivity extends AppCompatActivity {
             final String className = extras.getString(GmSpaceEvent.KEY_CLASS_NAME);
             SampleAppManager.onActivityLifecycle(packageName, methodName, className);
 
-        } else if(type == GmSpaceEvent.TYPE_APPLICATION_CREATE) {
+        } else if (type == GmSpaceEvent.TYPE_APPLICATION_CREATE) {
             GmSpacePackageConfiguration configuration = GmSpaceObject.getPackageConfiguration();
-            Log.d("iichen",">>>>>>>>handleReceivedEvent getGmSpaceApplicationLifecycleDelegateClassName " + configuration.getGmSpaceApplicationLifecycleDelegateClassName());
+            Log.d("iichen", ">>>>>>>>handleReceivedEvent getGmSpaceApplicationLifecycleDelegateClassName " + configuration.getGmSpaceApplicationLifecycleDelegateClassName());
         }
     }
 

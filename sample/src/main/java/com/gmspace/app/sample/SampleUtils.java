@@ -14,11 +14,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 
 import com.gmspace.app.BuildConfig;
+import com.gmspace.app.bean.AppItemEnhance;
 import com.gmspace.sdk.GmSpaceEvent;
 import com.gmspace.sdk.GmSpaceInstallConfig;
 import com.gmspace.sdk.GmSpaceObject;
@@ -53,7 +55,7 @@ public class SampleUtils {
     public static final String GP_PACKAGE_NAME = "com.android.vending";
     public static final String GMS_PACKAGE_NAME = "com.google.android.gms";
     public static final String GSF_PACKAGE_NAME = "com.google.android.gsf";
-    public static final String PLUGIN_PACKAGE_NAME = BuildConfig.SERVER_PACKAGE_NAME+".arm32";
+    public static final String PLUGIN_PACKAGE_NAME = "com.gmspace.sdk";
 
     private static GmSpaceInstallConfig mGlobalInstallConfig = new GmSpaceInstallConfig();
 
@@ -102,10 +104,10 @@ public class SampleUtils {
         return builder.toString();
     }
 
-    public static AppItem newAppItem(PackageManager pm, PackageInfo pkg) {
+    public static AppItemEnhance newAppItem(PackageManager pm, PackageInfo pkg) {
         final ActivityInfo launchIntent = GmSpaceUtils.getLaunchActivityInfoForPackage(pkg.packageName);
         if (launchIntent != null) {
-            final AppItem it = new AppItem();
+            final AppItemEnhance it = new AppItemEnhance();
             it.setVersionCode(pkg.versionCode);
             it.setVersionName(pkg.versionName);
             it.setPackageName(pkg.packageName);
@@ -150,6 +152,7 @@ public class SampleUtils {
 
 
     public static GmSpaceResultParcel installApk(Context context, String uri, boolean isIgnorePackageList){
+        Log.d("iichen",">>>>>>>>>>>>>>>>安装apk路径 " + uri);
         try {
             boolean isNeedDelAfterInstall = false;
             //GmSpaceUtils.installPackage 接口支持传入apk文件路径和文件夹路径
