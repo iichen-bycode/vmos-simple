@@ -46,6 +46,7 @@ import com.gmspace.sdk.GmSpacePackageConfiguration;
 import com.gmspace.sdk.GmSpaceResultParcel;
 import com.gmspace.sdk.OnGmSpaceReceivedEventListener;
 import com.gmspace.sdk.proxy.GmSpaceBitmapUtils;
+import com.gmspace.sdk.proxy.GmSpaceHostContext;
 import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.lzf.easyfloat.EasyFloat;
 import com.lzf.easyfloat.enums.ShowPattern;
@@ -81,6 +82,11 @@ import com.vlite.sdk.context.HostContext;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -444,6 +450,31 @@ public class MainActivity extends AppCompatActivity {
             AppItemEnhance mAppItem = GsonUtils.toObject(json,AppItemEnhance.class);
             if (mAppItem != null && uri != null) {
                 getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                try (InputStream inputStream = getContentResolver().openInputStream(uri)) {
+                    File outputFile = new File(GmSpaceHostContext.getContext().getCacheDir()+ File.separator + "icon_cache_v2",mAppItem.getAppName()+".png");
+                    if (inputStream != null) {
+                        try (OutputStream outputStream = new FileOutputStream(outputFile)) {
+                            byte[] buffer = new byte[1024];
+                            int length;
+                            long totalBytes = 0;
+                            while ((length = inputStream.read(buffer)) > 0) {
+                                outputStream.write(buffer, 0, length);
+                                totalBytes += length;
+                            }
+                            outputStream.flush();
+                            Log.d("iichen","File copied, total bytes: " + totalBytes);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            Log.d("iichen","Error writing file: " + e.getMessage());
+                        }
+                    } else {
+                        Log.d("iichen","Input stream is null");
+                    }
+                    mAppItem.setIconUri(outputFile.getAbsolutePath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 final Fragment fragment = getSupportFragmentManager().findFragmentById(binding.contentFragment.getId());
                 if (fragment instanceof LauncherFragment) {
                     ((LauncherFragment) fragment).notify32AppInstall(mAppItem);
