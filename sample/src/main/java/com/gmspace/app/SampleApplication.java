@@ -33,5 +33,7 @@ public class SampleApplication extends MultiDexApplication {
                 Log.i("csc","初始化有没有成功"+b);
             }
         });
+
+        MMKV.initialize(this);
     }
 }
