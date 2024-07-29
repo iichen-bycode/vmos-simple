@@ -1,6 +1,7 @@
 package com.gmspace.app.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,11 +31,11 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.gmspace.sdk.GmSpaceEvent;
+import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.GmSpaceResultParcel;
+import com.gmspace.sdk.model.AppItemEnhance;
 import com.gmspace.sdk.proxy.GmSpaceFileUtils;
-import com.gmspace.sdk.proxy.GmSpaceHostContext;
 import com.gmspace.sdk.proxy.GmSpaceUtils;
-import com.samplekit.bean.AppItem;
 import com.gmspace.app.R;
 import com.gmspace.app.activities.AppDetailActivity;
 import com.gmspace.app.activities.LaunchAppActivity;
@@ -87,18 +88,16 @@ public class LauncherFragment extends Fragment {
     }
 
     private void handleComponentSettingChangeEvent(Bundle extras) {
-        String packageName = extras.getString(GmSpaceEvent.KEY_PACKAGE_NAME);
-        if (TextUtils.isEmpty(packageName)) {
+        AppItemEnhance appItemEnhance = extras.getParcelable(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_INFO);
+        if (appItemEnhance == null) {
             return;
         }
         int index = -1;
-        final List<AppItem> data = adapter.getData();
+        final List<AppItemEnhance> data = adapter.getData();
         for (int i = 0; i < data.size(); i++) {
-            final AppItem item = data.get(i);
-            if (TextUtils.equals(packageName, item.getPackageName())) {
-                final PackageInfo pkg = GmSpaceUtils.getPackageInfo(packageName, 0);
-                final AppItem newItem = SampleUtils.newAppItem(GmSpaceHostContext.getContext().getPackageManager(), pkg);
-                item.setIconUri(newItem.getIconUri());
+            final AppItemEnhance item = data.get(i);
+            if (TextUtils.equals(appItemEnhance.getPackageName(), item.getPackageName())) {
+                item.setIconUri(appItemEnhance.getIconUri());
                 index = i;
                 break;
             }
@@ -110,15 +109,15 @@ public class LauncherFragment extends Fragment {
         binding.refreshLayout.setColorSchemeResources(R.color.colorPrimary);
         adapter = new AppItemAdapter(new ArrayList<>());
         adapter.setOnItemClickListener((view, position) -> {
-            final AppItem it = adapter.getData().get(position);
+            final AppItemEnhance it = adapter.getData().get(position);
             if (it != null) {
                 launchApp(it);
             }
         });
         adapter.setOnItemLongClickListener((view, position) -> {
-            final AppItem it = adapter.getData().get(position);
+            final AppItemEnhance it = adapter.getData().get(position);
             if (it != null) {
-                showAppOptionsDialog(it.getPackageName(), it.getAppName());
+                showAppOptionsDialog(it);
             }
         });
         Resources res = requireContext().getResources();
@@ -144,7 +143,6 @@ public class LauncherFragment extends Fragment {
         }else if (GmSpaceEvent.TYPE_COMPONENT_SETTING_CHANGE == type){
             //组件状态变化
             handleComponentSettingChangeEvent(extras);
-
         }
     }
 
@@ -155,7 +153,7 @@ public class LauncherFragment extends Fragment {
      */
     @SuppressLint("StaticFieldLeak")
     private void loadInstalledApps(Context context) {
-        new AsyncTask<Void, String, List<AppItem>>() {
+        new AsyncTask<Void, String, List<AppItemEnhance>>() {
             private long start = SystemClock.uptimeMillis();
 
             @Override
@@ -164,7 +162,7 @@ public class LauncherFragment extends Fragment {
             }
 
             @Override
-            protected List<AppItem> doInBackground(Void... voids) {
+            protected List<AppItemEnhance> doInBackground(Void... voids) {
                 publishProgress("正在加载");
                 requestInstallPresetApp(packageName -> {
                     publishProgress("正在安装 " + packageName);
@@ -172,20 +170,11 @@ public class LauncherFragment extends Fragment {
                 publishProgress("正在加载应用列表");
 
                 start = SystemClock.uptimeMillis();
-                final PackageManager pm = context.getPackageManager();
-                final List<PackageInfo> packages = GmSpaceUtils.getInstalledPackages(0);
-                final ArrayList<AppItem> items = new ArrayList<>();
-                for (PackageInfo pkg : packages) {
-                    final AppItem item = SampleUtils.newAppItem(pm, pkg);
-                    if (item != null){
-                        items.add(item);
-                    }
-                }
-                return items;
+                return GmSpaceObject.getInstalledCompatiblePackages();
             }
 
             @Override
-            protected void onPostExecute(List<AppItem> result) {
+            protected void onPostExecute(List<AppItemEnhance> result) {
                 binding.refreshLayout.setRefreshing(false);
                 adapter.setData(result);
                 adapter.notifyDataSetChanged();
@@ -201,28 +190,28 @@ public class LauncherFragment extends Fragment {
      */
     @SuppressLint("StaticFieldLeak")
 //    @NeedsPermission({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE})
-    public void launchApp(AppItem item) {
+    public void launchApp(AppItemEnhance item) {
         startActivity(LaunchAppActivity.getIntent(item));
     }
 
-    private void showAppOptionsDialog(String packageName, String appName) {
+    private void showAppOptionsDialog(AppItemEnhance appItemEnhance) {
         final Map<String, DialogInterface.OnClickListener> items = new HashMap<>();
         items.put("应用详情", (dialog, which) -> {
             final Intent intent = new Intent(requireContext(), AppDetailActivity.class);
-            intent.putExtra("app_name", appName);
-            intent.putExtra("package_name", packageName);
+            intent.putExtra("app_name", appItemEnhance.getAppName());
+            intent.putExtra("package_name", appItemEnhance.getPackageName());
             startActivity(intent);
         });
         items.put("卸载", (dialog, which) -> {
-            SampleUtils.showUninstallAppDialog(getContext(), appName, (dialog_, which_) -> {
+            SampleUtils.showUninstallAppDialog(getContext(), appItemEnhance.getAppName(), (dialog_, which_) -> {
                 dialog_.dismiss();
-                asyncUninstallApp(getContext(), packageName);
+                asyncUninstallApp(getContext(), appItemEnhance);
             });
         });
         final String[] labels = items.keySet().toArray(new String[0]);
         final DialogInterface.OnClickListener[] values = items.values().toArray(new DialogInterface.OnClickListener[0]);
         new AlertDialog.Builder(requireContext())
-                .setTitle(appName)
+                .setTitle(appItemEnhance.getAppName())
                 .setItems(labels, (dialog, which) -> {
                     values[which].onClick(dialog, which);
                     dialog.dismiss();
@@ -232,7 +221,8 @@ public class LauncherFragment extends Fragment {
     }
 
     @SuppressLint("StaticFieldLeak")
-    public static void asyncUninstallApp(Context context, String packageName) {
+    public void asyncUninstallApp(Context context, AppItemEnhance appItemEnhance) {
+        Activity activity = this.getActivity();
         new DialogAsyncTask<Void, Void, Boolean>(context) {
             @Override
             protected void onPreExecute() {
@@ -241,7 +231,7 @@ public class LauncherFragment extends Fragment {
 
             @Override
             protected Boolean doInBackground(Void... voids) {
-                return GmSpaceUtils.uninstallPackage(packageName);
+                return GmSpaceObject.uninstallCompatiblePackage(activity,appItemEnhance);
             }
 
             @Override
@@ -259,38 +249,22 @@ public class LauncherFragment extends Fragment {
      */
     @SuppressLint("StaticFieldLeak")
     private void handlePackageInstalledEvent(Bundle extras) {
-        final String packageName = extras.getString(GmSpaceEvent.KEY_PACKAGE_NAME);
-        final boolean isOverride = extras.getBoolean(GmSpaceEvent.KEY_IS_OVERRIDE);
-        if (!isOverride) {
-            new AsyncTask<Void, Void, AppItem>() {
-
-                @Override
-                protected AppItem doInBackground(Void... voids) {
-                    final PackageManager pm = requireContext().getPackageManager();
-                    final PackageInfo packageInfo = GmSpaceUtils.getPackageInfo(packageName, 0);
-                    return SampleUtils.newAppItem(pm, packageInfo);
-                }
-
-                @Override
-                protected void onPostExecute(AppItem result) {
-                    if (result != null) {
-                        synchronized (adapter.getData()) {
-                            boolean contains = false;
-                            for (int i = 0; i < adapter.getData().size(); i++) {
-                                final AppItem it = adapter.getData().get(i);
-                                if (packageName.equals(it.getPackageName())) {
-                                    contains = true;
-                                    break;
-                                }
-                            }
-                            if (!contains) {
-                                adapter.getData().add(result);
-                                adapter.notifyDataSetChanged();
-                            }
-                        }
+        AppItemEnhance appItemEnhance = extras.getParcelable(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_INFO);
+        if (appItemEnhance!= null && !appItemEnhance.isOverride()) {
+            synchronized (adapter.getData()) {
+                boolean contains = false;
+                for (int i = 0; i < adapter.getData().size(); i++) {
+                    final AppItemEnhance it = adapter.getData().get(i);
+                    if (appItemEnhance.getPackageName().equals(it.getPackageName())) {
+                        contains = true;
+                        break;
                     }
                 }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                if (!contains) {
+                    adapter.getData().add(appItemEnhance);
+                    adapter.notifyDataSetChanged();
+                }
+            }
         }
     }
 
@@ -302,18 +276,20 @@ public class LauncherFragment extends Fragment {
     @SuppressLint("StaticFieldLeak")
     private void handlePackageUninstalledEvent(Bundle extras) {
         final String packageName = extras.getString(GmSpaceEvent.KEY_PACKAGE_NAME);
-        synchronized (adapter.getData()) {
-            int removeIndex = -1;
-            for (int i = 0; i < adapter.getData().size(); i++) {
-                final AppItem it = adapter.getData().get(i);
-                if (packageName.equals(it.getPackageName())) {
-                    removeIndex = i;
-                    break;
+        if(packageName != null) {
+            synchronized (adapter.getData()) {
+                int removeIndex = -1;
+                for (int i = 0; i < adapter.getData().size(); i++) {
+                    final AppItemEnhance it = adapter.getData().get(i);
+                    if (packageName.equals(it.getPackageName())) {
+                        removeIndex = i;
+                        break;
+                    }
                 }
-            }
-            if (removeIndex >= 0) {
-                adapter.getData().remove(removeIndex);
-                adapter.notifyDataSetChanged();
+                if (removeIndex >= 0) {
+                    adapter.getData().remove(removeIndex);
+                    adapter.notifyDataSetChanged();
+                }
             }
         }
     }

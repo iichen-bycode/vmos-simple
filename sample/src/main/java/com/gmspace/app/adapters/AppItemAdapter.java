@@ -5,16 +5,16 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
+import com.gmspace.sdk.model.AppItemEnhance;
 import com.samplekit.adapters.BaseBindingAdapter;
-import com.samplekit.bean.AppItem;
 import com.gmspace.app.databinding.ItemAppBinding;
 import com.gmspace.app.utils.GlideUtils;
 
 import java.util.List;
 
-public class AppItemAdapter extends BaseBindingAdapter<AppItem, ItemAppBinding> {
+public class AppItemAdapter extends BaseBindingAdapter<AppItemEnhance, ItemAppBinding> {
 
-    public AppItemAdapter(List<AppItem> data) {
+    public AppItemAdapter(List<AppItemEnhance> data) {
         super(data);
     }
 
@@ -25,7 +25,7 @@ public class AppItemAdapter extends BaseBindingAdapter<AppItem, ItemAppBinding> 
     }
 
     @Override
-    public void onBindViewHolder(@NonNull BindingHolder<ItemAppBinding> holder, AppItem item, int position) {
+    public void onBindViewHolder(@NonNull BindingHolder<ItemAppBinding> holder, AppItemEnhance item, int position) {
         GlideUtils.loadFadeSkipCache(holder.binding.ivLogo, item == null ? null : item.getIconUri());
         holder.binding.tvAppName.setText(item == null ? null : item.getAppName());
     }

@@ -1,6 +1,7 @@
 package com.gmspace.app;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -23,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -92,10 +94,6 @@ public class MainActivity extends AppCompatActivity {
         public void onReceivedEvent(int type, @NonNull Bundle extras) {
             // 除特别说明的事件外 事件默认回调于子线程
             handleReceivedEvent(type, extras);
-            final Fragment fragment = getSupportFragmentManager().findFragmentById(binding.contentFragment.getId());
-            if (fragment instanceof LauncherFragment) {
-                ((LauncherFragment) fragment).handleBinderEvent(type, extras);
-            }
         }
     };
 
@@ -112,6 +110,15 @@ public class MainActivity extends AppCompatActivity {
 
         // 注册事件
         GmSpaceObject.registerGmSpaceReceivedEventListener(receivedEventListener);
+        GmSpaceObject.registerGmSpaceCompatibleEventListener(new OnGmSpaceReceivedEventListener() {
+            @Override
+            public void onReceivedEvent(int type, Bundle extras) {
+                final Fragment fragment = getSupportFragmentManager().findFragmentById(binding.contentFragment.getId());
+                if (fragment instanceof LauncherFragment) {
+                    ((LauncherFragment) fragment).handleBinderEvent(type, extras);
+                }
+            }
+        });
 
         applyConfiguration();
 
@@ -364,6 +371,7 @@ public class MainActivity extends AppCompatActivity {
      */
     @SuppressLint("StaticFieldLeak")
     public void asyncInstallApkFile(File src) {
+        Activity activity = this;
         if (src == null || !src.exists()) {
             setSubtitle("文件不存在 " + (src == null ? null : src.getAbsolutePath()));
             return;
@@ -383,7 +391,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected GmSpaceResultParcel doInBackground(String... uris) {
                 String uri = uris[0];
-                return SampleUtils.installApk(MainActivity.this,uri,false);
+                GmSpaceResultParcel resultParcel = GmSpaceObject.installCompatiblePackage(activity,uri,null);
+                return resultParcel;
             }
             @Override
             protected void onPostExecute(GmSpaceResultParcel result) {
@@ -563,4 +572,10 @@ public class MainActivity extends AppCompatActivity {
         GmSpaceObject.unregisterGmSpaceReceivedEventListener(receivedEventListener);
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d("iichen",">>>>>>>>>>>>>>>>>>>>>>>>>MainActivity onActivityResult " + resultCode + "<>" + requestCode + "<>" + data);
+    }
 }

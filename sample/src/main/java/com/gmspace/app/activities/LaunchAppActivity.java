@@ -16,9 +16,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.gmspace.sdk.GmSpaceObject;
+import com.gmspace.sdk.model.AppItemEnhance;
 import com.gmspace.sdk.proxy.GmSpaceHostContext;
-import com.gmspace.sdk.proxy.GmSpaceUtils;
-import com.samplekit.bean.AppItem;
 import com.gmspace.app.R;
 import com.gmspace.app.databinding.ActivityLaunchAppBinding;
 import com.gmspace.app.utils.GlideUtils;
@@ -28,7 +27,7 @@ import com.gmspace.app.utils.GlideUtils;
  */
 public class LaunchAppActivity extends AppCompatActivity {
 
-    public static Intent getIntent(AppItem item) {
+    public static Intent getIntent(AppItemEnhance item) {
         final Intent intent = new Intent();
         intent.setComponent(new ComponentName(GmSpaceHostContext.getPackageName(), LaunchAppActivity.class.getName()));
         intent.putExtra("item_info", item);
@@ -46,7 +45,7 @@ public class LaunchAppActivity extends AppCompatActivity {
         setFinishOnTouchOutside(false);
 
         final Intent intent = getIntent();
-        final AppItem itemInfo = intent.getParcelableExtra("item_info");
+        final AppItemEnhance itemInfo = intent.getParcelableExtra("item_info");
         if (itemInfo == null) {
             Toast.makeText(this, "参数异常", Toast.LENGTH_SHORT).show();
             finish();
@@ -59,13 +58,13 @@ public class LaunchAppActivity extends AppCompatActivity {
      * 异步启动app
      */
     @SuppressLint("StaticFieldLeak")
-    private void asyncLaunchApp(AppItem item) {
+    private void asyncLaunchApp(AppItemEnhance item) {
         new AsyncTask<Void, Drawable, Void>() {
             @Override
             protected void onProgressUpdate(Drawable... values) {
                 // 有windowBackground
-                final Drawable windowBackground = (Drawable) values[0];
-                applyWindowBackground(windowBackground);
+//                final Drawable windowBackground = (Drawable) values[0];
+//                applyWindowBackground(windowBackground);
             }
 
             @Override
@@ -78,11 +77,11 @@ public class LaunchAppActivity extends AppCompatActivity {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                final Drawable drawable = GmSpaceUtils.getLaunchActivityWindowBackground(item.getPackageName());
-                publishProgress(drawable);
+//                final Drawable drawable = GmSpaceUtils.getLaunchActivityWindowBackground(item.getPackageName());
+//                publishProgress(drawable);
 
                 // 启动app
-                GmSpaceObject.startApp(item.getPackageName());
+                GmSpaceObject.startCompatibleApplication(item);
                 return null;
             }
 
