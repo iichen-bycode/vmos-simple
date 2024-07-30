@@ -140,7 +140,7 @@ public class LauncherFragment extends Fragment {
         } else if (GmSpaceEvent.TYPE_PACKAGE_UNINSTALLED == type) {
             // 有应用卸载
             handlePackageUninstalledEvent(extras);
-        }else if (GmSpaceEvent.TYPE_COMPONENT_SETTING_CHANGE == type){
+        } else if (GmSpaceEvent.TYPE_COMPONENT_SETTING_CHANGE == type) {
             //组件状态变化
             handleComponentSettingChangeEvent(extras);
         }
@@ -223,21 +223,21 @@ public class LauncherFragment extends Fragment {
     @SuppressLint("StaticFieldLeak")
     public void asyncUninstallApp(Context context, AppItemEnhance appItemEnhance) {
         Activity activity = this.getActivity();
-        new DialogAsyncTask<Void, Void, Boolean>(context) {
+        new DialogAsyncTask<Void, Void, Void>(context) {
             @Override
             protected void onPreExecute() {
                 super.showProgressDialog("正在卸载");
             }
 
             @Override
-            protected Boolean doInBackground(Void... voids) {
-                return GmSpaceObject.uninstallCompatiblePackage(activity,appItemEnhance);
+            protected Void doInBackground(Void... voids) {
+                GmSpaceObject.uninstallCompatiblePackage(activity, appItemEnhance);
+                return null;
             }
 
             @Override
-            protected void onPostExecute(Boolean result) {
+            protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
-                Toast.makeText(context, result ? "卸载成功" : "卸载失败", Toast.LENGTH_SHORT).show();
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -249,8 +249,14 @@ public class LauncherFragment extends Fragment {
      */
     @SuppressLint("StaticFieldLeak")
     private void handlePackageInstalledEvent(Bundle extras) {
+        boolean mStatus = extras.getBoolean(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_STATUS, false);
+        GmSpaceResultParcel parcelable = extras.getParcelable(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_INSTALL_RESULT);
+        if (parcelable != null) {
+            Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageInstalledEvent " + mStatus + ">>" + parcelable.getMessage());
+        }
         AppItemEnhance appItemEnhance = extras.getParcelable(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_INFO);
-        if (appItemEnhance!= null && !appItemEnhance.isOverride()) {
+        Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageInstalledEvent  appItemEnhance  " + appItemEnhance);
+        if (appItemEnhance != null && !appItemEnhance.isOverride()) {
             synchronized (adapter.getData()) {
                 boolean contains = false;
                 for (int i = 0; i < adapter.getData().size(); i++) {
@@ -276,7 +282,9 @@ public class LauncherFragment extends Fragment {
     @SuppressLint("StaticFieldLeak")
     private void handlePackageUninstalledEvent(Bundle extras) {
         final String packageName = extras.getString(GmSpaceEvent.KEY_PACKAGE_NAME);
-        if(packageName != null) {
+        boolean mStatus = extras.getBoolean(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_STATUS, false);
+        Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageUninstalledEvent " + mStatus);
+        if (packageName != null) {
             synchronized (adapter.getData()) {
                 int removeIndex = -1;
                 for (int i = 0; i < adapter.getData().size(); i++) {
@@ -294,7 +302,7 @@ public class LauncherFragment extends Fragment {
         }
     }
 
-    private void notifyItemChanged(int index){
+    private void notifyItemChanged(int index) {
         final Runnable runnable = () -> {
             if (index >= 0) {
                 adapter.notifyItemChanged(index);
@@ -350,11 +358,11 @@ public class LauncherFragment extends Fragment {
                         FileUtils.deleteQuietly(packageCache);
                         // 再复制到缓存
                         AssetsUtils.copyTo(assets, assetPath, packageCache);
-                        final GmSpaceResultParcel result = SampleUtils.installApk(getContext(),packageCache.getAbsolutePath(),true);
+                        final GmSpaceResultParcel result = SampleUtils.installApk(getContext(), packageCache.getAbsolutePath(), true);
                         if (result.isSucceed()) {
-                            Log.d("iichen","prepare preset [" + packageName + "] success -> " + packageCache.getAbsolutePath() + " - " + (SystemClock.uptimeMillis() - _start) + "ms");
+                            Log.d("iichen", "prepare preset [" + packageName + "] success -> " + packageCache.getAbsolutePath() + " - " + (SystemClock.uptimeMillis() - _start) + "ms");
                         } else {
-                            Log.d("iichen","prepare preset [" + packageName + "] fail -> " + packageCache.getAbsolutePath());
+                            Log.d("iichen", "prepare preset [" + packageName + "] fail -> " + packageCache.getAbsolutePath());
                         }
                     }
                 } catch (Exception e) {

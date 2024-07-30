@@ -376,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
             setSubtitle("文件不存在 " + (src == null ? null : src.getAbsolutePath()));
             return;
         }
-        new DialogAsyncTask<String, String, GmSpaceResultParcel>(this) {
+        new DialogAsyncTask<String, String, Void>(this) {
 
             @Override
             protected void onPreExecute() {
@@ -389,19 +389,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            protected GmSpaceResultParcel doInBackground(String... uris) {
+            protected Void doInBackground(String... uris) {
                 String uri = uris[0];
-                GmSpaceResultParcel resultParcel = GmSpaceObject.installCompatiblePackage(activity,uri,null);
-                return resultParcel;
+                GmSpaceObject.installCompatiblePackage(activity,uri,null);
+                return null;
             }
             @Override
-            protected void onPostExecute(GmSpaceResultParcel result) {
+            protected void onPostExecute(Void result) {
                 super.onPostExecute(result);
-                if (result.isSucceed()) {
-                    setSubtitle("应用安装成功 " + (result.getData() == null ? "" : result.getData().getString(GmSpaceEvent.KEY_PACKAGE_NAME)));
-                } else {
-                    setSubtitle("应用安装失败 " + result.getMessage());
-                }
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, src.getAbsolutePath());
     }

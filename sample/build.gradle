@@ -17,7 +17,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         buildConfigField "String", "SERVER_PACKAGE_NAME", "\"${rootProject.ext.applicationId}\""
-
     }
 
     signingConfigs {
