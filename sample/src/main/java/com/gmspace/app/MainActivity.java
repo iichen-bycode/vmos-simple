@@ -3,6 +3,7 @@ package com.gmspace.app;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -113,6 +114,11 @@ public class MainActivity extends AppCompatActivity {
         GmSpaceObject.registerGmSpaceCompatibleEventListener(new OnGmSpaceReceivedEventListener() {
             @Override
             public void onReceivedEvent(int type, Bundle extras) {
+                if (GmSpaceEvent.TYPE_PACKAGE_INSTALLED == type || GmSpaceEvent.TYPE_PACKAGE_EXT_NOT_INSTALL == type) {
+                    if (mProgressDialog != null) {
+                        mProgressDialog.dismiss();
+                    }
+                }
                 final Fragment fragment = getSupportFragmentManager().findFragmentById(binding.contentFragment.getId());
                 if (fragment instanceof LauncherFragment) {
                     ((LauncherFragment) fragment).handleBinderEvent(type, extras);
@@ -364,6 +370,8 @@ public class MainActivity extends AppCompatActivity {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+
+    Dialog mProgressDialog;
     /**
      * 异步安装apk
      *
@@ -371,34 +379,21 @@ public class MainActivity extends AppCompatActivity {
      */
     @SuppressLint("StaticFieldLeak")
     public void asyncInstallApkFile(File src) {
-        Activity activity = this;
+        if(mProgressDialog == null) {
+            final View view = LayoutInflater.from(this).inflate(R.layout.dialog_material_loading, null);
+            TextView mMessageView = view.findViewById(android.R.id.message);
+            mMessageView.setText("安装中");
+            mProgressDialog  = new AlertDialog.Builder(this, R.style.Theme_App_Dialog)
+                    .setView(view)
+                    .setCancelable(false).show();
+        }
         if (src == null || !src.exists()) {
             setSubtitle("文件不存在 " + (src == null ? null : src.getAbsolutePath()));
             return;
         }
-        new DialogAsyncTask<String, String, Void>(this) {
 
-            @Override
-            protected void onPreExecute() {
-                super.showProgressDialog("正在安装");
-            }
-
-            @Override
-            protected void onProgressUpdate(String... values) {
-                super.updateProgressDialog(values[0]);
-            }
-
-            @Override
-            protected Void doInBackground(String... uris) {
-                String uri = uris[0];
-                GmSpaceObject.installCompatiblePackage(activity,uri,null);
-                return null;
-            }
-            @Override
-            protected void onPostExecute(Void result) {
-                super.onPostExecute(result);
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, src.getAbsolutePath());
+        mProgressDialog.show();
+        GmSpaceObject.installCompatiblePackage(this,src.getAbsolutePath(),null);
     }
 
 

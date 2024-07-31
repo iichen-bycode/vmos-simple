@@ -2,6 +2,7 @@ package com.gmspace.app.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -134,6 +136,9 @@ public class LauncherFragment extends Fragment {
      * @param extras
      */
     public void handleBinderEvent(int type, Bundle extras) {
+        if(mProgressDialog != null) {
+            mProgressDialog.dismiss();
+        }
         if (GmSpaceEvent.TYPE_PACKAGE_INSTALLED == type) {
             // 有应用安装
             handlePackageInstalledEvent(extras);
@@ -143,6 +148,9 @@ public class LauncherFragment extends Fragment {
         } else if (GmSpaceEvent.TYPE_COMPONENT_SETTING_CHANGE == type) {
             //组件状态变化
             handleComponentSettingChangeEvent(extras);
+        } else if(type == GmSpaceEvent.TYPE_PACKAGE_EXT_NOT_INSTALL) {
+            Toast.makeText(requireContext(),"32位插件应用未安装",Toast.LENGTH_SHORT).show();
+            loadInstalledApps(getContext());
         }
     }
 
@@ -220,26 +228,19 @@ public class LauncherFragment extends Fragment {
                 .show();
     }
 
+    Dialog mProgressDialog;
     @SuppressLint("StaticFieldLeak")
     public void asyncUninstallApp(Context context, AppItemEnhance appItemEnhance) {
-        Activity activity = this.getActivity();
-        new DialogAsyncTask<Void, Void, Void>(context) {
-            @Override
-            protected void onPreExecute() {
-                super.showProgressDialog("正在卸载");
-            }
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-                GmSpaceObject.uninstallCompatiblePackage(activity, appItemEnhance);
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void result) {
-                super.onPostExecute(result);
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        if(mProgressDialog == null) {
+            final View view = LayoutInflater.from(requireActivity()).inflate(R.layout.dialog_material_loading, null);
+            TextView mMessageView = view.findViewById(android.R.id.message);
+            mMessageView.setText("卸载中");
+            mProgressDialog  = new AlertDialog.Builder(requireActivity(), R.style.Theme_App_Dialog)
+                    .setView(view)
+                    .setCancelable(false).create();
+        }
+        mProgressDialog.show();
+        GmSpaceObject.uninstallCompatiblePackage(requireActivity(), appItemEnhance);
     }
 
     /**
@@ -249,11 +250,7 @@ public class LauncherFragment extends Fragment {
      */
     @SuppressLint("StaticFieldLeak")
     private void handlePackageInstalledEvent(Bundle extras) {
-        boolean mStatus = extras.getBoolean(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_STATUS, false);
         GmSpaceResultParcel parcelable = extras.getParcelable(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_INSTALL_RESULT);
-        if (parcelable != null) {
-            Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageInstalledEvent " + mStatus + ">>" + parcelable.getMessage());
-        }
         AppItemEnhance appItemEnhance = extras.getParcelable(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_INFO);
         Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageInstalledEvent  appItemEnhance  " + appItemEnhance);
         if (appItemEnhance != null && !appItemEnhance.isOverride()) {
