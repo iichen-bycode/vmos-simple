@@ -124,7 +124,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="gmspace.record.provider"
+            android:authorities="${applicationId}.record.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

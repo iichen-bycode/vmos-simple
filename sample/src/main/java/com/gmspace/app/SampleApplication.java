@@ -25,7 +25,7 @@ public class SampleApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        Log.d("iichen",">>>>>>>>>>>>>>>>>>>>>>>>>Host onCreate");
+        Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>Host onCreate");
 
         if (GmSpaceHostContext.isMainProcess()) {
             MMKV.initialize(this);
@@ -34,11 +34,16 @@ public class SampleApplication extends Application {
         GmSpaceObject.initialize(this, "fIyzKzyNNBEw1Hnn", "3ppgrZzdkRhunw", new IGmSpaceInitCallBack() {
             @Override
             public void initResult(boolean b, int i, String s) {
-                Log.i("csc","初始化有没有成功"+b);
+                Log.i("csc", "初始化有没有成功" + b);
             }
         });
 
-//        GmSpaceObject.set32BitExtConfig(new GmSpace32BitExtConfig());
+        GmSpaceObject.set32BitExtConfig(new GmSpace32BitExtConfig(
+                "com.gmspace.sdk",
+                "com.gmspace.ext.PluginInstallActivity",
+                "com.gmspace.ext.PluginLaunchActivity",
+                "com.gmspace.ext.PluginUnInstallActivity"
+        ));
 
         MMKV.initialize(this);
     }

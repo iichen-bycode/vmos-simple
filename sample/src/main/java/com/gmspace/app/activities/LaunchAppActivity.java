@@ -22,6 +22,9 @@ import com.gmspace.app.R;
 import com.gmspace.app.databinding.ActivityLaunchAppBinding;
 import com.gmspace.app.utils.GlideUtils;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
+
 /**
  * 启动app
  */
@@ -59,37 +62,14 @@ public class LaunchAppActivity extends AppCompatActivity {
      */
     @SuppressLint("StaticFieldLeak")
     private void asyncLaunchApp(AppItemEnhance item) {
-        new AsyncTask<Void, Drawable, Void>() {
-            @Override
-            protected void onProgressUpdate(Drawable... values) {
-                // 有windowBackground
-//                final Drawable windowBackground = (Drawable) values[0];
-//                applyWindowBackground(windowBackground);
-            }
-
-            @Override
-            protected void onPreExecute() {
-                GlideUtils.loadFadeSkipCache(binding.ivAppIcon, item.getIconUri());
-                binding.tvAppName.setText(item.getAppName());
-                binding.tvAppPackageName.setText(item.getPackageName());
-                binding.tvAppVersion.setText(String.format("%s（%s）", item.getVersionName(), item.getVersionCode()));
-            }
-
-            @Override
-            protected Void doInBackground(Void... voids) {
-//                final Drawable drawable = GmSpaceUtils.getLaunchActivityWindowBackground(item.getPackageName());
-//                publishProgress(drawable);
-
-                // 启动app
-                GmSpaceObject.startCompatibleApplication(item);
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void result) {
-                finish();
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        GlideUtils.loadFadeSkipCache(binding.ivAppIcon, item.getIconUri());
+        binding.tvAppName.setText(item.getAppName());
+        binding.tvAppPackageName.setText(item.getPackageName());
+        binding.tvAppVersion.setText(String.format("%s（%s）", item.getVersionName(), item.getVersionCode()));
+        GmSpaceObject.startCompatibleApplication(item, () -> {
+            finish();
+            return null;
+        });
     }
 
     private void applyWindowBackground(Drawable windowBackground) {
