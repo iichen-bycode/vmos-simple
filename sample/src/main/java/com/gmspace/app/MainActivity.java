@@ -385,7 +385,7 @@ public class MainActivity extends AppCompatActivity {
             mMessageView.setText("安装中");
             mProgressDialog  = new AlertDialog.Builder(this, R.style.Theme_App_Dialog)
                     .setView(view)
-                    .setCancelable(false).show();
+                    .setCancelable(false).create();
         }
         if (src == null || !src.exists()) {
             setSubtitle("文件不存在 " + (src == null ? null : src.getAbsolutePath()));
@@ -393,7 +393,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mProgressDialog.show();
-        GmSpaceObject.installCompatiblePackage(this,src.getAbsolutePath(),null);
+        GmSpaceObject.installCompatiblePackage(src.getAbsolutePath(),null);
     }
 
 

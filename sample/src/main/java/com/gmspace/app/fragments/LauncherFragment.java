@@ -151,6 +151,10 @@ public class LauncherFragment extends Fragment {
         } else if(type == GmSpaceEvent.TYPE_PACKAGE_EXT_NOT_INSTALL) {
             Toast.makeText(requireContext(),"32位插件应用未安装",Toast.LENGTH_SHORT).show();
             loadInstalledApps(getContext());
+        } else if(type == GmSpaceEvent.TYPE_PACKAGE_EXT_APPLICATION_NOT_INSTALL) {
+            String message = extras.getString(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_MESSAGE);
+            Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageInstalledEvent  message  " + message + ">>" + Thread.currentThread().getName());
+            Toast.makeText(requireContext(),message,Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -197,7 +201,7 @@ public class LauncherFragment extends Fragment {
      * 启动应用
      */
     @SuppressLint("StaticFieldLeak")
-//    @NeedsPermission({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE})
+//    @NeedsPermission({Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGhandlePackageInstalledEventE})
     public void launchApp(AppItemEnhance item) {
         startActivity(LaunchAppActivity.getIntent(item));
     }
@@ -240,7 +244,7 @@ public class LauncherFragment extends Fragment {
                     .setCancelable(false).create();
         }
         mProgressDialog.show();
-        GmSpaceObject.uninstallCompatiblePackage(requireActivity(), appItemEnhance);
+        GmSpaceObject.uninstallCompatiblePackage(appItemEnhance);
     }
 
     /**
@@ -250,8 +254,9 @@ public class LauncherFragment extends Fragment {
      */
     @SuppressLint("StaticFieldLeak")
     private void handlePackageInstalledEvent(Bundle extras) {
-        GmSpaceResultParcel parcelable = extras.getParcelable(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_INSTALL_RESULT);
         AppItemEnhance appItemEnhance = extras.getParcelable(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_INFO);
+        String message = extras.getString(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_MESSAGE);
+        Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageInstalledEvent  message  " + message + ">>" + Thread.currentThread().getName());
         Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageInstalledEvent  appItemEnhance  " + appItemEnhance);
         if (appItemEnhance != null && !appItemEnhance.isOverride()) {
             synchronized (adapter.getData()) {
