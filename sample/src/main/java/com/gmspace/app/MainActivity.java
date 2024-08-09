@@ -114,10 +114,8 @@ public class MainActivity extends AppCompatActivity {
         GmSpaceObject.registerGmSpaceCompatibleEventListener(new OnGmSpaceReceivedEventListener() {
             @Override
             public void onReceivedEvent(int type, Bundle extras) {
-                if (GmSpaceEvent.TYPE_PACKAGE_INSTALLED == type || GmSpaceEvent.TYPE_PACKAGE_EXT_NOT_INSTALL == type) {
-                    if (mProgressDialog != null) {
-                        mProgressDialog.dismiss();
-                    }
+                if (mProgressDialog != null) {
+                    mProgressDialog.dismiss();
                 }
                 final Fragment fragment = getSupportFragmentManager().findFragmentById(binding.contentFragment.getId());
                 if (fragment instanceof LauncherFragment) {

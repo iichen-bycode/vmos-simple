@@ -136,7 +136,7 @@ public class LauncherFragment extends Fragment {
      * @param extras
      */
     public void handleBinderEvent(int type, Bundle extras) {
-        if(mProgressDialog != null) {
+        if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }
         if (GmSpaceEvent.TYPE_PACKAGE_INSTALLED == type) {
@@ -148,13 +148,13 @@ public class LauncherFragment extends Fragment {
         } else if (GmSpaceEvent.TYPE_COMPONENT_SETTING_CHANGE == type) {
             //组件状态变化
             handleComponentSettingChangeEvent(extras);
-        } else if(type == GmSpaceEvent.TYPE_PACKAGE_EXT_NOT_INSTALL) {
-            Toast.makeText(requireContext(),"32位插件应用未安装",Toast.LENGTH_SHORT).show();
+        } else if (type == GmSpaceEvent.TYPE_PACKAGE_EXT_NOT_INSTALL) {
+            Toast.makeText(requireContext(), "32位插件应用未安装", Toast.LENGTH_SHORT).show();
             loadInstalledApps(getContext());
-        } else if(type == GmSpaceEvent.TYPE_PACKAGE_EXT_APPLICATION_NOT_INSTALL) {
+        } else if (type == GmSpaceEvent.TYPE_PACKAGE_EXT_APPLICATION_NOT_INSTALL) {
             String message = extras.getString(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_MESSAGE);
             Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageInstalledEvent  message  " + message + ">>" + Thread.currentThread().getName());
-            Toast.makeText(requireContext(),message,Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -233,13 +233,14 @@ public class LauncherFragment extends Fragment {
     }
 
     Dialog mProgressDialog;
+
     @SuppressLint("StaticFieldLeak")
     public void asyncUninstallApp(Context context, AppItemEnhance appItemEnhance) {
-        if(mProgressDialog == null) {
+        if (mProgressDialog == null) {
             final View view = LayoutInflater.from(requireActivity()).inflate(R.layout.dialog_material_loading, null);
             TextView mMessageView = view.findViewById(android.R.id.message);
             mMessageView.setText("卸载中");
-            mProgressDialog  = new AlertDialog.Builder(requireActivity(), R.style.Theme_App_Dialog)
+            mProgressDialog = new AlertDialog.Builder(requireActivity(), R.style.Theme_App_Dialog)
                     .setView(view)
                     .setCancelable(false).create();
         }
@@ -256,6 +257,9 @@ public class LauncherFragment extends Fragment {
     private void handlePackageInstalledEvent(Bundle extras) {
         AppItemEnhance appItemEnhance = extras.getParcelable(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_INFO);
         String message = extras.getString(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_MESSAGE);
+        boolean status = extras.getBoolean(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_STATUS);
+        String toastStr = status ? "安装成功" : "安装失败";
+        Toast.makeText(requireContext(), toastStr, Toast.LENGTH_SHORT).show();
         Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageInstalledEvent  message  " + message + ">>" + Thread.currentThread().getName());
         Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageInstalledEvent  appItemEnhance  " + appItemEnhance);
         if (appItemEnhance != null && !appItemEnhance.isOverride()) {
@@ -285,6 +289,8 @@ public class LauncherFragment extends Fragment {
     private void handlePackageUninstalledEvent(Bundle extras) {
         final String packageName = extras.getString(GmSpaceEvent.KEY_PACKAGE_NAME);
         boolean mStatus = extras.getBoolean(GmSpaceEvent.KEY_PACKAGE_COMPATIBLE_STATUS, false);
+        String toastStr = mStatus ? "卸载成功" : "卸载失败";
+        Toast.makeText(requireContext(), toastStr, Toast.LENGTH_SHORT).show();
         Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>handlePackageUninstalledEvent " + mStatus);
         if (packageName != null) {
             synchronized (adapter.getData()) {
