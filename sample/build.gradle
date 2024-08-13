@@ -54,9 +54,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = '17'
-    }
 //
 //    packagingOptions {
 //        jniLibs {
@@ -92,5 +89,5 @@ dependencies {
 
     implementation("com.vmos:vmos-lite-sdk:1.1.4-beta03")
     compileOnly 'com.vmos:hiddenapi-stub:1.1.5'
-    implementation files("libs/sdk-1.0.0.aar")
+    implementation 'top.canyie.pine:core:0.3.0'
 }

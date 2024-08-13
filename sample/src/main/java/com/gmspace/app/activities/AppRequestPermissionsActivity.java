@@ -15,9 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.gmspace.app.databinding.ActivityRequestPermissionBinding;
 import com.gmspace.app.sample.SampleUtils;
+import com.gmspace.sdk.GmSpaceObject;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -91,9 +91,9 @@ public class AppRequestPermissionsActivity extends AppCompatActivity {
                     index++;
                 }
                 // 设置权限结果
-                GmSpaceUtils.setPermissionResults(mPackageName, permissions, grantResults);
+                GmSpaceObject.setPermissionResults(mPackageName, permissions, grantResults);
                 // 结果返回给app
-                final Intent intent = GmSpaceUtils.buildRequestPermissionsResultIntent(permissions, grantResults);
+                final Intent intent = GmSpaceObject.buildRequestPermissionsResultIntent(permissions, grantResults);
                 setResult(Activity.RESULT_OK, intent);
                 finish();
             } else {
@@ -101,7 +101,7 @@ public class AppRequestPermissionsActivity extends AppCompatActivity {
                 mCurrentRequestPermission = mRequestPermissionQueue.poll();
                 // 宿主有权限 虚拟权限也有 才算有权限
                 boolean isGranted = ContextCompat.checkSelfPermission(this, mCurrentRequestPermission) == PackageManager.PERMISSION_GRANTED &&
-                        GmSpaceUtils.checkPermission(mPackageName, mCurrentRequestPermission) == PackageManager.PERMISSION_GRANTED;
+                        GmSpaceObject.checkPermission(mPackageName, mCurrentRequestPermission) == PackageManager.PERMISSION_GRANTED;
                 if (checkSelfPermissionCompat(mCurrentRequestPermission)) {
                     // 宿主有权限 就显示自定义的权限框
                     final PackageManager packageManager = getPackageManager();

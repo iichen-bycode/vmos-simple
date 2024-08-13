@@ -44,8 +44,8 @@ import com.gmspace.sdk.GmSpacePackageConfiguration;
 import com.gmspace.sdk.GmSpaceResultParcel;
 import com.gmspace.sdk.OnGmSpaceReceivedEventListener;
 import com.gmspace.sdk.proxy.GmSpaceBitmapUtils;
-import com.gmspace.sdk.proxy.GmSpaceUtils;
 
+import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.samplekit.bean.InstalledInfo;
 import com.samplekit.dialog.DeviceFileSelectorDialog;
 import com.samplekit.dialog.DeviceInstalledAppDialog;
@@ -60,7 +60,6 @@ import com.gmspace.app.databinding.DialogProcessListBinding;
 import com.gmspace.app.databinding.LayoutNavigationHeaderBinding;
 import com.gmspace.app.databinding.LayoutWindowMenuBinding;
 import com.gmspace.app.dialog.GoogleAppInfoDialog;
-import com.gmspace.app.dialog.MicroGInstallDialog;
 import com.gmspace.app.dialog.VmInstalledAppDialog;
 import com.gmspace.app.fragments.LauncherFragment;
 import com.gmspace.app.fragments.RunningTaskFragment;
@@ -69,6 +68,7 @@ import com.gmspace.app.sample.SampleUtils;
 import com.gmspace.app.service.AppKeepAliveService;
 import com.gmspace.app.utils.DialogAsyncTask;
 import com.gmspace.app.utils.FileSizeFormat;
+import com.vlite.sdk.VLite;
 
 
 import java.io.File;
@@ -81,7 +81,6 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private GoogleAppInfoDialog googleAppInfoDialog;
-    private MicroGInstallDialog microGInfoDialog;
     private DeviceFileSelectorDialog deviceFileSelectorDialog;
     private VmInstalledAppDialog vmInstalledAppDialog;
 
@@ -355,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected Boolean doInBackground(Void... voids) {
-                return GmSpaceUtils.uninstallPackage(packageName);
+                return GmSpaceObject.uninstallGmSpacePackage(packageName);
             }
 
             @Override
@@ -413,7 +412,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected List<ProcessInfo> doInBackground(Void... voids) {
-                final List<ActivityManager.RunningAppProcessInfo> processes = GmSpaceUtils.getRunningAppProcesses();
+                final List<ActivityManager.RunningAppProcessInfo> processes = GmSpaceObject.getRunningAppProcesses();
                 final int[] pids = new int[processes.size()];
                 for (int i = 0; i < processes.size(); i++) {
                     pids[i] = processes.get(i).pid;
@@ -467,12 +466,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected List<RunningInfo> doInBackground(Void... voids) {
                 final List<RunningInfo> items = new ArrayList<>();
-                final List<String> runningPackageNames = GmSpaceUtils.getRunningPackageNames();
+                final List<String> runningPackageNames = GmSpaceObject.getRunningPackageNames();
                 final PackageManager pm = getPackageManager();
                 for (String packageName : runningPackageNames) {
                     final RunningInfo item = new RunningInfo();
 
-                    final ApplicationInfo info = GmSpaceUtils.getApplicationInfo(packageName, 0);
+                    final ApplicationInfo info = GmSpaceObject.getGmSpaceApplicationInfo(packageName);
                     final Drawable drawable = SampleUtils.convertLauncherDrawable(info.loadIcon(pm));
                     final Bitmap bitmap = GmSpaceBitmapUtils.toBitmap(drawable);
                     if (bitmap != null) {
@@ -505,8 +504,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendBroadcastToApp() {
-        final Intent intent = new Intent("sample.register.test");
-        GmSpaceUtils.sendBroadcast(intent);
+        Log.d("iichen","接受到广播");
+        Intent newIntent = new Intent();
+        newIntent.setAction("sdk.authlogin");//这里可以自己定义
+        Bundle bundle=new Bundle();
+        bundle.putString("uid", "1825472");
+        bundle.putString("token", "fdb78ae378f0337ffce4204bf9041231");
+        bundle.putString("packagename", "com.mhbyj.batu");
+        newIntent.putExtras(bundle);
+        GmSpaceObject.sendGmSpaceBroadcast(newIntent);
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -520,9 +526,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                final List<String> packageNames = GmSpaceUtils.getRunningPackageNames();
+                final List<String> packageNames = GmSpaceObject.getRunningPackageNames();
                 for (String packageName : packageNames) {
-                    GmSpaceUtils.forceStopPackage(packageName);
+                    GmSpaceObject.killApp(packageName);
                 }
                 return null;
             }

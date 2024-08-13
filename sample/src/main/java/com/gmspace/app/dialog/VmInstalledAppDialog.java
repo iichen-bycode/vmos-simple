@@ -4,6 +4,7 @@ import android.content.pm.PackageInfo;
 
 import androidx.viewbinding.ViewBinding;
 
+import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.samplekit.adapters.BaseBindingAdapter;
 import com.samplekit.bean.InstalledInfo;
@@ -27,7 +28,7 @@ public class VmInstalledAppDialog extends InstalledAppDialog {
 
     @Override
     protected List<PackageInfo> getInstalledPackages() {
-        return GmSpaceUtils.getInstalledPackages(0);
+        return GmSpaceObject.getGmSpaceInstalledPackages();
     }
 
     @Override

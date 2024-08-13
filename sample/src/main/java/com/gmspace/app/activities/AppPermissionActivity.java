@@ -14,9 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.gmspace.app.databinding.ActivityAppPermissionBinding;
-import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.gmspace.app.adapters.PermissionAdapter;
 import com.gmspace.app.bean.AppPermissionInfo;
+import com.gmspace.sdk.GmSpaceObject;
 
 
 import java.util.ArrayList;
@@ -53,8 +53,8 @@ public class AppPermissionActivity extends AppCompatActivity {
             protected List<AppPermissionInfo> doInBackground(Void... voids) {
                 final PackageManager pm = getPackageManager();
                 final List<AppPermissionInfo> appPermissionInfos = new ArrayList<>();
-                final String[] permissions = GmSpaceUtils.getDangerousPermissions(packageName);
-                final int[] permissionResults = GmSpaceUtils.checkPermissions(packageName, permissions);
+                final String[] permissions = GmSpaceObject.getDangerousPermissions(packageName);
+                final int[] permissionResults = GmSpaceObject.checkPermissions(packageName, permissions);
                 for (int i = 0; i < permissions.length; i++) {
                     final String permission = permissions[i];
                     final AppPermissionInfo appPermissionInfo = new AppPermissionInfo(permission, permissionResults[i]);
@@ -83,7 +83,7 @@ public class AppPermissionActivity extends AppCompatActivity {
             final AppPermissionInfo item = mPermissionAdapter.getData().get(position);
             if (PackageManager.PERMISSION_GRANTED == item.getPermissionResult()) {
                 // 关闭权限
-                GmSpaceUtils.setPermissionResult(mPackageName, item.getPermission(), PackageManager.PERMISSION_DENIED);
+                GmSpaceObject.setPermissionResult(mPackageName, item.getPermission(), PackageManager.PERMISSION_DENIED);
 
                 item.setPermissionResult(PackageManager.PERMISSION_DENIED);
                 mPermissionAdapter.notifyItemChanged(position, item.getPermissionResult());
@@ -101,7 +101,7 @@ public class AppPermissionActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (REQUEST_CODE == requestCode) {
             // 宿主有权限 虚拟应用才有权限 更新虚拟应用权限状态
-            GmSpaceUtils.setPermissionResults(mPackageName, permissions, grantResults);
+            GmSpaceObject.setPermissionResults(mPackageName, permissions, grantResults);
 
             for (int i = 0; i < mPermissionAdapter.getData().size(); i++) {
                 final AppPermissionInfo item = mPermissionAdapter.getData().get(i);

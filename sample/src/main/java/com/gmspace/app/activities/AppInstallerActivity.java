@@ -27,8 +27,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.gmspace.app.R;
 import com.gmspace.sdk.GmSpaceEvent;
+import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.GmSpaceResultParcel;
-import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.gmspace.app.adapters.InstallerPermissionAdapter;
 import com.gmspace.app.bean.AppInstallInfo;
 import com.gmspace.app.bean.AppPermissionInfo;
@@ -114,7 +114,7 @@ public class AppInstallerActivity extends AppCompatActivity {
                         final PackageInfo archiveInfo = pm.getPackageArchiveInfo(requestInstallFile.getAbsolutePath(), PackageManager.GET_PERMISSIONS);
                         archiveInfo.applicationInfo.sourceDir = requestInstallFile.getAbsolutePath();
                         archiveInfo.applicationInfo.publicSourceDir = requestInstallFile.getAbsolutePath();
-                        info.setInstalled(GmSpaceUtils.getPackageInfo(archiveInfo.packageName, 0));
+                        info.setInstalled(GmSpaceObject.getGmSpacePackageInfo(archiveInfo.packageName));
                         info.setLogo(SampleUtils.convertLauncherDrawable(archiveInfo.applicationInfo.loadIcon(pm)));
                         info.setAppName(archiveInfo.applicationInfo.loadLabel(pm).toString());
                         info.setVersionCode(archiveInfo.versionCode);
@@ -175,55 +175,11 @@ public class AppInstallerActivity extends AppCompatActivity {
     }
 
     private File getFileFromUri(Uri uri) {
-//        try {
-//            // content://media/external/downloads/1000001318
-//            // file:///sdcard/Download/amap.apk
-//            // content://com.xxx.xxx/storage/emulated/0/Download/xxxx.apk
-//            // content://com.xxx.xxx.file.path.share/file_path/DownloadPrivate/xxxxxx.apk
-//            // content://downloads/all_downloads/11
-//            final String scheme = uri.getScheme();
-//            final boolean isContentUri = "content".equals(scheme);
-//            final boolean isMediaUri = isContentUri && "media".equals(uri.getAuthority());
-//            final boolean isFileUri = "file".equals(scheme);
-//            final boolean isDownloadsUri = isContentUri && "downloads".equals(uri.getAuthority());
-//            if (isMediaUri || isDownloadsUri || isFileUri
-//                    || TextUtils.isEmpty(origin)) {
-//                // content://media file:// 即使是应用内的也可以直接取
-//                // 没有来源说明是真机来的 直接获取
-//                return UriUtils.getFileFromUri(this, uri);
-//            } else {
-//                // 有来源说明是从宿主里应用来的
-//                final File file = UriUtils.getFileFromCursor(GmSpaceUtils.getContentResolver().query(uri, null, null, null, null));
-//                // 如果取出来是空的 可能是fileprovider 先复制一下到自己目录
-//                if (file == null) {
-//                    final InputStream inputStream = GmSpaceUtils.getContentResolver().openInputStream(uri);
-//                    final File output = new File(getExternalCacheDir(), uri.getLastPathSegment());
-//                    GmSpaceFileUtils.copyInputStreamToFile(inputStream, output);
-//                    return output;
-//                }else{
-//                    return file;
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
         return null;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void loadInstallInfoApi30() {
-//        // 有的系统上没这个界面
-//        final Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-//        final ResolveInfo resolveInfo = getPackageManager().resolveActivity(intent, 0);
-//        if (resolveInfo == null) {
-//            AppInstallerActivityPermissionsDispatcher.loadInstallInfoWithPermissionCheck(this);
-//        } else {
-//            if (Environment.isExternalStorageManager()) {
-//                loadInstallInfo();
-//            } else {
-//                startActivityForResult(intent, REQUEST_CODE_PERMISSION);
-//            }
-//        }
     }
 
     @SuppressLint("StaticFieldLeak")

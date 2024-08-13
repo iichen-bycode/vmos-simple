@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.proxy.GmSpaceUtils;
 
 /**
@@ -29,7 +30,7 @@ public class DeeplinkActivity extends AppCompatActivity {
                     newIntent.setComponent(null);
                     newIntent.setPackage("us.zoom.videomeetings");
                     newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    GmSpaceUtils.startActivity(newIntent);
+                    GmSpaceObject.startActivity(newIntent);
                     finish();
                 }
             }

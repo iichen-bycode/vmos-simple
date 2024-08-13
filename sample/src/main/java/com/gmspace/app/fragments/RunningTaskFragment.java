@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.gmspace.app.R;
 import com.gmspace.app.adapters.RunningTaskCardAdapter;
 import com.gmspace.app.bean.RunningInfo;
@@ -31,6 +30,7 @@ import com.gmspace.app.databinding.FragmentRunningTaskBinding;
 import com.gmspace.app.helper.SimpleItemTouchCallback;
 import com.gmspace.app.helper.ItemTouchStatus;
 import com.gmspace.app.helper.ScrollSmoothHelper;
+import com.gmspace.sdk.GmSpaceObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,7 +130,7 @@ public class RunningTaskFragment extends DialogFragment {
                 final RunningInfo item = result.get(position);
                 adapter.getData().remove(position);
                 adapter.notifyItemRemoved(position);
-                GmSpaceUtils.killApplication(item.getPackageName());
+                GmSpaceObject.killApp(item.getPackageName());
                 if (adapter.getData().isEmpty()){
                     dismissAllowingStateLoss();
                 }

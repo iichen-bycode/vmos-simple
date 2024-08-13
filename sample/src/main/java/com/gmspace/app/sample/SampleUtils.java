@@ -27,8 +27,6 @@ import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.GmSpaceResultParcel;
 import com.gmspace.sdk.proxy.GmSpaceBitmapUtils;
 import com.gmspace.sdk.proxy.GmSpaceHostContext;
-import com.gmspace.sdk.proxy.GmSpaceUtils;
-import com.samplekit.bean.AppItem;
 import com.samplekit.utils.FilenameUtils;
 import com.gmspace.app.utils.RuntimeUtils;
 import com.gmspace.app.view.LauncherAdaptiveIconDrawable;
@@ -105,7 +103,7 @@ public class SampleUtils {
     }
 
     public static AppItemEnhance newAppItem(PackageManager pm, PackageInfo pkg) {
-        final ActivityInfo launchIntent = GmSpaceUtils.getLaunchActivityInfoForPackage(pkg.packageName);
+        final ActivityInfo launchIntent = GmSpaceObject.getLaunchActivityInfoForPackage(pkg.packageName);
         if (launchIntent != null) {
             final AppItemEnhance it = new AppItemEnhance();
             it.setVersionCode(pkg.versionCode);
@@ -186,7 +184,7 @@ public class SampleUtils {
             String obbFolderPath = uri + File.separator + "Android" + File.separator + "obb";
             File obbFolder = new File(obbFolderPath);
             if (obbFolder.exists() && obbFolder.isDirectory()) {
-                FileUtils.copyDirectory(obbFolder, GmSpaceUtils.getHostDir("", GmSpaceUtils.DIRECTORY_KEY_SDCARD_EXTERNAL_OBB));
+                FileUtils.copyDirectory(obbFolder, GmSpaceObject.getHostDir("", GmSpaceObject.DIRECTORY_KEY_SDCARD_EXTERNAL_OBB));
             }
         } catch (Exception e) {
             e.printStackTrace();

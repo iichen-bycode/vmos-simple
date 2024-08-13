@@ -6,9 +6,9 @@ import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
 
-import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.gmspace.app.bean.GoogleInstallInfo;
 import com.gmspace.app.sample.SampleUtils;
+import com.gmspace.sdk.GmSpaceObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,15 +35,15 @@ public class GoogleAppInfoDialog extends InstallKitDialog {
     @Override
     protected void onPreinstallGoogleServiceKit() {
         // 安装谷歌服务之前要先卸载microG
-        final PackageInfo packageInfo = GmSpaceUtils.getPackageInfo(SampleUtils.GMS_PACKAGE_NAME, PackageManager.GET_PROVIDERS);
+        final PackageInfo packageInfo = GmSpaceObject.getGmSpacePackageInfo(SampleUtils.GMS_PACKAGE_NAME, PackageManager.GET_PROVIDERS);
         if (SampleUtils.isMicroG(packageInfo)){
-            GmSpaceUtils.uninstallPackage(SampleUtils.GMS_PACKAGE_NAME);
+            GmSpaceObject.uninstallGmSpacePackage(SampleUtils.GMS_PACKAGE_NAME);
         }
     }
 
     @Override
     protected PackageInfo getPackageInfo(String packageName) {
-        final PackageInfo packageInfo = GmSpaceUtils.getPackageInfo(packageName, PackageManager.GET_PROVIDERS);
+        final PackageInfo packageInfo = GmSpaceObject.getGmSpacePackageInfo(packageName, PackageManager.GET_PROVIDERS);
         if (SampleUtils.GMS_PACKAGE_NAME.equals(packageName)) {
             return SampleUtils.isMicroG(packageInfo) ? null : packageInfo;
         } else {

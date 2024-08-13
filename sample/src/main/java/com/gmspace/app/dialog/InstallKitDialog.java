@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.gmspace.sdk.GmSpaceInstallConfig;
 import com.gmspace.sdk.GmSpaceObject;
-import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.gmspace.app.adapters.GoogleInstallAdapter;
 import com.gmspace.app.bean.GoogleInstallInfo;
 import com.gmspace.app.databinding.DialogGoogleAppInfoBinding;
@@ -152,7 +151,7 @@ public abstract class InstallKitDialog extends AlertDialog {
                     GoogleInstallInfo it = mAdapter.getData().get(i);
                     it.setStatusString("正在卸载");
                     publishProgress(i);
-                    boolean result = GmSpaceUtils.uninstallPackage(it.getPackageName());
+                    boolean result = GmSpaceObject.uninstallGmSpacePackage(it.getPackageName());
                     if (result) it.setPackageInfo(null);
                     setInstalled(it);
                     publishProgress(i);

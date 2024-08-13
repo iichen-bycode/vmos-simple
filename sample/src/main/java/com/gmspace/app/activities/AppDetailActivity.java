@@ -12,7 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.gmspace.app.databinding.ActivityAppDetailBinding;
-import com.gmspace.sdk.proxy.GmSpaceUtils;
+import com.gmspace.sdk.GmSpaceObject;
 import com.samplekit.utils.GsonUtils;
 import com.gmspace.app.bean.AppDetailInfo;
 import com.gmspace.app.bean.AppPermissionInfo;
@@ -43,11 +43,11 @@ public class AppDetailActivity extends AppCompatActivity {
 
             @Override
             protected AppDetailInfo doInBackground(Void... voids) {
-                final PackageInfo info = GmSpaceUtils.getPackageInfo(packageName, 0);
+                final PackageInfo info = GmSpaceObject.getGmSpacePackageInfo(packageName);
                 final AppDetailInfo result = new AppDetailInfo(info.packageName);
                 final List<AppPermissionInfo> permissionInfos = new ArrayList<>();
-                final String[] permissions = GmSpaceUtils.getDangerousPermissions(info.packageName);
-                final int[] permissionResults = GmSpaceUtils.checkPermissions(info.packageName, permissions);
+                final String[] permissions = GmSpaceObject.getDangerousPermissions(info.packageName);
+                final int[] permissionResults = GmSpaceObject.checkPermissions(info.packageName, permissions);
                 for (int i = 0; i < permissions.length; i++) {
                     permissionInfos.add(new AppPermissionInfo(permissions[i], permissionResults[i]));
                 }

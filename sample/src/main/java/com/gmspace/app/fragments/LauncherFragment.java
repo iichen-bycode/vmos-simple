@@ -37,7 +37,6 @@ import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.GmSpaceResultParcel;
 import com.gmspace.sdk.model.AppItemEnhance;
 import com.gmspace.sdk.proxy.GmSpaceFileUtils;
-import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.gmspace.app.R;
 import com.gmspace.app.activities.AppDetailActivity;
 import com.gmspace.app.activities.LaunchAppActivity;
@@ -354,7 +353,7 @@ public class LauncherFragment extends Fragment {
                     final String assetPath = itemJson.optString("asset_path");
 
                     // 如果未安装或者已装的版本较低 才装
-                    final PackageInfo packageInfo = GmSpaceUtils.getPackageInfo(packageName, 0);
+                    final PackageInfo packageInfo = GmSpaceObject.getGmSpacePackageInfo(packageName, 0);
                     if (packageInfo == null || newVersionCode > packageInfo.versionCode) {
                         // 回调给界面
                         if (listener != null) {
