@@ -24,14 +24,12 @@ public class SampleApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>Host onCreate");
-
         if (GmSpaceHostContext.isMainProcess()) {
             MMKV.initialize(this);
         }
 
         GmSpaceObject.initialize(this, "fIyzKzyNNBEw1Hnn", "3ppgrZzdkRhunw", new IGmSpaceInitCallBack() {
+//        GmSpaceObject.initialize(this, "VoDjjBfYHFFARIVk", "EspxOgQpOWapok", new IGmSpaceInitCallBack() {
             @Override
             public void initResult(boolean b, int i, String s) {
                 Log.i("csc", "初始化有没有成功" + b);

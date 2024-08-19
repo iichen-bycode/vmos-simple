@@ -90,4 +90,5 @@ dependencies {
     implementation("com.vmos:vmos-lite-sdk:1.1.4-beta03")
     compileOnly 'com.vmos:hiddenapi-stub:1.1.5'
     implementation 'top.canyie.pine:core:0.3.0'
+    implementation files("libs/sdk-1.0.0.aar")
 }

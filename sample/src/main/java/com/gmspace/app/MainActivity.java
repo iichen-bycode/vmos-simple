@@ -33,7 +33,6 @@ import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.multidex.BuildConfig;
 import androidx.palette.graphics.Palette;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.gmspace.sdk.GmSpaceConfigContextBuilder;
@@ -41,18 +40,14 @@ import com.gmspace.sdk.GmSpaceEvent;
 import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.GmSpacePackageBuilder;
 import com.gmspace.sdk.GmSpacePackageConfiguration;
-import com.gmspace.sdk.GmSpaceResultParcel;
 import com.gmspace.sdk.OnGmSpaceReceivedEventListener;
 import com.gmspace.sdk.proxy.GmSpaceBitmapUtils;
 
-import com.gmspace.sdk.proxy.GmSpaceUtils;
 import com.samplekit.bean.InstalledInfo;
 import com.samplekit.dialog.DeviceFileSelectorDialog;
 import com.samplekit.dialog.DeviceInstalledAppDialog;
 import com.samplekit.utils.GsonUtils;
-import com.gmspace.app.adapters.FloatMenuAdapter;
 import com.gmspace.app.adapters.ProcessItemAdapter;
-import com.gmspace.app.bean.FloatMenuItem;
 import com.gmspace.app.bean.ProcessInfo;
 import com.gmspace.app.bean.RunningInfo;
 import com.gmspace.app.databinding.ActivityMainBinding;
@@ -412,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected List<ProcessInfo> doInBackground(Void... voids) {
-                final List<ActivityManager.RunningAppProcessInfo> processes = GmSpaceObject.getRunningAppProcesses();
+                final List<ActivityManager.RunningAppProcessInfo> processes = VLite.get().getRunningAppProcesses();
                 final int[] pids = new int[processes.size()];
                 for (int i = 0; i < processes.size(); i++) {
                     pids[i] = processes.get(i).pid;
@@ -466,7 +461,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected List<RunningInfo> doInBackground(Void... voids) {
                 final List<RunningInfo> items = new ArrayList<>();
-                final List<String> runningPackageNames = GmSpaceObject.getRunningPackageNames();
+                final List<String> runningPackageNames = VLite.get().getRunningPackageNames();
                 final PackageManager pm = getPackageManager();
                 for (String packageName : runningPackageNames) {
                     final RunningInfo item = new RunningInfo();
@@ -526,7 +521,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                final List<String> packageNames = GmSpaceObject.getRunningPackageNames();
+                final List<String> packageNames = VLite.get().getRunningPackageNames();
                 for (String packageName : packageNames) {
                     GmSpaceObject.killApp(packageName);
                 }
