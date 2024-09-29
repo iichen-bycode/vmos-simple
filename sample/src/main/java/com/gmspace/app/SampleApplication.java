@@ -10,6 +10,8 @@ import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.IGmSpaceInitCallBack;
 import com.gmspace.sdk.model.GmSpace32BitExtConfig;
 import com.gmspace.sdk.proxy.GmSpaceHostContext;
+import com.ssy185.app.sdk.GMTBOX;
+import com.ssy185.sdk.common.base.inerface.GmtInitListener;
 import com.tencent.mmkv.MMKV;
 
 public class SampleApplication extends Application {
@@ -17,6 +19,7 @@ public class SampleApplication extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+//        GmSpaceObject.attachBaseContext(base,true);
         GmSpaceObject.attachBaseContext(base);
     }
 
@@ -44,5 +47,18 @@ public class SampleApplication extends Application {
         ));
 
         MMKV.initialize(this);
+        GMTBOX.enableLog();
+        GMTBOX.init(this, "7Txf2MMpYus36EPd", "GoCnqGWXcwmBYX", new GmtInitListener() {
+            @Override
+            public void onFail(int i) {
+                Log.d("iichen",">>>>>>>>>>>>>>>>> 初始化失败  $p0");
+            }
+
+            @Override
+            public void onSuccess() {
+                Log.d("iichen",">>>>>>>>>>>>>>>>> 初始化成功");
+
+            }
+        });
     }
 }

@@ -8,11 +8,92 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_apps"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:padding="16dp" />
+            android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_apps"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:padding="16dp" />
+
+            <WebView
+                android:id="@+id/webview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+           <LinearLayout
+               android:orientation="vertical"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content">
+               <Button
+                   android:text="全部"
+                   android:id="@+id/openBox"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+               <Button
+                   android:text="点击"
+                   android:id="@+id/openBoxClick"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+                <Button
+                   android:text="加速"
+                   android:id="@+id/openBoxSpeed"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+                <Button
+                   android:text="小窗"
+                   android:id="@+id/openBoxPip"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+
+               <Button
+                   android:text="点击+加速"
+                   android:id="@+id/openBoxClickSpeed"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+
+               <Button
+                   android:text="点击+小窗"
+                   android:id="@+id/openBoxClickPip"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+
+                <Button
+                   android:text="全不开"
+                   android:id="@+id/unOpen"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+
+
+               <Button
+                   android:text="加速+小窗"
+                   android:id="@+id/openBoxSpeedPip"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+
+
+
+
+               <Button
+                   android:text="openClick"
+                   android:id="@+id/openClick"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+
+               <Button
+                   android:text="openSpeed"
+                   android:id="@+id/openSpeed"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+
+               <Button
+                   android:text="openPip"
+                   android:id="@+id/openPip"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"/>
+           </LinearLayout>
+        </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

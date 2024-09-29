@@ -63,6 +63,8 @@ import com.gmspace.app.sample.SampleUtils;
 import com.gmspace.app.service.AppKeepAliveService;
 import com.gmspace.app.utils.DialogAsyncTask;
 import com.gmspace.app.utils.FileSizeFormat;
+import com.ssy185.app.sdk.GMTBOX;
+import com.ssy185.sdk.common.base.inerface.GmtFeature;
 import com.vlite.sdk.VLite;
 
 
@@ -184,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                 gmSpacePackageBuilder.setGmSpaceAllowCreateDynamicShortcut(true);
                 gmSpacePackageBuilder.setGmSpaceEnableTraceNativeCrash(true);
                 GmSpaceObject.setGmSpacePackageConfiguration(gmSpacePackageBuilder);
-                Log.d("iichen",">>>>>>>接入setGmSpacePackageConfiguration");
+                Log.d("iichen", ">>>>>>>接入setGmSpacePackageConfiguration");
                 return null;
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -220,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
             // 应用管理
             case R.id.menu_vm_install_app:
                 // 安装应用
-                showChooseApkFragment();
+                GMTBOX.openBox(new GmtFeature[]{GmtFeature.PIP});
                 break;
 //            case R.id.menu_google_app_install:
 //                if (googleAppInfoDialog == null) {
@@ -235,16 +237,15 @@ public class MainActivity extends AppCompatActivity {
 //                microGInfoDialog.show();
 //                break;
             case R.id.menu_vm_install_app_from_device:
-                // 导入真机应用
-                showDeviceInstalledAppDialog();
+                GMTBOX.openSpeedPanel();
                 break;
             case R.id.menu_installed_app:
                 // 已安装的应用
-                showInstalledAppDialog();
+                GMTBOX.openSimulateClickPanel();
                 break;
             case R.id.menu_vm_running_app:
                 // 运行中的应用
-                showRunningTasks();
+                GMTBOX.openPipPanel();
                 break;
             // 运行中的进程
             case R.id.menu_vm_running_process:
@@ -307,7 +308,7 @@ public class MainActivity extends AppCompatActivity {
         vmInstalledAppDialog.show(getSupportFragmentManager());
     }
 
-    private void showInstalledAppMenuDialog(InstalledInfo item, final int position){
+    private void showInstalledAppMenuDialog(InstalledInfo item, final int position) {
         final Map<String, DialogInterface.OnClickListener> menus = new HashMap<>();
         menus.put("卸载应用", (dialog, which) -> {
             dialog.dismiss();
@@ -364,6 +365,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     Dialog mProgressDialog;
+
     /**
      * 异步安装apk
      *
@@ -371,11 +373,11 @@ public class MainActivity extends AppCompatActivity {
      */
     @SuppressLint("StaticFieldLeak")
     public void asyncInstallApkFile(File src) {
-        if(mProgressDialog == null) {
+        if (mProgressDialog == null) {
             final View view = LayoutInflater.from(this).inflate(R.layout.dialog_material_loading, null);
             TextView mMessageView = view.findViewById(android.R.id.message);
             mMessageView.setText("安装中");
-            mProgressDialog  = new AlertDialog.Builder(this, R.style.Theme_App_Dialog)
+            mProgressDialog = new AlertDialog.Builder(this, R.style.Theme_App_Dialog)
                     .setView(view)
                     .setCancelable(false).create();
         }
@@ -385,10 +387,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mProgressDialog.show();
-        GmSpaceObject.installCompatiblePackage(src.getAbsolutePath(),null);
+        GmSpaceObject.installCompatiblePackage(src.getAbsolutePath(), null);
     }
-
-
 
 
     /**
@@ -499,10 +499,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendBroadcastToApp() {
-        Log.d("iichen","接受到广播");
+        Log.d("iichen", "接受到广播");
         Intent newIntent = new Intent();
         newIntent.setAction("sdk.authlogin");//这里可以自己定义
-        Bundle bundle=new Bundle();
+        Bundle bundle = new Bundle();
         bundle.putString("uid", "1825472");
         bundle.putString("token", "fdb78ae378f0337ffce4204bf9041231");
         bundle.putString("packagename", "com.mhbyj.batu");
@@ -544,9 +544,9 @@ public class MainActivity extends AppCompatActivity {
             final String className = extras.getString(GmSpaceEvent.KEY_CLASS_NAME);
             SampleAppManager.onActivityLifecycle(packageName, methodName, className);
 
-        } else if(type == GmSpaceEvent.TYPE_APPLICATION_CREATE) {
+        } else if (type == GmSpaceEvent.TYPE_APPLICATION_CREATE) {
             GmSpacePackageConfiguration configuration = GmSpaceObject.getPackageConfiguration();
-            Log.d("iichen",">>>>>>>>handleReceivedEvent getGmSpaceApplicationLifecycleDelegateClassName " + configuration.getGmSpaceApplicationLifecycleDelegateClassName());
+            Log.d("iichen", ">>>>>>>>handleReceivedEvent getGmSpaceApplicationLifecycleDelegateClassName " + configuration.getGmSpaceApplicationLifecycleDelegateClassName());
         }
     }
 
@@ -565,6 +565,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d("iichen",">>>>>>>>>>>>>>>>>>>>>>>>>MainActivity onActivityResult " + resultCode + "<>" + requestCode + "<>" + data);
+        Log.d("iichen", ">>>>>>>>>>>>>>>>>>>>>>>>>MainActivity onActivityResult " + resultCode + "<>" + requestCode + "<>" + data);
     }
 }

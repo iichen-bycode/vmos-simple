@@ -85,3 +85,9 @@
 -keep class com.bumptech.glide.** { *; }
 
 -keep class com.gmspace.app.bean.** { *; }
+-keep class com.baidu.protect.** {
+    *;
+}
+-keep class com.ssy185.** {
+    *;
+}

@@ -45,6 +45,8 @@ import com.gmspace.app.databinding.FragmentLauncherBinding;
 import com.gmspace.app.sample.SampleUtils;
 import com.gmspace.app.utils.AssetsUtils;
 import com.gmspace.app.utils.DialogAsyncTask;
+import com.ssy185.app.sdk.GMTBOX;
+import com.ssy185.sdk.common.base.inerface.GmtFeature;
 
 import org.json.JSONObject;
 import org.zeroturnaround.zip.commons.FileUtils;
@@ -83,6 +85,45 @@ public class LauncherFragment extends Fragment {
         binding.refreshLayout.setOnRefreshListener(() -> {
             loadInstalledApps(view.getContext());
         });
+
+        binding.webview.loadUrl("https://cdn.guoyue.games/games/myty/jfH5/h5_jf1005/web-mobile/");
+
+        binding.unOpen.setOnClickListener(v -> {
+            GMTBOX.openBox();
+        });
+        binding.openBox.setOnClickListener(v -> {
+            GMTBOX.openBox(new GmtFeature[]{GmtFeature.PIP,GmtFeature.SIMULATE_CLICK,GmtFeature.SPEED});
+        });
+        binding.openBoxPip.setOnClickListener(v -> {
+            GMTBOX.openBox(new GmtFeature[]{GmtFeature.PIP});
+        });
+        binding.openBoxClick.setOnClickListener(v -> {
+            GMTBOX.openBox(new GmtFeature[]{GmtFeature.SIMULATE_CLICK});
+        });
+        binding.openBoxSpeed.setOnClickListener(v -> {
+            GMTBOX.openBox(new GmtFeature[]{GmtFeature.SPEED});
+        });
+        binding.openBoxClickPip.setOnClickListener(v -> {
+            GMTBOX.openBox(new GmtFeature[]{GmtFeature.PIP,GmtFeature.SIMULATE_CLICK});
+        });
+        binding.openBoxSpeedPip.setOnClickListener(v -> {
+            GMTBOX.openBox(new GmtFeature[]{GmtFeature.PIP,GmtFeature.SPEED});
+        });
+        binding.openBoxClickSpeed.setOnClickListener(v -> {
+            GMTBOX.openBox(new GmtFeature[]{GmtFeature.SIMULATE_CLICK,GmtFeature.SPEED});
+        });
+
+
+        binding.openClick.setOnClickListener(v -> {
+            GMTBOX.openSimulateClickPanel();
+        });
+        binding.openPip.setOnClickListener(v -> {
+            GMTBOX.openPipPanel();
+        });
+        binding.openSpeed.setOnClickListener(v -> {
+            GMTBOX.openSpeedPanel();
+        });
+
 
         // 加载已安装的应用
         loadInstalledApps(view.getContext());
