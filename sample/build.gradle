@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace 'com.gmspace.app'
+    namespace 'com.hqmyx.flgame'
     compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
@@ -91,10 +91,10 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
 
-    implementation files("libs/app-release.aar")
+    implementation files("libs/sdk-1.0.0.aar")
+    implementation files("libs/vmos-lite-sdk-1.1.4-beta03.aar")
 //    implementation("top.canyie.pine:core:0.3.0")
     compileOnly('com.tencent.tbs:tbssdk:44286')
-    implementation("com.vmos:vmos-lite-sdk:1.1.4-beta03")
+//    implementation("com.vmos:vmos-lite-sdk:1.1.4-beta03")
     compileOnly 'com.vmos:hiddenapi-stub:1.1.5'
-    implementation files("libs/sdk-1.0.0.aar")
 }

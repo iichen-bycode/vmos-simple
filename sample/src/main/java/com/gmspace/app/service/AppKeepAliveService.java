@@ -6,7 +6,7 @@ import android.os.IBinder;
 
 import androidx.annotation.Nullable;
 
-import com.gmspace.app.R;
+import com.hqmyx.flgame.R;
 import com.gmspace.app.utils.ServiceUtils;
 
 /**

@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 
 import com.samplekit.adapters.BaseBindingAdapter;
 import com.gmspace.app.bean.AppPermissionInfo;
-import com.gmspace.app.databinding.ItemInstallerPermissionBinding;
+import com.hqmyx.flgame.databinding.ItemInstallerPermissionBinding;
 
 import java.util.List;
 

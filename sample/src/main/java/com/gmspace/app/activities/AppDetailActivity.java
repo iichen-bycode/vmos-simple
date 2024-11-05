@@ -11,8 +11,8 @@ import android.view.LayoutInflater;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.gmspace.app.databinding.ActivityAppDetailBinding;
 import com.gmspace.sdk.GmSpaceObject;
+import com.hqmyx.flgame.databinding.ActivityAppDetailBinding;
 import com.samplekit.utils.GsonUtils;
 import com.gmspace.app.bean.AppDetailInfo;
 import com.gmspace.app.bean.AppPermissionInfo;

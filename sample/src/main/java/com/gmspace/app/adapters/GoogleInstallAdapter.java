@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.samplekit.adapters.BaseBindingAdapter;
 import com.gmspace.app.bean.GoogleInstallInfo;
-import com.gmspace.app.databinding.ItemGoogleAppInstallBinding;
+import com.hqmyx.flgame.databinding.ItemGoogleAppInstallBinding;
 
 import java.util.List;
 

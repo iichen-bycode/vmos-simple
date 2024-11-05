@@ -25,17 +25,17 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.gmspace.app.R;
 import com.gmspace.sdk.GmSpaceEvent;
 import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.GmSpaceResultParcel;
 import com.gmspace.app.adapters.InstallerPermissionAdapter;
 import com.gmspace.app.bean.AppInstallInfo;
 import com.gmspace.app.bean.AppPermissionInfo;
-import com.gmspace.app.databinding.ActivityAppInstallerBinding;
 import com.gmspace.app.sample.SampleUtils;
 import com.gmspace.app.utils.FileSizeFormat;
 import com.gmspace.app.view.ProgressButton;
+import com.hqmyx.flgame.R;
+import com.hqmyx.flgame.databinding.ActivityAppInstallerBinding;
 
 import java.io.File;
 import java.util.ArrayList;

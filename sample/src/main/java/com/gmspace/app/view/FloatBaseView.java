@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.gmspace.app.R;
+import com.hqmyx.flgame.R;
 
 public abstract class FloatBaseView extends ConstraintLayout implements TouchProxy.OnTouchEventListener {
     private final TouchProxy mTouchProxy = new TouchProxy(this);

@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.hqmyx.flgame.databinding.ItemAppPermissionBinding;
 import com.samplekit.adapters.BaseBindingAdapter;
 import com.gmspace.app.bean.AppPermissionInfo;
-import com.gmspace.app.databinding.ItemAppPermissionBinding;
 
 import java.util.List;
 

@@ -43,6 +43,8 @@ import com.gmspace.sdk.GmSpacePackageConfiguration;
 import com.gmspace.sdk.OnGmSpaceReceivedEventListener;
 import com.gmspace.sdk.proxy.GmSpaceBitmapUtils;
 
+import com.gmspace.sdk.proxy.GmSpaceUtils;
+import com.hqmyx.flgame.R;
 import com.samplekit.bean.InstalledInfo;
 import com.samplekit.dialog.DeviceFileSelectorDialog;
 import com.samplekit.dialog.DeviceInstalledAppDialog;
@@ -50,10 +52,10 @@ import com.samplekit.utils.GsonUtils;
 import com.gmspace.app.adapters.ProcessItemAdapter;
 import com.gmspace.app.bean.ProcessInfo;
 import com.gmspace.app.bean.RunningInfo;
-import com.gmspace.app.databinding.ActivityMainBinding;
-import com.gmspace.app.databinding.DialogProcessListBinding;
-import com.gmspace.app.databinding.LayoutNavigationHeaderBinding;
-import com.gmspace.app.databinding.LayoutWindowMenuBinding;
+import com.hqmyx.flgame.databinding.ActivityMainBinding;
+import com.hqmyx.flgame.databinding.DialogProcessListBinding;
+import com.hqmyx.flgame.databinding.LayoutNavigationHeaderBinding;
+import com.hqmyx.flgame.databinding.LayoutWindowMenuBinding;
 import com.gmspace.app.dialog.GoogleAppInfoDialog;
 import com.gmspace.app.dialog.VmInstalledAppDialog;
 import com.gmspace.app.fragments.LauncherFragment;
@@ -63,9 +65,6 @@ import com.gmspace.app.sample.SampleUtils;
 import com.gmspace.app.service.AppKeepAliveService;
 import com.gmspace.app.utils.DialogAsyncTask;
 import com.gmspace.app.utils.FileSizeFormat;
-import com.ssy185.app.sdk.GMTBOX;
-import com.ssy185.sdk.common.base.inerface.GmtFeature;
-import com.vlite.sdk.VLite;
 
 
 import java.io.File;
@@ -222,7 +221,6 @@ public class MainActivity extends AppCompatActivity {
             // 应用管理
             case R.id.menu_vm_install_app:
                 // 安装应用
-                GMTBOX.openBox(new GmtFeature[]{GmtFeature.PIP});
                 break;
 //            case R.id.menu_google_app_install:
 //                if (googleAppInfoDialog == null) {
@@ -237,15 +235,16 @@ public class MainActivity extends AppCompatActivity {
 //                microGInfoDialog.show();
 //                break;
             case R.id.menu_vm_install_app_from_device:
-                GMTBOX.openSpeedPanel();
+                // 导入真机应用
+                showDeviceInstalledAppDialog();
                 break;
             case R.id.menu_installed_app:
                 // 已安装的应用
-                GMTBOX.openSimulateClickPanel();
+                showInstalledAppDialog();
                 break;
             case R.id.menu_vm_running_app:
                 // 运行中的应用
-                GMTBOX.openPipPanel();
+                showRunningTasks();
                 break;
             // 运行中的进程
             case R.id.menu_vm_running_process:
@@ -407,7 +406,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected List<ProcessInfo> doInBackground(Void... voids) {
-                final List<ActivityManager.RunningAppProcessInfo> processes = VLite.get().getRunningAppProcesses();
+                final List<ActivityManager.RunningAppProcessInfo> processes = GmSpaceObject.getRunningAppProcesses();
                 final int[] pids = new int[processes.size()];
                 for (int i = 0; i < processes.size(); i++) {
                     pids[i] = processes.get(i).pid;
@@ -461,7 +460,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             protected List<RunningInfo> doInBackground(Void... voids) {
                 final List<RunningInfo> items = new ArrayList<>();
-                final List<String> runningPackageNames = VLite.get().getRunningPackageNames();
+                final List<String> runningPackageNames = GmSpaceObject.getRunningPackageNames();
                 final PackageManager pm = getPackageManager();
                 for (String packageName : runningPackageNames) {
                     final RunningInfo item = new RunningInfo();
@@ -521,7 +520,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             protected Void doInBackground(Void... voids) {
-                final List<String> packageNames = VLite.get().getRunningPackageNames();
+                final List<String> packageNames = GmSpaceObject.getRunningPackageNames();
                 for (String packageName : packageNames) {
                     GmSpaceObject.killApp(packageName);
                 }

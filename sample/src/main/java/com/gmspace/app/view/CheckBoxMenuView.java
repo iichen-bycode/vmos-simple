@@ -11,8 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.gmspace.app.R;
-import com.gmspace.app.databinding.ViewCheckboxMenuBinding;
+import com.hqmyx.flgame.R;
+import com.hqmyx.flgame.databinding.ViewCheckboxMenuBinding;
+
 
 public class CheckBoxMenuView extends ConstraintLayout implements Checkable {
     private final ViewCheckboxMenuBinding mBinding;

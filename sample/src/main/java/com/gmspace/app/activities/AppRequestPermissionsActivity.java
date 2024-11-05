@@ -15,9 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.gmspace.app.databinding.ActivityRequestPermissionBinding;
 import com.gmspace.app.sample.SampleUtils;
 import com.gmspace.sdk.GmSpaceObject;
+import com.hqmyx.flgame.databinding.ActivityRequestPermissionBinding;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;

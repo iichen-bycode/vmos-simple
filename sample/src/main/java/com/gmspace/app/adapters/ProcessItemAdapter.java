@@ -8,9 +8,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.samplekit.adapters.BaseBindingAdapter;
-import com.gmspace.app.R;
+import com.hqmyx.flgame.R;
 import com.gmspace.app.bean.ProcessInfo;
-import com.gmspace.app.databinding.ItemProcessInfoBinding;
+import com.hqmyx.flgame.databinding.ItemProcessInfoBinding;
 import com.gmspace.app.utils.FileSizeFormat;
 
 import java.util.List;

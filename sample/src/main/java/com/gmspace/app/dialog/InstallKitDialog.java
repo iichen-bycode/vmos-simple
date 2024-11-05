@@ -14,9 +14,9 @@ import com.gmspace.sdk.GmSpaceInstallConfig;
 import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.app.adapters.GoogleInstallAdapter;
 import com.gmspace.app.bean.GoogleInstallInfo;
-import com.gmspace.app.databinding.DialogGoogleAppInfoBinding;
 import com.gmspace.app.download.DownloadHttpClient;
 import com.gmspace.app.utils.FileSizeFormat;
+import com.hqmyx.flgame.databinding.DialogGoogleAppInfoBinding;
 
 import java.io.File;
 import java.util.List;

@@ -13,7 +13,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.gmspace.sdk.proxy.GmSpaceHostContext;
 import com.samplekit.adapters.BaseBindingAdapter;
 import com.gmspace.app.bean.RunningInfo;
-import com.gmspace.app.databinding.ItemRunningTaskCardBinding;
+import com.hqmyx.flgame.databinding.ItemRunningTaskCardBinding;
 import com.gmspace.app.utils.GlideUtils;
 
 

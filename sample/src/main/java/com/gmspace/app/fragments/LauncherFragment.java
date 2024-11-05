@@ -37,16 +37,13 @@ import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.GmSpaceResultParcel;
 import com.gmspace.sdk.model.AppItemEnhance;
 import com.gmspace.sdk.proxy.GmSpaceFileUtils;
-import com.gmspace.app.R;
+import com.hqmyx.flgame.R;
 import com.gmspace.app.activities.AppDetailActivity;
 import com.gmspace.app.activities.LaunchAppActivity;
 import com.gmspace.app.adapters.AppItemAdapter;
-import com.gmspace.app.databinding.FragmentLauncherBinding;
+import com.hqmyx.flgame.databinding.FragmentLauncherBinding;
 import com.gmspace.app.sample.SampleUtils;
 import com.gmspace.app.utils.AssetsUtils;
-import com.gmspace.app.utils.DialogAsyncTask;
-import com.ssy185.app.sdk.GMTBOX;
-import com.ssy185.sdk.common.base.inerface.GmtFeature;
 
 import org.json.JSONObject;
 import org.zeroturnaround.zip.commons.FileUtils;
@@ -84,44 +81,6 @@ public class LauncherFragment extends Fragment {
 
         binding.refreshLayout.setOnRefreshListener(() -> {
             loadInstalledApps(view.getContext());
-        });
-
-        binding.webview.loadUrl("https://cdn.guoyue.games/games/myty/jfH5/h5_jf1005/web-mobile/");
-
-        binding.unOpen.setOnClickListener(v -> {
-            GMTBOX.openBox();
-        });
-        binding.openBox.setOnClickListener(v -> {
-            GMTBOX.openBox(new GmtFeature[]{GmtFeature.PIP,GmtFeature.SIMULATE_CLICK,GmtFeature.SPEED});
-        });
-        binding.openBoxPip.setOnClickListener(v -> {
-            GMTBOX.openBox(new GmtFeature[]{GmtFeature.PIP});
-        });
-        binding.openBoxClick.setOnClickListener(v -> {
-            GMTBOX.openBox(new GmtFeature[]{GmtFeature.SIMULATE_CLICK});
-        });
-        binding.openBoxSpeed.setOnClickListener(v -> {
-            GMTBOX.openBox(new GmtFeature[]{GmtFeature.SPEED});
-        });
-        binding.openBoxClickPip.setOnClickListener(v -> {
-            GMTBOX.openBox(new GmtFeature[]{GmtFeature.PIP,GmtFeature.SIMULATE_CLICK});
-        });
-        binding.openBoxSpeedPip.setOnClickListener(v -> {
-            GMTBOX.openBox(new GmtFeature[]{GmtFeature.PIP,GmtFeature.SPEED});
-        });
-        binding.openBoxClickSpeed.setOnClickListener(v -> {
-            GMTBOX.openBox(new GmtFeature[]{GmtFeature.SIMULATE_CLICK,GmtFeature.SPEED});
-        });
-
-
-        binding.openClick.setOnClickListener(v -> {
-            GMTBOX.openSimulateClickPanel();
-        });
-        binding.openPip.setOnClickListener(v -> {
-            GMTBOX.openPipPanel();
-        });
-        binding.openSpeed.setOnClickListener(v -> {
-            GMTBOX.openSpeedPanel();
         });
 
 

@@ -34,7 +34,7 @@
     </queries>
 
     <application
-        android:name=".SampleApplication"
+        android:name="com.gmspace.app.SampleApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -50,7 +50,7 @@
         android:usesCleartextTraffic="true">
         <activity
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize"
-            android:name=".MainActivity"
+            android:name="com.gmspace.app.MainActivity"
             android:exported="true"
             android:theme="@style/Theme_App_Main">
             <intent-filter>
@@ -60,7 +60,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.LaunchAppActivity"
+            android:name="com.gmspace.app.activities.LaunchAppActivity"
             android:excludeFromRecents="true"
             android:configChanges="orientation|keyboardHidden"
             android:launchMode="singleTop"
@@ -81,7 +81,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.AppInstallerActivity"
+            android:name="com.gmspace.app.activities.AppInstallerActivity"
             android:exported="true"
             android:label="@string/title_installer"
             android:launchMode="singleInstance"
@@ -118,7 +118,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.AppKeepAliveService"
+        <service android:name="com.gmspace.app.service.AppKeepAliveService"
             android:process=":GmSpace"/>
     </application>
 

@@ -13,10 +13,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.gmspace.app.databinding.ActivityAppPermissionBinding;
 import com.gmspace.app.adapters.PermissionAdapter;
 import com.gmspace.app.bean.AppPermissionInfo;
 import com.gmspace.sdk.GmSpaceObject;
+import com.hqmyx.flgame.databinding.ActivityAppPermissionBinding;
 
 
 import java.util.ArrayList;

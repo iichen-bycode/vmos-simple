@@ -6,8 +6,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 
 import com.gmspace.sdk.model.AppItemEnhance;
+import com.hqmyx.flgame.databinding.ItemAppBinding;
 import com.samplekit.adapters.BaseBindingAdapter;
-import com.gmspace.app.databinding.ItemAppBinding;
 import com.gmspace.app.utils.GlideUtils;
 
 import java.util.List;

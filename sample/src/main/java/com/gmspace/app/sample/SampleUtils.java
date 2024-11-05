@@ -19,7 +19,6 @@ import android.util.Log;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 
-import com.gmspace.app.BuildConfig;
 import com.gmspace.app.bean.AppItemEnhance;
 import com.gmspace.sdk.GmSpaceEvent;
 import com.gmspace.sdk.GmSpaceInstallConfig;

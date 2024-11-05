@@ -8,7 +8,7 @@ import androidx.annotation.Nullable;
 
 import com.samplekit.adapters.BaseBindingAdapter;
 import com.samplekit.bean.InstalledInfo;
-import com.gmspace.app.databinding.ItemVmInstalledAppBinding;
+import com.hqmyx.flgame.databinding.ItemVmInstalledAppBinding;
 
 import java.util.List;
 

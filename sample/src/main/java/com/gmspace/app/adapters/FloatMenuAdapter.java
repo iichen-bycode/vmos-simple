@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 import com.samplekit.adapters.BaseBindingAdapter;
 import com.gmspace.app.bean.FloatMenuItem;
-import com.gmspace.app.databinding.ItemFloatMenuBinding;
+import com.hqmyx.flgame.databinding.ItemFloatMenuBinding;
 
 import java.util.List;
 

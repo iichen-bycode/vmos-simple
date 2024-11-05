@@ -23,10 +23,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.gmspace.app.R;
+import com.hqmyx.flgame.R;
 import com.gmspace.app.adapters.RunningTaskCardAdapter;
 import com.gmspace.app.bean.RunningInfo;
-import com.gmspace.app.databinding.FragmentRunningTaskBinding;
+import com.hqmyx.flgame.databinding.FragmentRunningTaskBinding;
 import com.gmspace.app.helper.SimpleItemTouchCallback;
 import com.gmspace.app.helper.ItemTouchStatus;
 import com.gmspace.app.helper.ScrollSmoothHelper;

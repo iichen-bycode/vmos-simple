@@ -18,8 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.gmspace.sdk.GmSpaceObject;
 import com.gmspace.sdk.model.AppItemEnhance;
 import com.gmspace.sdk.proxy.GmSpaceHostContext;
-import com.gmspace.app.R;
-import com.gmspace.app.databinding.ActivityLaunchAppBinding;
+import com.hqmyx.flgame.R;
+import com.hqmyx.flgame.databinding.ActivityLaunchAppBinding;
 import com.gmspace.app.utils.GlideUtils;
 
 import kotlin.Unit;

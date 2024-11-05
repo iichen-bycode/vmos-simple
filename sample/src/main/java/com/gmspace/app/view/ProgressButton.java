@@ -12,8 +12,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.gmspace.app.R;
-import com.gmspace.app.databinding.ViewProgressButtonBinding;
+import com.hqmyx.flgame.R;
+import com.hqmyx.flgame.databinding.ActivityAppInstallerBinding;
+import com.hqmyx.flgame.databinding.ViewProgressButtonBinding;
 
 public class ProgressButton extends ConstraintLayout {
     public final static int STYLE_TYPE_PRIMARY = 0;
