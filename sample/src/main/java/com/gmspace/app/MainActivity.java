@@ -221,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
             // 应用管理
             case R.id.menu_vm_install_app:
                 // 安装应用
+                showChooseApkFragment();
                 break;
 //            case R.id.menu_google_app_install:
 //                if (googleAppInfoDialog == null) {

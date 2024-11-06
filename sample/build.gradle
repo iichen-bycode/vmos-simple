@@ -93,6 +93,7 @@ dependencies {
 
     implementation files("libs/sdk-1.0.0.aar")
     implementation files("libs/vmos-lite-sdk-1.1.4-beta03.aar")
+    implementation files("libs/hiddenapibypass-4.3.aar")
 //    implementation("top.canyie.pine:core:0.3.0")
     compileOnly('com.tencent.tbs:tbssdk:44286')
 //    implementation("com.vmos:vmos-lite-sdk:1.1.4-beta03")
